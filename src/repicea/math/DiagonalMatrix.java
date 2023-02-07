@@ -18,6 +18,7 @@
  */
 package repicea.math;
 
+@SuppressWarnings("serial")
 public class DiagonalMatrix extends SymmetricMatrix {
 
 	public DiagonalMatrix(int size) {

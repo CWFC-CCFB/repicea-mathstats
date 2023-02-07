@@ -674,7 +674,7 @@ public class Matrix implements Serializable, DeepCloneable {
 	 * @param j the column index of the first element to be changed
 	 */
 	public final void setSubMatrix(Matrix m, int i, int j) {
-		if (this instanceof UnmodifiableMatrix) {
+		if (this instanceof SymmetricMatrix) {
 			throw new UnsupportedOperationException("This Matrix instance does not support the setSubMatrix method!");
 		} else {
 			for (int ii = 0; ii < m.m_iRows; ii++) {
@@ -860,7 +860,7 @@ public class Matrix implements Serializable, DeepCloneable {
 	 * @param m a Matrix instance
 	 */
 	public final void setElements(List<Integer> indices, Matrix m) {
-		if (this instanceof UnmodifiableMatrix) {
+		if (this instanceof SymmetricMatrix) {
 			throw new UnsupportedOperationException("This Matrix instance does not support the setElement method!");
 		}
 		if (!m.isColumnVector()) {
@@ -881,7 +881,7 @@ public class Matrix implements Serializable, DeepCloneable {
 	 * @param m a Matrix instance
 	 */
 	public final void addElementsAt(List<Integer> indices, Matrix m) {
-		if (this instanceof UnmodifiableMatrix) {
+		if (this instanceof SymmetricMatrix) {
 			throw new UnsupportedOperationException("This Matrix instance does not support the addElementsAt method!");
 		}
 		if (!m.isColumnVector()) {

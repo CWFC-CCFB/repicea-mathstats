@@ -21,7 +21,7 @@ package repicea.math;
 import java.util.List;
 
 @SuppressWarnings("serial")
-public class SymmetricMatrix extends Matrix implements UnmodifiableMatrix {
+public class SymmetricMatrix extends Matrix {
 
 	public SymmetricMatrix(int size) {
 		super(size, size, true);
