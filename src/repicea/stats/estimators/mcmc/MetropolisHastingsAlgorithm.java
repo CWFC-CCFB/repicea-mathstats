@@ -1,7 +1,7 @@
 /*
  * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2021 Mathieu Fortin for Rouge Epicea.
+ * Copyright (C) 2009-2023 Mathieu Fortin for Rouge Epicea.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -49,7 +49,6 @@ public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHa
 	
 	protected MetropolisHastingsParameters simParms;
 	protected final MetropolisHastingsPriorHandler priors;
-//	protected final MetropolisHastingsCompatibleModel model;
 	private Matrix parameters;
 	private Matrix parmsVarCov;
 	protected double lpml;
@@ -464,6 +463,13 @@ public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHa
 		record[1] = lpml;
 		ds.addObservation(record);
 		return ds;
+	}
+	
+	/**
+	 * Release the final sample for a lighter version of the meta-model. 
+	 */
+	public void releaseFinalSampleSelection() {
+		finalMetropolisHastingsSampleSelection = null;
 	}
 
 
