@@ -33,6 +33,7 @@ public abstract class MathOperator implements Calculable {
 		NamedOperators.put("exp", Exponential.class);
 		NamedOperators.put("log", Logarithm.class);
 		NamedOperators.put("sqr", Square.class);
+		NamedOperators.put("sqrt", SquareRoot.class);
 	}
 	
 	
@@ -225,6 +226,22 @@ public abstract class MathOperator implements Calculable {
 		}
 	}
 
+	/**
+	 * A classical square root operator.
+	 * @author Mathieu Fortin - May 2023
+	 */
+	static class SquareRoot extends MathOperator {
+		
+		protected SquareRoot() {
+			priority = 2;
+		}
+
+		@Override
+		public double calculate() {
+			double argument = leftSide.calculate();
+			return Math.sqrt(argument);
+		}
+	}
 
 
 }
