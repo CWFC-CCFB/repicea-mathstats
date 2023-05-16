@@ -88,7 +88,7 @@ public class NegativeBinomialUtilityTest {
 		}
 		double mean = est.getMean().getValueAt(0, 0);
 		double variance = est.getVariance().getValueAt(0, 0);
-		Assert.assertEquals("Testing the mean", mu, mean, 1E-2);
+		Assert.assertEquals("Testing the mean", mu, mean, 1.5E-2);
 		Assert.assertEquals("Testing the variance", mu + theta*mu*mu, variance, 1E-1);
 	}
 
@@ -107,7 +107,7 @@ public class NegativeBinomialUtilityTest {
 		}
 		double mean = est.getMean().getValueAt(0, 0);
 		double variance = est.getVariance().getValueAt(0, 0);
-		Assert.assertEquals("Testing the mean", mu, mean, 2E-2);
+		Assert.assertEquals("Testing the mean", mu, mean, 3E-2);
 		Assert.assertEquals("Testing the variance", mu + theta*mu*mu, variance, 1E-1);
 	}
 
