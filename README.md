@@ -1,3 +1,7 @@
+<!-- badges: start -->
+[![Java CI](https://github.com/CWFC-CCFB/repicea-mathstats/actions/workflows/gradle.yml/badge.svg)](https://github.com/CWFC-CCFB/repicea-mathstats/actions/workflows/gradle.yml)
+<!-- badges: end -->
+
 The repicea-mathstats library
 ==============================
 
