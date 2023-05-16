@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import repicea.data.Record;
 
 @SuppressWarnings("rawtypes")
@@ -100,6 +102,7 @@ public class Observation implements Record, Comparable {
 		return values.get(index);
 	}
 
+	@JsonProperty("values")
 	@Override
 	public Object[] getContentArray() {
 		return toArray();

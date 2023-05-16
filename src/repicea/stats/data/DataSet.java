@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import repicea.data.Record;
 import repicea.data.Table;
 import repicea.gui.REpiceaUIObject;
@@ -69,7 +71,9 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 	protected List<Observation> observations;
 	private final String originalFilename;
 	
+	@JsonIgnore
 	private transient REpiceaTable table;
+	@JsonIgnore
 	private Map<Integer, NumberFormat> formatters;
 	
 	protected DataSet(String filename) {
@@ -411,7 +415,7 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 			}
 		}
 	}
-	
+		
 	@Override
 	public List<String> getFieldNames() {
 		List<String> fieldNames = new ArrayList<String>();
@@ -426,6 +430,7 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 		return fieldTypes;
 	}
 	
+	@JsonIgnore
 	@Override
 	public REpiceaTable getUI() {
 		if (table == null) {
@@ -436,6 +441,7 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 	}
 
 
+	@JsonIgnore
 	@Override
 	public boolean isVisible() {
 		return table.isVisible();
@@ -445,7 +451,7 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 	/**
 	 * Returns the observations of the data set.
 	 * @return a List of Observation instances
-	 */
+	 */	
 	public List<Observation> getObservations() {
 		return observations;
 	}
@@ -468,6 +474,7 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 		return sb.toString();
 	}
 	
+	@JsonIgnore
 	private Map<Integer, NumberFormat> getFormatters() {
 		if (formatters == null) {
 			formatters = new HashMap<Integer, NumberFormat>();
@@ -475,6 +482,7 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 		return formatters;
 	}
 	
+	@JsonIgnore
 	private NumberFormat getFormatter(int j) {
 		return getFormatters().get(j);
 	}
@@ -550,7 +558,7 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 	* This method returns a list of the values in a particular field.
 	* @param i the field id
 	* @return a List of object instance
-	*/
+	*/	
 	public List<Object> getFieldValues(int i) {
 		List<Object> objs = new ArrayList<Object>();
 		for (Observation obs : observations) {
@@ -558,7 +566,7 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 		}
 		return objs;
 	}
-
+	
 	@Override
 	public List<? extends Record> getRecords() {
 		return getObservations();
