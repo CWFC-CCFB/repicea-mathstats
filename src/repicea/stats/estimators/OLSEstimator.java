@@ -56,7 +56,7 @@ public class OLSEstimator extends AbstractEstimator<OLSCompatibleModel> {
 	
 	/**
 	 * Constructor.
-	 * @param model
+	 * @param model an OLSCompatibleModel instance
 	 */
 	public OLSEstimator(OLSCompatibleModel model) {
 		super(model);

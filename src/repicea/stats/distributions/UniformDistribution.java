@@ -31,8 +31,7 @@ public class UniformDistribution implements ContinuousDistribution, BoundedDistr
 	private final BasicBound lowerBound;
 
 	/**
-	 * Constructor. </br>
-	 * </br>
+	 * Constructor. <p>
 	 * The two arguments must column vectors of the same size.
 	 * @param lowerBound a Matrix instance that represents a column vector.
 	 * @param upperBound a Matrix instance that represents a column vector.

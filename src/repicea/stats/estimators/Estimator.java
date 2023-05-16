@@ -42,7 +42,7 @@ public interface Estimator {
 	/**
 	 * Run the estimation process. 
 	 * @return true if the estimation was successful or false otherwise
-	 * @throws EstimatorException
+	 * @throws EstimatorException if an estimation error has occurred
 	 */
 	public boolean doEstimation() throws EstimatorException;
 
@@ -83,8 +83,8 @@ public interface Estimator {
 	
 	/**
 	 * Provides the report on the convergence and parameter estimates.
-	 * @param model
-	 * @return
+	 * 
+	 * @return a long String containing the report
 	 */
 	public default String getReport() {
 		if (!isConvergenceAchieved()) {

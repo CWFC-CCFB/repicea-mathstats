@@ -88,6 +88,7 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 	 * @param filename the name of the file to be read
 	 * @param autoLoad true if the file is to be read now. Typically, this boolean is set to false when the swingworker is
 	 * launched from a window that retrieves some events.
+	 * @throws Exception if an error has occurred during the loading
 	 */
 	public DataSet(String filename, boolean autoLoad) throws Exception {
 		this(filename);

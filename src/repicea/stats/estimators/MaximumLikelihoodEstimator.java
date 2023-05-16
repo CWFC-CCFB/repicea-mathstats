@@ -102,6 +102,7 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 	
 	/**
 	 * Constructor. 
+	 * @param model a MaximumLikelihoodCompatibleModel instance 
 	 */
 	public MaximumLikelihoodEstimator(MaximumLikelihoodCompatibleModel model) {
 		super(model);
@@ -213,13 +214,10 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 	public String toString() {return "Maximum likelihood estimator";}
 
 	/**
-	 * Sets the line search method. <br>
-	 * <br>
-	 *  
-	 * If the lsm parameter is null,
-	 * the line search method is set to LineSearchMethod.TEN_EQUAL 
+	 * Sets the line search method. <p>
+	 * If the lineSearchMethod parameter is null, the line search method is set to LineSearchMethod.TEN_EQUAL 
 	 * by default.
-	 * @param lsm a LineSearchMethod enum
+	 * @param lineSearchMethod a LineSearchMethod enum
 	 */
 	public void setLineSearchMethod(LineSearchMethod lineSearchMethod) {
 		nro.setLineSearchMethod(lineSearchMethod);

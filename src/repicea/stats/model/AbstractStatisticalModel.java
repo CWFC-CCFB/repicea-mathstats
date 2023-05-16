@@ -69,8 +69,8 @@ public abstract class AbstractStatisticalModel implements StatisticalModel {
 
 	
 	/**
-	 * This method sets the parameter for the optimizer.
-	 * @param optimizerParameters
+	 * Set the parameter for the optimizer.
+	 * @param optimizerParameters an object containing the parameters
 	 */
 	public void setOptimizerParameters(Object optimizerParameters) {this.optimizerParameters = optimizerParameters;}
 	
@@ -98,7 +98,8 @@ public abstract class AbstractStatisticalModel implements StatisticalModel {
 	/**
 	 * This method sets the model definition and computes the appropriate matrix from the data.
 	 * @param modelDefinition a String that defines the model
-	 * @throws StatisticalDataException
+	 * @param additionalParm an object containing additional parameters if need be
+	 * @throws StatisticalDataException if the model definition cannot be parsed
 	 */
 	protected void setModelDefinition(String modelDefinition, Object additionalParm) throws StatisticalDataException {
 		this.modelDefinition = modelDefinition;

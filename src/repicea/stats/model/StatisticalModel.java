@@ -41,6 +41,7 @@ public interface StatisticalModel {
 
 	/**
 	 * This method returns the results of the fit on screen.
+	 * @return a string containing the summary of the model fit
 	 */
 	public default String getSummary() {
 		StringBuilder sb = new StringBuilder();

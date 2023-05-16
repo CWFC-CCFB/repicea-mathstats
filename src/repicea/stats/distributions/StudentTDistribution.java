@@ -40,8 +40,8 @@ public class StudentTDistribution implements Distribution {
 	private final int degreesOfFreedom;
 	
 	/**
-	 * This constructor creates a Student't distribution with mean mu and variance sigma2. NOTE: It 
-	 * does not handle multivariate distribution. If the mean and the variance are of dimensions > 1,
+	 * Create a Student't distribution with mean mu and variance sigma2.<p>
+	 * It does not handle multivariate distribution. If the mean and the variance are of dimensions &#62; 1,
 	 * they are assumed to be independent, i.e. the non zero off diagonal elements in the variance 
 	 * matrix will not be considered.
 	 * @param mu the mean of the function
@@ -56,7 +56,7 @@ public class StudentTDistribution implements Distribution {
 	
 	/**
 	 * Constructor for a standard Student's distribution, i.e. with mean 0 and sigma^2 = 1.
-	 * @param degreesOfFreedom
+	 * @param degreesOfFreedom an integer 
 	 */
 	public StudentTDistribution(int degreesOfFreedom) {
 		this.degreesOfFreedom = degreesOfFreedom;

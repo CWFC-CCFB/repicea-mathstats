@@ -99,8 +99,7 @@ public class SamplingUtility {
 	}
 	
 	/**
-	 * Return a random sample of observation indices. <br>
-	 * <br>
+	 * Return a random sample of observation indices. <p>
 	 * The theoretical observations are labeled from 0 to N-1 where N is the population size. This
 	 * method is equivalent to the getSampleIndex(int, int, boolean) method except that the return
 	 * object is passed as an argument. Should be preferred in case of multithreading because it avoids
@@ -110,7 +109,6 @@ public class SamplingUtility {
 	 * @param populationSize the population size
 	 * @param withReplacement allow sampling with replacement
 	 * @param sampleIndex the list of randomly drawn indices 
-	 * @return a List of integers
 	 */
 	public static void getSampleIndex(int sampleSize, int populationSize, boolean withReplacement, List<Integer> sampleIndex) {
 		sampleIndex.clear();

@@ -21,7 +21,7 @@ public class TruncatedGaussianBound extends BasicBound implements Serializable {
 		
 		/**
 		 * Return the variance of the original distribution (before truncating)
-		 * @return
+		 * @return the variance 
 		 */
 		public double getSigma2Value();
 	}

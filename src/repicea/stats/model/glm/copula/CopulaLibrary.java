@@ -142,12 +142,11 @@ public class CopulaLibrary {
 		 * @param hierarchicalLevelSpecifications the field that sets the hierarchical (e.g. plotID)
 		 * @param distanceFieldsEnumeration the fields that contains the x and y coordinates
 		 * @param parameterStartingValue the starting value of the beta parameter
-		 * @throws StatisticalDataException
 		 */
 		public DistanceLinkFunctionCopulaExpression(Type linkFunctionType,	
 				String hierarchicalLevelSpecifications, 
 				String distanceFieldsEnumeration, 
-				double parameterStartingValue) throws StatisticalDataException {
+				double parameterStartingValue) {
 			super(hierarchicalLevelSpecifications);
 			this.distanceFieldsEnumeration = distanceFieldsEnumeration;
 			

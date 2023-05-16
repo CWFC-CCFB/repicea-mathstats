@@ -115,11 +115,11 @@ public abstract class AbstractGaussHermiteQuadrature extends AbstractGaussQuadra
 
 	/**
 	 * This method makes it possible to integrate an AbstractStatisticalExpression through Gauss-Hermite quadrature. 
-	 * @param functionToEvaluate an EvaluableFunction instance that returns Double 
-	 * @param index the index of the parameter over which the integration is made
+	 * @param functionToEvaluate a GaussHermiteQuadratureCompatibleFunction instance 
+	 * @param indices a list of integers that designate the parameters over which the integration is made
 	 * @param isParameter a boolean to indicate that indices refer to parameters. If false, it is assumed that the
 	 * indices refer to variables.
-	 * @param standardDeviation the standard deviation of this variable
+	 * @param startingIndex the starting index
 	 * @return the approximation of the integral
 	 */
 	protected abstract double getOneDimensionIntegral(GaussHermiteQuadratureCompatibleFunction<Double> functionToEvaluate,
@@ -129,11 +129,11 @@ public abstract class AbstractGaussHermiteQuadrature extends AbstractGaussQuadra
 	
 	/**
 	 * This method returns the value of a multi-dimension integral
-	 * @param functionToEvaluate an EvaluableFunction instance that returns Double 
+	 * @param functionToEvaluate an GaussHermiteQuadratureCompatibleFunction instance 
 	 * @param indices the indices of the parameters over which the integration is made
 	 * @param isParameter a boolean to indicate that indices refer to parameters. If false, it is assumed that the
 	 * indices refer to variables.
-	 * @param lowerCholeskyTriangle the lower triangle of the Cholesky factorization of the variance-covariance matrix
+	 * @param startingIndex the index of the parameter from which we start the integration
 	 * @return the approximation of the integral
 	 */
 	protected double getMultiDimensionIntegral(GaussHermiteQuadratureCompatibleFunction<Double> functionToEvaluate,

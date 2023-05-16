@@ -83,16 +83,13 @@ public final class StatisticalUtility {
 	}
 	
 	/**
-	 * Construct a within-subject correlation matrix using a variance parameter, a correlation parameter and a column vector of coordinates. <br>
-	 * <br>
-	 * @deprecated
-     * This method is no longer acceptable.
-     * <p> Use {@link constructRMatrix(covParms, type, coordinates)} instead.
+	 * Construct a within-subject correlation matrix using a variance parameter, a correlation parameter and a column vector of coordinates. <p>
 	 * @param coordinates a column vector of coordinates from which the distances are calculated
 	 * @param varianceParameter the variance parameter
 	 * @param covarianceParameter the covariance parameter
 	 * @param type the type of correlation
 	 * @return the resulting matrix
+	 * @deprecated This method is no longer acceptable. Use {@link #constructRMatrix(List, TypeMatrixR, Matrix...)} instead.
 	 */
 	@Deprecated
 	protected static Matrix constructRMatrix(Matrix coordinates, double varianceParameter, double covarianceParameter, TypeMatrixR type) {
@@ -152,8 +149,7 @@ public final class StatisticalUtility {
 	}
 	
 	/**
-	 * Compute the R matrix <br>
-	 * <br>
+	 * Compute the R matrix. <p>
 	 * Compute the R matrix of the type set by the type argument. 
 	 * 
 	 * @param covParms a List of double containing the parameter. The first is the variance parameter, the second is the 
@@ -275,17 +271,14 @@ public final class StatisticalUtility {
 	
 	
 	/**
-	 * Construct a within-subject correlation matrix using a rho parameter, a gamma parameter, a residual parameter and a column vector of coordinates. <br>
-	 * @deprecated
-     * This method is no longer acceptable.
-     * <p> Use {@link constructRMatrix(covParms, type, coordinates)} instead.
-	 * <br>
+	 * Construct a within-subject correlation matrix using a rho parameter, a gamma parameter, a residual parameter and a column vector of coordinates. <p>
 	 * @param coordinates a column vector of coordinates from which the distances are calculated
 	 * @param rho the rho parameter
 	 * @param gamma the gamma parameter
 	 * @param residual the residual parameter
 	 * @param type the type of correlation
 	 * @return the resulting matrix
+	 * @deprecated This method is no longer acceptable. Use {@link #constructRMatrix(List, TypeMatrixR, Matrix...)} instead.
 	 */
 	@Deprecated
 	protected static Matrix constructRMatrix(Matrix coordinates, double rho, double gamma, double residual, TypeMatrixR type) {

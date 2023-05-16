@@ -34,12 +34,10 @@ import repicea.stats.sampling.SamplingUtility;
 public class QuantileUtility {
 	
 	/**
-	 * Return the quantile of a distribution estimated from a sample. <br>
-	 * <br>
+	 * Calculate the quantile of a distribution estimated from a sample. <p>
 	 * The quantile is calculated following the Definition 8 found in <a href=https://doi.org/10.1080/00031305.1996.10473566>
 	 * Hyndman, R. J. and Fan, Y. 1996. Sample quantiles in statistical packages. The American Statistician
-	 * 50(4): 361-365. </a> <br>
-	 * <br>
+	 * 50(4): 361-365. </a> <p>
 	 * The weighted version implements the technique shown on the wikipedia entry for <a href=https://en.wikipedia.org/wiki/Percentile#The_weighted_percentile_method>
 	 *  Percentile </a>.
 	 * 
@@ -100,16 +98,14 @@ public class QuantileUtility {
 	
 	
 	/**
-	 * Return an estimated quantile as well as it variability. <br>
-	 * <br>
+	 * Estimate a quantile and its variability. <p>
 	 * The variability is assessed through bootstrap.
 	 * 
 	 * @param sample a list of doubles
 	 * @param p the quantile probability
 	 * @param weights a list of doubles 
 	 * @param nReal the number of bootstrap realizations 
-	 * @return a MonteCarloEstimate
-	 * @throws InterruptedException 
+	 * @return a MonteCarloEstimate estimate
 	 */
 	public static MonteCarloEstimate getQuantileEstimateFromSample(List<Double> sample, 
 			double p, 
@@ -150,9 +146,7 @@ public class QuantileUtility {
 
 	
 	/**
-	 * Return the quantile of a distribution calculated from the population. <br>
-	 * <br>
-	 * 
+	 * Return the quantile of a distribution calculated from the population. <p>
 	 * @param population the population
 	 * @param p the probability of the quantile (between 0 and 1)
 	 * @return the calculated quantile of the distribution
@@ -202,7 +196,7 @@ public class QuantileUtility {
 	 * @param sample the sample of the distribution
 	 * @param p the probability of the quantile (between 0 and 1)
 	 * @param weights an optional list of integers representing the weighting (must be positive)
-	 * @param boolean performChecks checks whether the input are correct
+	 * @param performChecks a boolean true means it checks whether the input are correct
 	 * @return a double
 	 */
 	protected static double getInternalWeightedQuantileEstimationFromSample(List<Double> sample, double p, List<Double> weights, boolean performChecks) {

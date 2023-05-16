@@ -41,7 +41,7 @@ public interface HierarchicalStatisticalDataStructure extends StatisticalDataStr
 	/**
 	 * This method set the hierarchical structures of the data set.
 	 * @param hierarchicalStructureLevels a List of Strings that contains the field names that serve as hierarchical index
-	 * @throws StatisticalDataException
+	 * @throws StatisticalDataException if an error has occurred
 	 */
 	public void setHierarchicalStructureLevel(List<String> hierarchicalStructureLevels) throws StatisticalDataException;
 	

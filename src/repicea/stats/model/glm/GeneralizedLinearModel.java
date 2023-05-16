@@ -97,19 +97,16 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	
 	/**
 	 * Generic private constructor.
-	 * @param dataSet
-	 * @param d a Distribution enum that defines the distribution of the response variable
-	 * @param linkFunctionType
-	 * @param modelDefinition
-	 * @param llk
+	 * @param dataSet a DataSet instance
+	 * @param d a GLMDistribution enum that defines the distribution of the response variable
+	 * @param linkFunctionType a Type enum that defines the type of linkFunction
+	 * @param modelDefinition a String that defines the model 
+	 * @param llk an IndividualLogLikelihood instance 
 	 * @param startingBeta a Matrix of starting parameters for the fixed effects
+	 * @param additionalParm an object that contains additional parameters (can be null)
 	 */
 	protected GeneralizedLinearModel(DataSet dataSet, GLMDistribution d, Type linkFunctionType, String modelDefinition, IndividualLogLikelihood llk, Matrix startingBeta, Object additionalParm) {
 		super();
-//		if (!d.isAcceptedType(linkFunctionType)) {
-//			throw new InvalidParameterException("The distribution " + d.name() + " does not support the link function " + linkFunctionType.name());
-//		}
-//		this.distribution = d;
 		dataStruct = createDataStructure(dataSet, additionalParm);
 
 		// then define the model effects and retrieve matrix X and vector y
@@ -150,6 +147,7 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 
 	/**
 	 * Constructor for derived class.
+	 * @param glm a GeneralizedLinearModel instance
 	 */
 	protected GeneralizedLinearModel(GeneralizedLinearModel glm) {
 		this(glm.getDataStructure().getDataSet(), 

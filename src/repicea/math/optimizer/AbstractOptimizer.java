@@ -117,8 +117,11 @@ public abstract class AbstractOptimizer {
 	 * This method optimizes the likelihood of the StatisticalModel instance.
 	 * @param function a AbstractMathematicalFunction object
 	 * @param indicesOfParametersToOptimize	a List instance that contains the indices of the parameters to be optimized
+	 * @return a boolean true if the optimization succeeded
+	 * @throws OptimizationException if an error has occurred
 	 */
 	public abstract boolean optimize(MathematicalFunction function, List<Integer> indicesOfParametersToOptimize) throws OptimizationException;
+
 
 	protected void fireOptimizerEvent(String actionString) {
 		for (OptimizerListener listener : listeners) {

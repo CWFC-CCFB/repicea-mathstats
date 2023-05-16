@@ -55,8 +55,8 @@ public class GaussianEstimate extends Estimate<GaussianDistribution> implements 
 
 	/**
 	 * Constructor for univariate distribution.
-	 * @param mean
-	 * @param variance
+	 * @param mean a double that stands for the mean
+	 * @param variance a double that stands for the variance
 	 */
 	public GaussianEstimate(double mean, double variance) {
 		this();

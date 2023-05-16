@@ -46,8 +46,8 @@ public class GaussianDistribution extends StandardGaussianDistribution implement
 	
 	/**
 	 * Constructor for univariate Gaussian distribution.
-	 * @param mean
-	 * @param variance
+	 * @param mean the mean of the distribution
+	 * @param variance the variance of the distribution
 	 */
 	public GaussianDistribution(double mean, double variance) {
 		Matrix mu = new Matrix(1,1);

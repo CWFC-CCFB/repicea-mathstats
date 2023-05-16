@@ -58,7 +58,7 @@ public class TruncatedGaussianUtility {
 	/**
 	 * Compute the cumulative probability of a truncated normal distribution. 
 	 * 
-	 * @param x the value for which the cumulative density is to be calculated, i.e. F(X<x)
+	 * @param x the value for which the cumulative density is to be calculated, i.e. F(X &#60; x)
 	 * @param mu the mean of the original normal distribution
 	 * @param sigma2 the variance of the original distribution
 	 * @param a the lower bound

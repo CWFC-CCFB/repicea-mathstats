@@ -35,7 +35,6 @@ public interface MultidimensionalIntegralApproximation<P extends EvaluableFuncti
 	 * @param indices the indices of the parameters over which the integration is made
 	 * @param isParameter a boolean to indicate that indices refer to parameters. If false, it is assumed that the
 	 * indices refer to variables.
-	 * @param lowerCholeskyTriangle the lower triangle of the Cholesky factorization of the variance-covariance matrix
 	 * @return the approximation of the integral
 	 */
 	public double getMultiDimensionalIntegralApproximation(P functionToEvaluate,

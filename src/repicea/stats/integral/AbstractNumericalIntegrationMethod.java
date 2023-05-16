@@ -88,11 +88,11 @@ public abstract class AbstractNumericalIntegrationMethod implements Serializable
 	}
 	
 	/**
-	 * This method sets the upper bound of the numerical integration. Setting the 
-	 * upper bound to Double.NaN (default value) means plus infinity. IMPORTANT:
+	 * Set the upper bound of the numerical integration. <p>
+	 * Setting the upper bound to Double.NaN (default value) means plus infinity. IMPORTANT:
 	 * changing the upper bound resets the arrays that contain the x values, the weights,
 	 * and the rescaling factors.
-	 * @param upperBound
+	 * @param upperBound the value of the upper bound
 	 */
 	public void setUpperBound(double upperBound) {
 		this.upperBound = upperBound; 

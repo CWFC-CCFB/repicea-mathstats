@@ -252,8 +252,8 @@ public class GaussianUtility {
 
 	/**
 	 * Compute the probability density for a quantile of the standard normal distribution. 
-	 * @param y 
-	 * @return a probability density
+	 * @param y the quantile
+	 * @return its probability density
 	 */
 	public static double getProbabilityDensity(double y) {
 		return getProbabilityDensity(y, 0, 1);

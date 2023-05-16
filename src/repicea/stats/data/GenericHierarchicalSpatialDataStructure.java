@@ -171,6 +171,7 @@ public class GenericHierarchicalSpatialDataStructure extends GenericHierarchical
 
 	/**
 	 * This method computes the Euclidian distance between two observations regardless of the dimensions. 
+	 * @param type the index of the distance field
 	 * @param indexA the index of the first observation
 	 * @param indexB the index of the second observation
 	 * @return a double the Euclidian distance

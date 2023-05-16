@@ -47,9 +47,9 @@ public class SymmetricMatrix extends Matrix {
 	
 	/**
 	 * Return the value at row i and column j.
-	 * @param i
-	 * @param j
-	 * @return a double
+	 * @param i the row index
+	 * @param j the column index
+	 * @return the entry
 	 */
 	@Override
 	public double getValueAt(int i, int j) {

@@ -59,6 +59,7 @@ public class Matrix implements Serializable, DeepCloneable {
 	
 	/**
 	 * Constructor 1. Creates a matrix from a two-dimension array.
+	 * @param data a two-dimension array of double
 	 */
 	public Matrix(double data[][]) {
 		this(data.length, data[0].length);
@@ -165,9 +166,9 @@ public class Matrix implements Serializable, DeepCloneable {
 	
 	/**
 	 * Set the value at row i and column j.
-	 * @param i
-	 * @param j
-	 * @param value
+	 * @param i the row index 
+	 * @param j the column index
+	 * @param value the value to be set in the cell
 	 */
 	public void setValueAt(int i, int j, double value) {
 		if (isNewImplementationForColumnVector()) {	// the vector is actually transposed for a better memory management
@@ -179,9 +180,9 @@ public class Matrix implements Serializable, DeepCloneable {
 
 	/**
 	 * Return the value at row i and column j.
-	 * @param i
-	 * @param j
-	 * @return a double
+	 * @param i the row index
+	 * @param j the column index
+	 * @return the entry
 	 */
 	public double getValueAt(int i, int j) {
 		return isNewImplementationForColumnVector() ? m_afData[j][i] : m_afData[i][j];
@@ -307,8 +308,8 @@ public class Matrix implements Serializable, DeepCloneable {
 	}
 
 	/**
-	 * This method compute the elementwise division of this / m
-	 * @param m
+	 * Compute the elementwise division of this by m.
+	 * @param m a Matrix instance of the same dimensions
 	 * @return the resulting matrix
 	 */
 	public Matrix elementWiseDivide(Matrix m) {
@@ -1335,8 +1336,9 @@ public class Matrix implements Serializable, DeepCloneable {
 	
 	
 	/**
-	 * Ensures that no elements in the matrix are lower than value by setting them to value if needed
-	 * Note : changes the matrix in place 
+	 * Ensure that no elements in the matrix are lower than value by setting them to value if needed. <p>
+	 * This method changes the matrix in place 
+	 * @param value the threshold. Lower values are set to this value.
 	 */
 	public final void clampIfLowerThan(double value) {
 		if (isNewImplementationForColumnVector()) {
@@ -1356,8 +1358,9 @@ public class Matrix implements Serializable, DeepCloneable {
 	}
 	
 	/**
-	 * Ensures that no elements in the matrix are higher than value by setting them to value if needed
-	 * Note : changes the matrix in place 
+	 * Ensure that no elements in the matrix are higher than value by setting them to value if needed.<p>
+	 * This method changes the matrix in place 
+	 * @param value the threshold. Higher values are set to this value.
 	 */
 	public final void clampIfHigherThan(double value) {
 		if (isNewImplementationForColumnVector()) {

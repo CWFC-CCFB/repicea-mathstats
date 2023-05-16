@@ -42,13 +42,12 @@ public class GaussHermiteQuadrature extends AbstractGaussHermiteQuadrature imple
 	/**
 	 * An interface for a better management of function rescaling.
 	 * @author Mathieu Fortin - July 2022
-	 * @see <a href=https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature /a> Gaussian-Hermite quadrature 
+	 * @see <a href=https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature>Gaussian-Hermite quadrature </a> 
 	 */
 	public static interface GaussHermiteQuadratureCompatibleFunction<P> extends EvaluableFunction<P> {
 		
 		/**
-		 * Convert the value to the original scale.<br>
-		 * <br>
+		 * Convert the value to the original scale.<p>
 		 * In most cases, the function is not e^-(x^2) and consequently, the function
 		 * has to be rescaled. For instance, with the pdf of the normal distribution, 
 		 * x = (y - mu)/((2 * sigma2)^(1/2)). From x, we can calculate the y on the 
@@ -59,13 +58,13 @@ public class GaussHermiteQuadrature extends AbstractGaussHermiteQuadrature imple
 		 * @param covarianceIndexI the row index where to find the std in the Cholesky matrix.
 		 * @param covarianceIndexJ the column index where to find the std in the Cholesky matrix.
 		 * @return the value on the original scale.
-		 * @see <a href=https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature /a> Gaussian-Hermite quadrature 
+		 * @see <a href=https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature>Gaussian-Hermite quadrature</a> 
 		 */
 		public double convertFromGaussToOriginal(double x, double mu, int covarianceIndexI, int covarianceIndexJ);
 		
 		/**
-		 * Calculate the adjustment to the integral. <br>
-		 * <br>
+		 * Calculate the adjustment to the integral. <p>
+		 * 
 		 * For instance in the context of a Gaussian distribution, the relationship between x and y 
 		 * is y = (2 * sigma2)^(1/2) * x + mu. Consequently, dy = (2 * sigma2)^(1/2) * dx and the integral
 		 * adjustment reductes to to 1/PI^(-N/2) where N is the number of dimensions. This is the
@@ -73,7 +72,7 @@ public class GaussHermiteQuadrature extends AbstractGaussHermiteQuadrature imple
 		 * 
 		 * @param dimensions the number of dimensions
 		 * @return a double
-		 * @see <a href=https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature /a> Gaussian-Hermite quadrature 
+		 * @see <a href=https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature>Gaussian-Hermite quadrature</a> 
 		 */
 		public default double getIntegralAdjustment(int dimensions) {
 			return Math.pow(Math.PI, -dimensions/2d);

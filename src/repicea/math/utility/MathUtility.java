@@ -30,15 +30,14 @@ public class MathUtility {
 
 
 	/**
-	 * Compute the Euclidean distance between two points. <br>
-	 * <br>
+	 * Compute the Euclidean distance between two points. <p>
 	 * This method assumes that the checks have been performed on the coordinates argument. Basically,
 	 * these matrices should be column vectors of the same size. Each one of them represents a dimensions.
 	 * 
 	 * @param i the index of the first point
 	 * @param j the index of the second point
 	 * @param coordinates A series of column matrices that stand for the coordinates. 
-	 * @return
+	 * @return the distance
 	 */
 	public final static double getEuclideanDistance(int i, int j, Matrix... coordinates) {
 		double squareDiffSum = 0d;
@@ -72,8 +71,9 @@ public class MathUtility {
 	
 	
 	/**
-	 * This method returns the ratio of two factorial factorial of parameter i.
-	 * @param i an integer
+	 * Provide the ratio between the factorial of i and the factorial of j.
+	 * @param i a first integer
+	 * @param j a second integer
 	 * @return the result as a double
 	 */
 	public static double FactorialRatio(int i, int j) {
@@ -96,8 +96,8 @@ public class MathUtility {
 	/**
 	 * Makes it possible to determine if a double is negative or not. Useful to identify -0.0 for example.
 	 * After Peter Lawrey on <a href=https://stackoverflow.com/questions/10399801/how-to-check-if-double-value-is-negative-or-not> StackOverFlow </a>
-	 * @param d
-	 * @return
+	 * @param d a real number
+	 * @return a boolean true if negative
 	 */
 	public static boolean isNegative(double d) {
 	     return Double.doubleToRawLongBits(d) < 0;

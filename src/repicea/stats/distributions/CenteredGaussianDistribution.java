@@ -141,7 +141,7 @@ public final class CenteredGaussianDistribution implements Distribution {
 
 	/**
 	 * This method should be used in preference to the getMean() method.
-	 * @param errorTermList
+	 * @param errorTermList a GaussianErrorTermList instance
 	 * @return a Matrix instance
 	 */
 	public Matrix getMean(GaussianErrorTermList errorTermList) {

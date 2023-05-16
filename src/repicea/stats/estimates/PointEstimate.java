@@ -117,7 +117,6 @@ public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<G
 	/**
 	 * Add an observation to the sample.
 	 * 
-	 * @param sampleId a string that represents the sample id
 	 * @param obs a PopulationUnitObservation instance
 	 */
 	public void addObservation(O obs) {

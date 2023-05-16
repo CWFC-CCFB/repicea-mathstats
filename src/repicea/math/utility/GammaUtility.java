@@ -31,9 +31,10 @@ public class GammaUtility {
     		0.5384136432509564062961e-7, -0.4023533141268236372067e-8};		// higher precision with these coefficients
 
 	/**
-	 * This method returns the result of the Gamma function. The implementation is the Lanczos approximation. 
-	 * @param z 
-	 * @return a double
+	 * Compute the result of the Gamma function. <p>
+	 * The implementation is the Lanczos approximation. 
+	 * @param z the argument
+	 * @return a double the value of the function
 	 */
 	public static double gamma(double z) {
 		if (z <= 0d) {
@@ -59,9 +60,9 @@ public class GammaUtility {
 	}
 	
 	/**
-	 * This method returns the logarithm of the Gamma function.
-	 * @param z
-	 * @return a double
+	 * Calculate the logarithm of the Gamma function.
+	 * @param z the argument
+	 * @return a double the logarithm of the Gamma function
 	 */
 	public static double logGamma(double z) {
 		return Math.log(gamma(z));
@@ -73,10 +74,11 @@ public class GammaUtility {
 	private static final double C = SQRT_TWICE_PI / Math.exp(1) - gamma(K);
 
 	/**
-	 * This method implements the approximation of the inverse Gamma function designed by 
-	 * David W. Cantrell (see http://mathforum.org/kb/message.jspa?messageID=342551&tstart=0).
+	 * Compute the approximation of the inverse Gamma function. <p>
+	 * This approximation was designed by David W. Cantrell. 
 	 * @param z a double equal or greater than 1.
 	 * @return a double
+	 * @see <a href="https://web.archive.org/web/20171104030158/http://mathforum.org/kb/message.jspa?messageID=342551&tstart=0">Link to David W. Cantrell post</a>
 	 */
 	public static double inverseGamma(double z) {
 		if (z < 1) {
@@ -143,11 +145,10 @@ public class GammaUtility {
 	}
 
 	/**
-	 * Compute the first derivative of the gamma function. <br>
-	 * <br>
+	 * Compute the first derivative of the gamma function. <p>
 	 * The calculation is based on the digamma function.
 	 * @see<a href=https://en.wikipedia.org/wiki/Digamma_function> Digamma function </a>
-	 * @param d
+	 * @param d the argument of the function
 	 * @return the first derivative (a double)
 	 */
 	public static double gammaFirstDerivative(double d) {

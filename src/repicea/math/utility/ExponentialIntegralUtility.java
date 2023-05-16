@@ -29,13 +29,7 @@ public class ExponentialIntegralUtility {
 	private final static double EULER_CONSTANT = 0.57721566490153286060651209008240243104215933593992;
 	private static int K_MAX = 30;
 	
-	/**
-	 * Returns the result of the E1(z) function using the approximation of Abramowitz and Stegun, p. 229, 5.1.11. 
-	 * This approximation is good if -2.5 < z < 2.5. 
-	 * @param z a double different from 0
-	 * @return a double
-	 */
-	public static double getE1(double z, Double logTransformed) {
+	private static double getE1(double z, Double logTransformed) {
 		checkValue(z);
 		if (z < 0) {
 			return -getAbramowitzAndStegunApproximationForEi(-z, logTransformed);
@@ -47,8 +41,8 @@ public class ExponentialIntegralUtility {
 	}
 	
 	/**
-	 * Returns the result of the E1(z) function using the approximation of Abramowitz and Stegun, p. 229, 5.1.11. 
-	 * This approximation is good if -2.5 < z < 2.5. 
+	 * Provide the result of the E1(z) function.<p>
+	 * The method relies on  the approximation of Abramowitz and Stegun, p. 229, 5.1.11. This approximation is good if -2.5 &#60; z &#60; 2.5. 
 	 * @param z a double different from 0
 	 * @return a double
 	 */
@@ -59,7 +53,7 @@ public class ExponentialIntegralUtility {
 
 	private static void checkValue(double z) {
 		if (z < -2.5 || z > 2.5) {
-			System.out.println("Warning: the Abramowitz And Stegun Approximation for the exponential integral is valid only for -2.5 < z 2.5 !");
+			System.out.println("Warning: the Abramowitz And Stegun Approximation for the exponential integral is valid only for -2.5 < z < 2.5 !");
 		}
 	}
 	
@@ -78,7 +72,7 @@ public class ExponentialIntegralUtility {
 	 * @param z a double different from 0
 	 * @return a double
 	 */
-	public static double getEi(double z, Double logTransformed) {
+	private static double getEi(double z, Double logTransformed) {
 		checkValue(z);
 		if (z < 0) {
 			return -getAbramowitzAndStegunApproximationForE1(-z, logTransformed);

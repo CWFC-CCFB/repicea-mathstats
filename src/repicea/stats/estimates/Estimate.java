@@ -164,7 +164,7 @@ s	 */
 	 * This method checks if the two point estimates are compatible. The basic
 	 * check consists of comparing the classes. Then, the matrix data is checked
 	 * for consistency with previous data.
-	 * @param estimate
+	 * @param estimate an Estimate instance
 	 * @return a boolean
 	 */
 	protected boolean isMergeableEstimate(Estimate<?> estimate) {
