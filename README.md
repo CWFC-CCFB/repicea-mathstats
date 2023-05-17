@@ -8,6 +8,7 @@ The repicea-mathstats library
 A extension of repicea for math and stats.
 
 Copyright (C) 2009-2021 Mathieu Fortin for Rouge Epicea.
+
 Copyright (C) 2021-2023 His Majesty the King in right of Canada (authors: Mathieu Fortin and Jean-Francois Lavoie (CWFC-CCFB, Canadian Forest Service)
 
 Email: mathieu.fortin.re@gmail.com
