@@ -30,6 +30,6 @@ This library uses some icons from the GTK library which are protected
 by a GNU Lesser General Public License. 
 
 This library relies on 
-	- repicea (licensed LGPL-2.1)  
+- repicea (licensed LGPL-2.1)  
 
 
