@@ -30,9 +30,20 @@ import repicea.math.Matrix;
 
 /**
  * The GaussLegendreQuadrature class implements a numerical integration method based
- * on Legendre polynomials. The current implementation is based on 2, 3, 4 or 5 points,
- * which is set in the constructor.
- * @author Mathieu Fortin - July 2012
+ * on Legendre polynomials. <p>
+ * 
+ * The current implementation is based on 2, 3, 4, 5, or 10 points, which is set in the constructor.
+ * A typical usage of this class is: <p>
+ * 
+ * <code>
+ * GaussLegendreQuadrature glq = new GaussLegendreQuadrature(NumberOfPoints.N10); <br>
+ * glq.setLowerBound(lowerBound); <br>
+ * glq.setUpperBound(upperBound); <br>
+ * double integralApprox = glq.getIntegralApproximation(imf, 1, false); 
+ * </code><p>
+ * where <code>imf</code> is an EvaluableFunction, and 1 is the index of the variable to be integrated. 
+ * 
+ * @author Mathieu Fortin - July 2023
  */
 @SuppressWarnings("serial")
 public class GaussLegendreQuadrature extends AbstractGaussQuadrature implements UnidimensionalIntegralApproximation<EvaluableFunction<Double>>,
@@ -59,6 +70,15 @@ public class GaussLegendreQuadrature extends AbstractGaussQuadrature implements 
 		nodes.add(new QuadratureNode(Math.sqrt(245d - 14d * Math.sqrt(70)) / 21d, (322d + 13 * Math.sqrt(70d)) / 900d));
 		nodes.add(new QuadratureNode(Math.sqrt(245d + 14d * Math.sqrt(70)) / 21d, (322d - 13 * Math.sqrt(70d)) / 900d));
 		NODE_MAP.put(NumberOfPoints.N5, nodes);
+		
+		nodes = new HashSet<QuadratureNode>();
+		nodes.add(new QuadratureNode(0.1488743389816312108848, 0.295524224714752870174));
+		nodes.add(new QuadratureNode(0.4333953941292471907993, 0.269266719309996355091));
+		nodes.add(new QuadratureNode(0.6794095682990244062343, 0.2190863625159820439955));
+		nodes.add(new QuadratureNode(0.8650633666889845107321, 0.1494513491505805931458));
+		nodes.add(new QuadratureNode(0.973906528517171720078, 0.0666713443086881375936));
+		NODE_MAP.put(NumberOfPoints.N10, nodes);
+
 	}
 	
 	private NumberOfPoints numberOfPoints;
@@ -83,7 +103,6 @@ public class GaussLegendreQuadrature extends AbstractGaussQuadrature implements 
 		}
 		return weights;
 	}
-
 
 
 	@Override

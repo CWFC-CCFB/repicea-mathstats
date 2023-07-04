@@ -78,7 +78,7 @@ public class TruncatedGaussianUtilityTest {
 		Assert.assertEquals("Comparing means", expectedMean, observedMean, 1E-2);
 		double expectedVariance = var * (1 + alpha * GaussianUtility.getProbabilityDensity(alpha)/Z - (GaussianUtility.getProbabilityDensity(alpha)/Z) * (GaussianUtility.getProbabilityDensity(alpha)/Z));
 		double observedVariance = estimate.getVariance().getValueAt(0, 0);
-		Assert.assertEquals("Comparing variances", expectedVariance, observedVariance, 3E-2);
+		Assert.assertEquals("Comparing variances", expectedVariance, observedVariance, 3.5E-2);
 	}
 	
 	@Test

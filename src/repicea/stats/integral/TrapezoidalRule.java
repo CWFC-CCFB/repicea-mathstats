@@ -26,7 +26,7 @@ import repicea.math.Matrix;
 import repicea.math.utility.MatrixUtility;
 
 /**
- * The TrapezoidalRule class implements the trapezoidal rule integration method.
+ * The TrapezoidalRule class implements the trapezoidal rule integration method.<p>
  * The resolution parameter in the constructor sets the distance between the x values.
  * The class is adapted to resolution that does not perfectly match the range of the integral.
  * @author Mathieu Fortin - July 2012
@@ -194,10 +194,8 @@ public class TrapezoidalRule extends AbstractNumericalIntegrationMethod implemen
 			if (i == 0) {
 				sum = value;
 			} else {
-//				MatrixUtility.add(sum, value);
 				sum = sum.add(value);
 			}
-//			sum = i == 0 ? value : sum.add(value);
 		}
 		
 		if (isParameter) {

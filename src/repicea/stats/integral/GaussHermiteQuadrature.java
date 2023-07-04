@@ -20,9 +20,7 @@ package repicea.stats.integral;
 
 import java.security.InvalidParameterException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import repicea.math.EvaluableFunction;
 import repicea.math.Matrix;
@@ -40,7 +38,12 @@ public class GaussHermiteQuadrature extends AbstractGaussHermiteQuadrature imple
 	
 	
 	/**
-	 * An interface for a better management of function rescaling.
+	 * An interface for a better management of function rescaling.<p>
+	 * 
+	 * Typically the constructor of the class that implements this interface should include the variance of the y as a final variable. 
+	 * This variance is later used in the convertFromGaussToOriginal method. IMPORTANT: it is assumed that the parameter or variable
+	 * is already set to its mean in the function that implements this interface.
+	 * 
 	 * @author Mathieu Fortin - July 2022
 	 * @see <a href=https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature>Gaussian-Hermite quadrature </a> 
 	 */

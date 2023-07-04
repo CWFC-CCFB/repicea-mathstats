@@ -671,6 +671,10 @@ public class NumericalIntegrationTest {
 		ghq5.setLowerBound(lowerBound);
 		ghq5.setUpperBound(upperBound);
 
+		GaussLegendreQuadrature ghq10 = new GaussLegendreQuadrature(NumberOfPoints.N10);
+		ghq10.setLowerBound(lowerBound);
+		ghq10.setUpperBound(upperBound);
+
 		double trueMean = (Math.pow(upperBound, 3d)/3 + Math.pow(upperBound, 2d)/2) - (Math.pow(lowerBound, 3d)/3 + Math.pow(lowerBound, 2d)/2); 
 		System.out.println("Function x^2 + x between [" + lowerBound + "," + upperBound + "] =  " + trueMean);
 
@@ -689,9 +693,12 @@ public class NumericalIntegrationTest {
 		sum = ghq5.getIntegralApproximation(new SquarePlusXFunction(), 0, false); // integrate the variable and not the parameter
 		System.out.println("Mean with 5 points =  " + sum);
 		assertEquals(trueMean, sum, 1E-8);
-	}
+		
+		sum = ghq10.getIntegralApproximation(new SquarePlusXFunction(), 0, false); // integrate the variable and not the parameter
+		System.out.println("Mean with 10 points =  " + sum);
+		assertEquals(trueMean, sum, 1E-8);
 
-	
+	}
 
 	@SuppressWarnings("serial")
 	protected static class SquarePlusXFunction extends AbstractMathematicalFunction {
