@@ -126,6 +126,8 @@ public class QuantileUtilityTest {
 			}
 		}
 		double q = QuantileUtility.getInternalWeightedQuantileEstimationFromSample(myList, 0.3, myWeights, true);
+		double expected = 1041.6;
+		System.out.println("Expected = " + expected + "; Actual = " + q);
 		Assert.assertEquals("Comparing quantile", 1041.6, q, 1E-8);
 	}
 	
@@ -141,8 +143,10 @@ public class QuantileUtilityTest {
 				myWeights.add(1d);
 			}
 		}
+		double expected = myList.get(0);
 		double q = QuantileUtility.getInternalWeightedQuantileEstimationFromSample(myList, 0, myWeights, true);
-		Assert.assertEquals("Comparing quantile", myList.get(0), q, 1E-8);
+		System.out.println("Expected = " + expected + "; Actual = " + q);
+		Assert.assertEquals("Comparing quantile", expected, q, 1E-8);
 	}
 
 	@Test
@@ -157,8 +161,11 @@ public class QuantileUtilityTest {
 				myWeights.add(1d);
 			}
 		}
+		double expected = myList.get(myList.size() - 1);
 		double q = QuantileUtility.getInternalWeightedQuantileEstimationFromSample(myList, 1.0, myWeights, true);
-		Assert.assertEquals("Comparing quantile", myList.get(myList.size() - 1), q, 1E-8);
+		System.out.println("Expected = " + expected + "; Actual = " + q);
+
+		Assert.assertEquals("Comparing quantile", expected, q, 1E-8);
 	}
 
 	
@@ -172,6 +179,7 @@ public class QuantileUtilityTest {
 		}
 		double q1 = QuantileUtility.getQuantileEstimateFromSample(myList, 0.3, myWeights);
 		double q2 = QuantileUtility.getQuantileEstimateFromSample(myList, 0.3, null);
+		System.out.println("Expected = " + q1 + "; Actual = " + q2);
 		Assert.assertEquals("Comparing quantile", q1, q2, 1E-8);
 	}
 
@@ -184,10 +192,14 @@ public class QuantileUtilityTest {
 			myWeights.add(1d);
 		}
 		MonteCarloEstimate est = QuantileUtility.getQuantileEstimateFromSample(myList, 0.3, myWeights, 1000);	// first call is to make sure the class is loaded
+		double expectedMean = 895.6358666666663;
 		double mean = est.getMean().getValueAt(0, 0);
+		System.out.println("Expected mean = " + expectedMean + "; Actual mean = " + mean);
+		Assert.assertEquals("Testing mean", expectedMean, mean, 35);
+		double expectedVariance = 137033.9766902726;
 		double variance = est.getVariance().getValueAt(0, 0);
-		Assert.assertEquals("Testing mean", 895.6358666666663, mean, 35);
-		Assert.assertEquals("Testing variance", 137033.9766902726, variance, 3E4);
+		System.out.println("Expected variance = " + expectedVariance + "; Actual variance = " + variance);
+		Assert.assertEquals("Testing variance", expectedVariance, variance, 3E4);
 	}
 
 }
