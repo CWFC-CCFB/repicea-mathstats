@@ -22,10 +22,10 @@ import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
+import repicea.math.integral.TrapezoidalRule;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataStructure;
-import repicea.stats.integral.TrapezoidalRule;
 import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 import repicea.stats.model.IndividualLogLikelihood;
 import repicea.stats.model.glm.LinkFunction;

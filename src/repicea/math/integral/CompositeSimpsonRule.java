@@ -1,7 +1,7 @@
 /*
- * This file is part of the repicea library.
+ * This file is part of the repicea-statistics library.
  *
- * Copyright (C) 2009-2022 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,53 +16,76 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.stats.integral;
+package repicea.math.integral;
 
 import java.security.InvalidParameterException;
 import java.util.List;
 
 import repicea.math.EvaluableFunction;
 import repicea.math.Matrix;
-import repicea.math.utility.MatrixUtility;
 
 /**
- * The TrapezoidalRule class implements the trapezoidal rule integration method.<p>
- * The resolution parameter in the constructor sets the distance between the x values.
- * The class is adapted to resolution that does not perfectly match the range of the integral.
+ * This class implements the Composite Simpson's rule.
  * @author Mathieu Fortin - July 2012
  */
 @SuppressWarnings("serial")
-public class TrapezoidalRule extends AbstractNumericalIntegrationMethod implements UnidimensionalIntegralApproximation<EvaluableFunction<Double>>,
-																					UnidimensionalIntegralApproximationForMatrix<EvaluableFunction<Matrix>> {
+public final class CompositeSimpsonRule extends AbstractNumericalIntegrationMethod implements UnidimensionalIntegralApproximation<EvaluableFunction<Double>>,
+																								UnidimensionalIntegralApproximationForMatrix<EvaluableFunction<Matrix>> {
 
-	private double resolution;
-	
+	private static final double EPSILON = 1E-12;
+	private final int numberOfSubintervals;
+
+
 	/**
 	 * Constructor.
-	 * @param resolution the distance between the x points (must be larger than 0)
+	 * @param numberOfSubintervals the number of sub intervals which must be even
 	 */
-	public TrapezoidalRule(double resolution) {
-		if (resolution <= 0) {
-			throw new InvalidParameterException("The resolution must be larger than 0!");
+	public CompositeSimpsonRule(int numberOfSubintervals) {
+		if ((numberOfSubintervals % 2) != 0) {
+			throw new InvalidParameterException("The number of subintervals must be even!");
+		} else {
+			this.numberOfSubintervals = numberOfSubintervals;
 		}
-		this.resolution = resolution;
-	}
-	
-	
-	/**
-	 * This constructor is set through a list of double instances that represents the point along the
-	 * integral. Any replicate is eliminated in the process.
-	 * @param points a List of Double instances
-	 */
-	public TrapezoidalRule(List<Double> points) {
-		setXValuesFromListOfPoints(points);
 	}
 
 	/**
-	 * Constructor for derived classes.
+	 * Constructor 2.
+	 * @param points a List of evenly spaced points.
 	 */
-	protected TrapezoidalRule() {
-		super();
+	public CompositeSimpsonRule(List<Double> points) {
+		if (points.size() % 2 != 1) {		// checks if the number of subsections is even
+			throw new InvalidParameterException("The number of subintervals must be even!");
+		}
+		double previousDiff = 0;
+		double diff;
+		for (int i = 1; i < points.size(); i++) {
+			diff = points.get(i) - points.get(i - 1);
+			if (i == 1) {
+				previousDiff = diff;
+			}
+			if (Math.abs(1 - diff / previousDiff) > EPSILON) {		// checks if the sections are evenly spaced
+				throw new InvalidParameterException("The points are not evenly spaced!");
+			}
+		}
+		setXValuesFromListOfPoints(points);
+		this.numberOfSubintervals = points.size() - 1;
+
+	}
+
+	@Override
+	public List<Double> getWeights() {
+		if (weights.isEmpty()) {
+			for (int i = 0; i < getXValues().size(); i++) {
+				if (i == 0 || i == getXValues().size() - 1) {
+					weights.add(1d);
+				} else if ((i%2) == 1) {
+					weights.add(4d);
+				} else {
+					weights.add(2d);
+				}
+			}
+		}
+		return weights;
 	}
 
 	private void setXValues() {
@@ -70,51 +93,17 @@ public class TrapezoidalRule extends AbstractNumericalIntegrationMethod implemen
 			return;
 		} else {
 			double difference = getUpperBound() - getLowerBound();
-			double numberOfSectionsWithDigits = difference / resolution;
-			int numberOfSections = (int) (numberOfSectionsWithDigits);
-			if (numberOfSectionsWithDigits > numberOfSections) {
-				numberOfSections++;			// add one section for the top section
-			}
-			numberOfSections++;
+			double slope = difference / numberOfSubintervals;
 			double height;
 			int i = 0;
-			while (i < numberOfSections) {
-				height = getLowerBound() + i * resolution;
-				if (height >= getUpperBound()) {
-					height = getUpperBound();
-				}
+			while (i <= numberOfSubintervals) {
+				height = getLowerBound() + i * slope;
 				xValues.add(height);
 				i++;
 			}
 		}
 	}
 
-	/*
-	 * Calculates the weights based on the distance between the sections. 
-	 * The distances does not need to be even. 
-	 * (non-Javadoc)
-	 * @see repicea.stats.integral.NumericalIntegrationMethod#getWeights()
-	 */
-	@Override
-	public List<Double> getWeights() {
-		if (weights.isEmpty()) {
-			List<Double> xValues = getXValues();
-			if (xValues != null) {
-				double diff;
-				double lag = 0d;
-				for (int i = 0; i < xValues.size(); i++) {
-					if (i == xValues.size() - 1) {
-						diff = 0;
-					} else {
-						diff = (xValues.get(i + 1) - xValues.get(i)) * .5;
-					}
-					weights.add(diff + lag);
-					lag = diff;
-				}
-			}
-		}
-		return weights;
-	}
 
 
 	@Override
@@ -128,11 +117,9 @@ public class TrapezoidalRule extends AbstractNumericalIntegrationMethod implemen
 	@Override
 	public List<Double> getRescalingFactors() {
 		if (rescalingFactors.isEmpty()) {
-			List<Double> xValues = getXValues();
-			if (!xValues.isEmpty()) {
-				for (int i = 0; i < xValues.size(); i++) {
-					rescalingFactors.add(1d);
-				}
+			double rf = (getUpperBound() - getLowerBound()) / numberOfSubintervals / 3;
+			for (int i = 0; i < getXValues().size(); i++) {
+				rescalingFactors.add(rf);
 			}
 		}
 		return rescalingFactors;
@@ -140,14 +127,16 @@ public class TrapezoidalRule extends AbstractNumericalIntegrationMethod implemen
 
 	@Override
 	public double getIntegralApproximation(EvaluableFunction<Double> functionToEvaluate, 
-											int index,
-											boolean isParameter) {
+			int index,
+			boolean isParameter) {
+
 		double originalValue;
 		if (isParameter) {
 			originalValue = functionToEvaluate.getParameterValue(index);
 		} else {
 			originalValue = functionToEvaluate.getVariableValue(index);
 		}
+
 		double sum = 0d;
 		double point;
 		for (int i = 0; i < getXValues().size(); i++) {
@@ -165,11 +154,10 @@ public class TrapezoidalRule extends AbstractNumericalIntegrationMethod implemen
 		} else {
 			functionToEvaluate.setVariableValue(index, originalValue);
 		}
-		
+
 		return sum;
 	}
-	
-	
+
 	@Override
 	public Matrix getIntegralApproximationForMatrixFunction(EvaluableFunction<Matrix> functionToEvaluate, 
 											int index,
@@ -191,11 +179,7 @@ public class TrapezoidalRule extends AbstractNumericalIntegrationMethod implemen
 				functionToEvaluate.setVariableValue(index, point);
 			}
 			Matrix value = functionToEvaluate.getValue().scalarMultiply(getWeights().get(i) * getRescalingFactors().get(i));
-			if (i == 0) {
-				sum = value;
-			} else {
-				sum = sum.add(value);
-			}
+			sum = i == 0 ? value : sum.add(value);
 		}
 		
 		if (isParameter) {
@@ -206,15 +190,5 @@ public class TrapezoidalRule extends AbstractNumericalIntegrationMethod implemen
 		
 		return sum;
 	}
-
-//	public static void main(String[] args) {
-//		TrapezoidalRule tr = new TrapezoidalRule(3);
-//		tr.setLowerBound(0);
-//		tr.setUpperBound(20);
-//		List<Double> xValues = tr.getXValues();
-//		List<Double> weights = tr.getWeights();
-//		List<Double> mf = tr.getRescalingFactors();
-//		int u = 0;
-//	}
 	
 }

@@ -16,28 +16,25 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.stats.integral;
-
-import java.util.List;
+package repicea.math.integral;
 
 import repicea.math.EvaluableFunction;
+import repicea.math.Matrix;
 
 /**
- * Provides a simple method for numerical integration of multidimensional integrals.
+ * Provides a simple method for numerical integration of unidimensional integrals for matrices.
  * @author Mathieu Fortin - July 2022
  */
-public interface MultidimensionalIntegralApproximation<P extends EvaluableFunction<Double>> {
+public interface UnidimensionalIntegralApproximationForMatrix<P extends EvaluableFunction<Matrix>> {
 
-	
 	/**
-	 * This method returns the value of a multi-dimension integral
-	 * @param functionToEvaluate a MathematicalFunction instance that returns Double 
-	 * @param indices the indices of the parameters over which the integration is made
-	 * @param isParameter a boolean to indicate that indices refer to parameters. If false, it is assumed that the
-	 * indices refer to variables.
-	 * @return the approximation of the integral
+	 * Compute the numerical integration for one-dimension integrals.
+	 * @param functionToEvaluate an AbstractMathematicalFunction function
+	 * @param index the index of the parameter or the variable that is integrated
+	 * @param isParameter a boolean true it is a parameter, false it is a variable
+	 * @return a double
 	 */
-	public double getMultiDimensionalIntegralApproximation(P functionToEvaluate,
-			List<Integer> indices, 
+	public Matrix getIntegralApproximationForMatrixFunction(P functionToEvaluate, 
+			int index, 
 			boolean isParameter);
 }

@@ -25,7 +25,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import repicea.stats.integral.TrapezoidalRule;
+import repicea.math.integral.TrapezoidalRule;
 
 
 public class EmpiricalDistributionProbabilityDensityFunctionTest {

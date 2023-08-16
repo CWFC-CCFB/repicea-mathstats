@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.stats.integral;
+package repicea.math.integral;
 
 import java.security.InvalidParameterException;
 import java.util.HashMap;
@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import repicea.math.integral.GaussHermiteQuadrature.GaussHermiteQuadratureCompatibleFunction;
 import repicea.serial.xml.XmlSerializerChangeMonitor;
-import repicea.stats.integral.GaussHermiteQuadrature.GaussHermiteQuadratureCompatibleFunction;
 
 @SuppressWarnings("serial")
 public abstract class AbstractGaussHermiteQuadrature extends AbstractGaussQuadrature {
