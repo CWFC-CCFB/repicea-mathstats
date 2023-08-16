@@ -20,6 +20,10 @@ package repicea.stats.model;
 
 import repicea.math.Matrix;
 
+/**
+ * This interface ensures the model can provide its predicted values and its residuals
+ * @author Mathieu Fortin - 2022
+ */
 public interface PredictableModel {
 
 	

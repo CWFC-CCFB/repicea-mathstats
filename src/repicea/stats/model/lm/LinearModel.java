@@ -95,15 +95,10 @@ public class LinearModel extends AbstractStatisticalModel implements Predictable
 		return getVectorY().subtract(getPredicted());
 	}
 
-	/*
-	 * Useless for this class (non-Javadoc)
-	 * @see repicea.stats.model.AbstractStatisticalModel#instantiateDefaultOptimizer()
-	 */
 	@Override
 	protected Estimator instantiateDefaultEstimator() {
 		return new OLSEstimator(this);
 	}
-
 
 	protected void setModelDefinition(String modelDefinition) throws StatisticalDataException {
 		super.setModelDefinition(modelDefinition);
