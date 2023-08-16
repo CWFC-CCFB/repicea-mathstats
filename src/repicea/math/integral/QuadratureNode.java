@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.stats.integral;
+package repicea.math.integral;
 
 /**
  * This class represents the implementation of a Gaussian Quadrature Node. Every instance contains

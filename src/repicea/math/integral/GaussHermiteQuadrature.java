@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.stats.integral;
+package repicea.math.integral;
 
 import java.security.InvalidParameterException;
 import java.util.Arrays;
@@ -24,7 +24,7 @@ import java.util.List;
 
 import repicea.math.EvaluableFunction;
 import repicea.math.Matrix;
-import repicea.stats.integral.GaussHermiteQuadrature.GaussHermiteQuadratureCompatibleFunction;
+import repicea.math.integral.GaussHermiteQuadrature.GaussHermiteQuadratureCompatibleFunction;
 
 /**
  * The GaussHermiteQuadrature class provides the x values and their weights for numerical integration.

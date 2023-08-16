@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.stats.integral;
+package repicea.math.integral;
 
 import static org.junit.Assert.assertEquals;
 
@@ -30,10 +30,15 @@ import repicea.math.AbstractMathematicalFunction;
 import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
+import repicea.math.integral.AbstractNumericalIntegrationMethod;
+import repicea.math.integral.CompositeSimpsonRule;
+import repicea.math.integral.GaussHermiteQuadrature;
+import repicea.math.integral.GaussLegendreQuadrature;
+import repicea.math.integral.TrapezoidalRule;
+import repicea.math.integral.AbstractGaussQuadrature.NumberOfPoints;
+import repicea.math.integral.GaussHermiteQuadrature.GaussHermiteQuadratureCompatibleFunction;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
-import repicea.stats.integral.AbstractGaussQuadrature.NumberOfPoints;
-import repicea.stats.integral.GaussHermiteQuadrature.GaussHermiteQuadratureCompatibleFunction;
 import repicea.stats.model.glm.LinkFunction;
 import repicea.stats.model.glm.LinkFunction.Type;
 
