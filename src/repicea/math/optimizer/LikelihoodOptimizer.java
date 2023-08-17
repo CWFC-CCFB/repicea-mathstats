@@ -25,15 +25,16 @@ import java.util.logging.Level;
 import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
-import repicea.math.utility.MatrixUtility;
 import repicea.util.REpiceaLogManager;
 
 /**
- * The NewtonRaphsonOptimizer class implements the Optimizer interface. It optimizes a log-likelihood function using the
- * Newton-Raphson algorithm. The vector of parameter changes is estimated as - inv(d2LLK/d2Beta) * dLLK/dBeta.
+ * The LikelihoodOptimizer class implements methods for the maximization 
+ * of likelihood function.<p>
+ * The class implements the Newton-Raphson algorithm. The vector of parameter changes is estimated as - inv(d2LLK/d2Beta) * dLLK/dBeta.
+ * 
  * @author Mathieu Fortin - June 2011
  */
-public class NewtonRaphsonOptimizer extends AbstractOptimizer {
+public class LikelihoodOptimizer extends AbstractOptimizer {
 	
 	public final static String InnerIterationStarted = "InnerIterationStarted";
 
@@ -43,15 +44,16 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 	protected double gradientCriterion = 1E-3;
 	private int iterationID;
 	private LineSearchMethod lineSearchMethod;
-	
-	public NewtonRaphsonOptimizer(LineSearchMethod lineSearchMethod) {
+		
+	public LikelihoodOptimizer(LineSearchMethod lineSearchMethod) {
 		this.convergenceCriterion = 1E-8; // default value
 		setLineSearchMethod(lineSearchMethod);
 	}
 	
-	public NewtonRaphsonOptimizer() {
+	public LikelihoodOptimizer() {
 		this(null);
 	}
+
 	
 	/**
 	 * Sets the line search method. <br>
@@ -96,7 +98,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		Matrix newBeta;
 		boolean areParametersWithinBounds;
 		do {
-			fireOptimizerEvent(NewtonRaphsonOptimizer.InnerIterationStarted);
+			fireOptimizerEvent(LikelihoodOptimizer.InnerIterationStarted);
 			scalingFactor = getScalingFactor(numberSubIter);
 			newBeta = originalBeta.add(optimisationStep.scalarMultiply(scalingFactor));
 			areParametersWithinBounds = areParametersWithinBounds(function, newBeta);
@@ -172,7 +174,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 				Matrix optimisationStep = inverseHessian.multiply(gradient).scalarMultiply(-1d);
 				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINEST, LOGGER_NAME, "Optimization step at iteration " + iterationID + " = " + optimisationStep.toString());
 
-				Matrix originalBeta = extractParameters(function,indicesOfParametersToOptimize);
+				Matrix originalBeta = extractParameters(function, indicesOfParametersToOptimize);
 				previousLLK = value0;	
 				value0 = runInnerOptimisation(function, 
 						indicesOfParametersToOptimize, 

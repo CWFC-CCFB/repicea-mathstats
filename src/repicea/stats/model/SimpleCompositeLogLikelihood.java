@@ -21,7 +21,6 @@ package repicea.stats.model;
 import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
-import repicea.math.utility.MatrixUtility;
 
 /**
  * A simple composite log likelihood for distribution models. <br>
@@ -67,9 +66,6 @@ public class SimpleCompositeLogLikelihood extends AbstractMathematicalFunctionWr
 	public SymmetricMatrix getHessian() {
 		SymmetricMatrix resultingHessian = new SymmetricMatrix(getOriginalFunction().getNumberOfParameters());
 		for (int i = 0; i < yValues.m_iRows; i++) {
-			if (i == 208) {
-				int u = 0;
-			}
 			setValuesInLikelihoodFunction(i);
 			Matrix hessianToAdd = getOriginalFunction().getHessian();
 //			if (hessianToAdd.anyElementNaN()) {

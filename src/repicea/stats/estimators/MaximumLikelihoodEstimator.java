@@ -1,8 +1,10 @@
 /*
- * This file is part of the repicea library.
+ * This file is part of the repicea-mathstats library.
  *
  * Copyright (C) 2009-2022 Mathieu Fortin for Rouge-Epicea
- *
+ * Copyright (C) 2023 His Majesty the King in Right of Canada
+ * Author: Mathieu Fortin, Canadian Wood Fibre Centre, CFS
+ * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,7 +22,6 @@ package repicea.stats.estimators;
 
 import java.security.InvalidParameterException;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +31,7 @@ import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.math.optimizer.AbstractOptimizer.LineSearchMethod;
 import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
+import repicea.math.optimizer.LikelihoodOptimizer;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianEstimate;
@@ -45,9 +47,16 @@ import repicea.util.REpiceaLogManager;
  */
 public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelihoodCompatibleModel> {
 
-	
+	/**
+	 * Ensure the model is compatible with the maximum likelihood estimator.
+	 * @author Mathieu Fortin - 2022
+	 */
 	public interface MaximumLikelihoodCompatibleModel extends EstimatorCompatibleModel {
-	
+		
+		/**
+		 * Provide the convergence criterion.
+		 * @return a double
+		 */
 		public double getConvergenceCriterion();
 
 		/**
@@ -65,9 +74,6 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 				getCompleteLogLikelihood().setParameterValue(i, beta.getValueAt(i, 0));
 			}
 		}
-
-		
-		
 	}
 	
 	
@@ -98,7 +104,7 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 
 	public static String LOGGER_NAME = "MLEstimator";
 	protected GaussianEstimate parameterEstimate;
-	protected final repicea.math.optimizer.NewtonRaphsonOptimizer nro;
+	protected final LikelihoodOptimizer nro;
 	
 	/**
 	 * Constructor. 
@@ -106,7 +112,7 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 	 */
 	public MaximumLikelihoodEstimator(MaximumLikelihoodCompatibleModel model) {
 		super(model);
-		nro = new repicea.math.optimizer.NewtonRaphsonOptimizer();
+		nro = new LikelihoodOptimizer();
 	}
 	
 	
@@ -260,8 +266,8 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 			sb.append(convergenceDataset.toString() + System.lineSeparator());
 			DataSet parameterDataset = getParameterEstimatesReport();
 			decFormat = new DecimalFormat();
-			decFormat.setMaximumFractionDigits(6);
-			decFormat.setMinimumFractionDigits(6);
+			decFormat.setMaximumFractionDigits(8);
+			decFormat.setMinimumFractionDigits(8);
 			parameterDataset.setFormatter(1, decFormat);
 			parameterDataset.setFormatter(2, decFormat);
 			parameterDataset.setFormatter(4, decFormat);
@@ -272,6 +278,7 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 			sb.append(parameterDataset.toString() + System.lineSeparator());
 			return sb.toString();
 		}
-
 	}
+	
+	
 }

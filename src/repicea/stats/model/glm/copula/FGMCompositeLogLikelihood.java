@@ -7,7 +7,7 @@ import java.util.Map;
 import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
-import repicea.math.optimizer.NewtonRaphsonOptimizer;
+import repicea.math.optimizer.LikelihoodOptimizer;
 import repicea.math.optimizer.OptimizerListener;
 import repicea.math.utility.MatrixUtility;
 import repicea.stats.data.DataBlock;
@@ -378,7 +378,7 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihoodWithExplana
 
 	@Override
 	public void optimizerDidThis(String actionString) {
-		if (OptimizerListener.optimizationStarted.equals(actionString) || NewtonRaphsonOptimizer.InnerIterationStarted.equals(actionString)) {
+		if (OptimizerListener.optimizationStarted.equals(actionString) || LikelihoodOptimizer.InnerIterationStarted.equals(actionString)) {
 			reset();
 		}
 	}
