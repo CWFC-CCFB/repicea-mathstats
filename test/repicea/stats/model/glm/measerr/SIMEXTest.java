@@ -66,9 +66,18 @@ public class SIMEXTest {
 		double actualParm1 = estimate.getMean().getValueAt(0, 0);
 		System.out.println("Expected parm1 = " + expParm1 + "; Actual parm1 = " + actualParm1);
 		Assert.assertEquals("Checking parm estimate 1", expParm1, actualParm1, 5E-3);
-		Assert.assertEquals("Checking standard error parm estimate 1", 0.067178, Math.sqrt(estimate.getVariance().getValueAt(0, 0)), 6E-4);
-		Assert.assertEquals("Checking parm 2", -0.05505, estimate.getMean().getValueAt(1, 0), 4E-4);
-		Assert.assertEquals("Checking standard error parm estimate 2", 0.004364, Math.sqrt(estimate.getVariance().getValueAt(1, 1)), 6E-5);
+		double expParm1Std = 0.067178;
+		double actualParm1Std = Math.sqrt(estimate.getVariance().getValueAt(0, 0));
+		System.out.println("Expected std parm1 = " + expParm1Std + "; Actual std parm1 = " + actualParm1Std);
+		Assert.assertEquals("Checking standard error parm estimate 1", expParm1Std, actualParm1Std, 6E-4);
+		double expParm2 = -0.05505;
+		double actualParm2 = estimate.getMean().getValueAt(1, 0); 
+		System.out.println("Expected parm2 = " + expParm2 + "; Actual parm1 = " + actualParm2);
+		Assert.assertEquals("Checking parm2", expParm2, actualParm2, 4E-4);
+		double expParm2Std = 0.004364;
+		double actualParm2Std = Math.sqrt(estimate.getVariance().getValueAt(1, 1)); 
+		System.out.println("Expected std parm2 = " + expParm2Std + "; Actual std parm2 = " + actualParm2Std);
+		Assert.assertEquals("Checking standard error parm estimate 2", expParm2Std, actualParm2Std, 6E-5);
 	}
 	
 	@Test
