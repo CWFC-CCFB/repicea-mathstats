@@ -30,9 +30,9 @@ import repicea.stats.model.IndividualLogLikelihood;
 @SuppressWarnings("serial")
 public class GaussianIndividualLogLikelihood extends AbstractMathematicalFunctionWrapper implements IndividualLogLikelihood {
 
-	private Matrix yVector;
-	private double sigma2;
-	private final int nbParmsFromMatrixX;
+	protected Matrix yVector;
+	protected double sigma2;
+	protected final int nbParmsFromMatrixX;
 	
 	protected GaussianIndividualLogLikelihood(int nbParmsFromMatrixX, Matrix startingValues) {
 		super(new LinearStatisticalExpression());
@@ -89,17 +89,18 @@ public class GaussianIndividualLogLikelihood extends AbstractMathematicalFunctio
 		}
 		return beta;
 	}
-	
+
+	@Override
+	public int getNumberOfParameters() {
+		return getOriginalFunction().getNumberOfParameters() + 1;
+	}
+
 	@Override
 	public Double getValue() {
 		double res = yVector.getValueAt(0, 0) - getOriginalFunction().getValue();
 		return - 0.5 * (res * res) / sigma2 - 0.5 * Math.log(2 * Math.PI) - 0.5 * Math.log(sigma2);
 	}
 
-	@Override
-	public int getNumberOfParameters() {
-		return getOriginalFunction().getNumberOfParameters() + 1;
-	}
 	
 	@Override
 	public Matrix getGradient() {

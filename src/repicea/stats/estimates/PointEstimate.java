@@ -26,8 +26,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import repicea.math.Matrix;
+import repicea.math.utility.GaussianUtility;
 import repicea.stats.distributions.GaussianDistribution;
-import repicea.stats.distributions.utility.GaussianUtility;
 import repicea.stats.sampling.PopulationUnit;
 
 /**

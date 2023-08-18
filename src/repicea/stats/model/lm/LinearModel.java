@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea-mathstats library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -47,7 +47,7 @@ public class LinearModel extends AbstractStatisticalModel implements Predictable
 	private Matrix matrixX;
 	private Matrix vectorY;
 	private double convergenceCriterion = 1E-8;
-	private final Matrix startingValues;
+	protected final Matrix startingValues;
 
 	
 	/**

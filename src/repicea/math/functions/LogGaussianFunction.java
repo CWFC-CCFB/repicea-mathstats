@@ -24,7 +24,7 @@ import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
 import repicea.math.ParameterBound;
 import repicea.math.SymmetricMatrix;
-import repicea.stats.distributions.utility.GaussianUtility;
+import repicea.math.utility.GaussianUtility;
 
 /**
  * The LogGaussianFunction class implements the pdf of the lognormal distribution. <br>

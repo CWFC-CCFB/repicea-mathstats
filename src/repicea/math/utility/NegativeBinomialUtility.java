@@ -16,12 +16,9 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.stats.distributions.utility;
+package repicea.math.utility;
 
 import java.security.InvalidParameterException;
-
-import repicea.math.utility.GammaUtility;
-import repicea.math.utility.MathUtility;
 
 public class NegativeBinomialUtility {
 	

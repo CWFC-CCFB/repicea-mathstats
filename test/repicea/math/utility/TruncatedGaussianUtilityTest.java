@@ -16,12 +16,14 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.stats.distributions.utility;
+package repicea.math.utility;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.math.Matrix;
+import repicea.math.utility.GaussianUtility;
+import repicea.math.utility.TruncatedGaussianUtility;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.estimates.MonteCarloEstimate;
 

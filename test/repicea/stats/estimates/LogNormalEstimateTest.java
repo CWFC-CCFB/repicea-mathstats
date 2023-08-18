@@ -20,7 +20,8 @@ package repicea.stats.estimates;
 
 import org.junit.Assert;
 import org.junit.Test;
-import repicea.stats.distributions.utility.GaussianUtility;
+
+import repicea.math.utility.GaussianUtility;
 
 public class LogNormalEstimateTest {
 

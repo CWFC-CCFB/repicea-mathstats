@@ -22,9 +22,9 @@ import java.security.InvalidParameterException;
 import java.util.Random;
 
 import repicea.math.Matrix;
-import repicea.stats.distributions.utility.NegativeBinomialUtility;
-import repicea.stats.distributions.utility.TruncatedGaussianUtility;
-import repicea.stats.distributions.utility.WeibullUtility;
+import repicea.math.utility.NegativeBinomialUtility;
+import repicea.math.utility.TruncatedGaussianUtility;
+import repicea.math.utility.WeibullUtility;
 
 @SuppressWarnings("serial")
 public class REpiceaRandom extends Random {
