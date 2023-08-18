@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.math.utility.GaussianUtility;
 import repicea.stats.data.DataSet;
-import repicea.stats.distributions.utility.GaussianUtility;
 import repicea.stats.estimators.AbstractEstimator.EstimatorCompatibleModel;
 
 public abstract class AbstractEstimator<P extends EstimatorCompatibleModel> implements Estimator {

@@ -64,6 +64,7 @@ public class OLSEstimator extends AbstractEstimator<OLSCompatibleModel> {
 	
 	@Override
 	public boolean doEstimation() throws EstimatorException {
+		hasConverged = false;
 		if (!(model instanceof LinearModel)) {
 			throw new EstimatorException("The OLS optimizer is designed to work with instances of LinearModel only!");
 		}
@@ -75,6 +76,7 @@ public class OLSEstimator extends AbstractEstimator<OLSCompatibleModel> {
 		SymmetricMatrix inverseProduct = SymmetricMatrix.convertToSymmetricIfPossible(matrixXT.multiply(matrixX).getInverseMatrix());
 		((GaussianEstimate) betaVector).setMean(inverseProduct.multiply(matrixX.transpose()).multiply(matrixY));
 		model.setParameters(betaVector.getMean());
+		hasConverged = true;
 		Matrix residual = model.getResiduals();
 		int degreesOfFreedom = model.getNumberOfObservations() - betaVector.getMean().m_iRows;
 		double resVar = residual.transpose().multiply(residual).scalarMultiply(1d / degreesOfFreedom).getValueAt(0, 0);

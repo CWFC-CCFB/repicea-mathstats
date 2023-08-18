@@ -25,9 +25,9 @@ import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
+import repicea.math.utility.GaussianUtility;
 import repicea.stats.distributions.EmpiricalDistribution;
 import repicea.stats.distributions.UnknownDistribution;
-import repicea.stats.distributions.utility.GaussianUtility;
 import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
 import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
 

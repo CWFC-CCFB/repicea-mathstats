@@ -28,7 +28,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import repicea.math.optimizer.AbstractOptimizer.LineSearchMethod;
-import repicea.math.optimizer.NewtonRaphsonOptimizer;
+import repicea.math.optimizer.LikelihoodOptimizer;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.util.REpiceaLogManager;
@@ -38,7 +38,7 @@ public class WeibullModelTest {
 	@BeforeClass
 	public static void doThis() {
 		Level l = Level.OFF;
-		NewtonRaphsonOptimizer.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
+		LikelihoodOptimizer.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
 		ConsoleHandler ch = new ConsoleHandler();
 		ch.setLevel(l);
 		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).setLevel(l);

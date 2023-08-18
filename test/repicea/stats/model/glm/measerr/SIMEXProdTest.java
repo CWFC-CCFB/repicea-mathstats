@@ -25,7 +25,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import repicea.math.optimizer.NewtonRaphsonOptimizer;
+import repicea.math.optimizer.LikelihoodOptimizer;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.glm.GeneralizedLinearModel;
@@ -38,7 +38,7 @@ public class SIMEXProdTest {
 
 	public static void main(String[] args) throws Exception {
 		Level l = Level.OFF;
-		NewtonRaphsonOptimizer.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
+		LikelihoodOptimizer.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
 		ConsoleHandler ch = new ConsoleHandler();
 		ch.setLevel(l);
 		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).setLevel(l);

@@ -20,10 +20,10 @@ package repicea.stats.estimates;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
+import repicea.math.utility.GaussianUtility;
 import repicea.stats.StatisticalUtility.TypeMatrixR;
 import repicea.stats.distributions.CenteredGaussianDistribution;
 import repicea.stats.distributions.GaussianErrorTermList;
-import repicea.stats.distributions.utility.GaussianUtility;
 
 /**
  * The GaussianErrorTermEstimate class handles the complex covariance structure in linear and nonlinear models. It assumes the mean of the

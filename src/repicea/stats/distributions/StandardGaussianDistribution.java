@@ -22,10 +22,10 @@ import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
+import repicea.math.utility.GaussianUtility;
 import repicea.serial.xml.PostXmlUnmarshalling;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
-import repicea.stats.distributions.utility.GaussianUtility;
 
 @SuppressWarnings("serial")
 public class StandardGaussianDistribution implements ContinuousDistribution, PostXmlUnmarshalling {

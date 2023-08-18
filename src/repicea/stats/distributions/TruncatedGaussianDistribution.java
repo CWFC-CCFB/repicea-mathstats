@@ -22,9 +22,9 @@ import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
+import repicea.math.utility.GaussianUtility;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.distributions.TruncatedGaussianBound.TruncatedGaussianBoundCompatible;
-import repicea.stats.distributions.utility.GaussianUtility;
 
 /**
  * A class for truncated gaussian distribution.

@@ -3,7 +3,7 @@ package repicea.stats.distributions;
 import java.io.Serializable;
 
 import repicea.math.Matrix;
-import repicea.stats.distributions.utility.GaussianUtility;
+import repicea.math.utility.GaussianUtility;
 
 @SuppressWarnings("serial")
 public class TruncatedGaussianBound extends BasicBound implements Serializable {

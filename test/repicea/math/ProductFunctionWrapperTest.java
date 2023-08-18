@@ -24,7 +24,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.math.functions.GaussianFunction;
-import repicea.stats.distributions.utility.GaussianUtility;
+import repicea.math.utility.GaussianUtility;
 
 public class ProductFunctionWrapperTest {
 	

@@ -24,7 +24,7 @@ import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
 import repicea.math.ParameterBound;
 import repicea.math.SymmetricMatrix;
-import repicea.stats.distributions.utility.WeibullUtility;
+import repicea.math.utility.WeibullUtility;
 
 public class WeibullFunction extends AbstractMathematicalFunction {
 

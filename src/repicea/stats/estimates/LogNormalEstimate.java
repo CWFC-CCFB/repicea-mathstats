@@ -23,9 +23,9 @@ import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
+import repicea.math.utility.GaussianUtility;
 import repicea.stats.CentralMomentsSettable;
 import repicea.stats.distributions.GaussianDistribution;
-import repicea.stats.distributions.utility.GaussianUtility;
 
 /**
  * The LogNormalEstimate class implements an estimate that follows

@@ -8,7 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.math.Matrix;
-import repicea.stats.distributions.utility.GaussianUtility;
+import repicea.math.utility.GaussianUtility;
 
 public class GaussianTest {
 

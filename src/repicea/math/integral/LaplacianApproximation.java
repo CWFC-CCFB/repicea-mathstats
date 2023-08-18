@@ -24,7 +24,7 @@ import java.util.List;
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
 import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
-import repicea.math.optimizer.NewtonRaphsonOptimizer;
+import repicea.math.optimizer.LikelihoodOptimizer;
 
 /**
  * The LaplacianApproximation class implements the Laplace approximation for integrals.

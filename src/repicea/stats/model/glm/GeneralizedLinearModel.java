@@ -74,7 +74,6 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	private final StatisticalDataStructure dataStruct;
 	private final CompositeLogLikelihoodWithExplanatoryVariables completeLLK;
 	protected final IndividualLogLikelihood individualLLK;
-//	protected final LinkFunction lf;
 	protected final Family family;
 	protected Matrix matrixX;		// reference
 	protected Matrix y;				// reference

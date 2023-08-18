@@ -21,7 +21,7 @@ package repicea.stats.model.glm;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.math.utility.GammaUtility;
-import repicea.stats.distributions.utility.NegativeBinomialUtility;
+import repicea.math.utility.NegativeBinomialUtility;
 import repicea.stats.model.glm.GeneralizedLinearModel.GLMIndividualLikelihood;
 
 /**
