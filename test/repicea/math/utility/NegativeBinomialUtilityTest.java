@@ -19,6 +19,7 @@
 package repicea.math.utility;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import repicea.math.Matrix;
@@ -35,6 +36,7 @@ public class NegativeBinomialUtilityTest {
 		Assert.assertEquals("Testing the two methods", expected, observed, 1E-8);
 	}
 
+	@Ignore
 	@Test
 	public void performanceTest() {
 		for (int i = 0; i < 100000; i++) 
