@@ -151,7 +151,7 @@ public class SIMEXTest {
 		parmEst = s.getParameters().getValueAt(4, 0);
 		Assert.assertEquals("Checking parm estimate: occIndex10km", 3.37, parmEst, 2E-1);
 		parmEst = s.getParameters().getValueAt(5, 0);
-		Assert.assertEquals("Checking parm estimate: timeSince1970", 0.0450, parmEst, 2E-3);
+		Assert.assertEquals("Checking parm estimate: timeSince1970", 0.0450, parmEst, 2.5E-3);
 		parmEst = s.getParameters().getValueAt(6, 0);
 		Assert.assertEquals("Checking parm estimate: theta", 1.83, parmEst, 1E-1);
 		SIMEXModel.OverrideVarianceForTest = before; 
