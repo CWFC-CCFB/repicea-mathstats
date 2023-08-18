@@ -158,6 +158,8 @@ public class LikelihoodOptimizer extends AbstractOptimizer {
 		REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINER, LOGGER_NAME, "Gradient = " + gradient.toString());
 		SymmetricMatrix hessian = function.getHessian();
 				
+//		Matrix approxVCOV = hessian.getInverseMatrix().scalarMultiply(-1);
+//		Matrix approxStd = approxVCOV.diagonalVector().elementWisePower(0.5);
 		iterationID = 0;
 		
 		double gconv = calculateConvergence(gradient, hessian, value0);

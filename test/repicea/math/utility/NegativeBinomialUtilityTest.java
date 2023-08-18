@@ -22,11 +22,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.math.Matrix;
-import repicea.math.utility.NegativeBinomialUtility;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.estimates.MonteCarloEstimate;
 
-
+@SuppressWarnings("deprecation")
 public class NegativeBinomialUtilityTest {
 
 	@Test

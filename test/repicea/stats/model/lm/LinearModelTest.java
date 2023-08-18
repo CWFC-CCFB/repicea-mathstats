@@ -22,6 +22,7 @@ package repicea.stats.model.lm;
 import java.security.InvalidParameterException;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import repicea.math.Matrix;
@@ -66,7 +67,6 @@ public class LinearModelTest {
 		Assert.assertEquals("Testing intercept estimate std", expectedInterceptStd, actualInterceptStd, 1E-8);
 	}
 
-	
 	@Test
 	public void linearModelWithMaximumLikelihoodEstimatorButInconsistentStartingValues() throws Exception {
 		String filename = ObjectUtility.getPackagePath(getClass()) + "datasetSingleObs.csv";
@@ -77,12 +77,34 @@ public class LinearModelTest {
 		startingValues.setValueAt(2, 0, -0.007);
 		startingValues.setValueAt(3, 0, -0.007);
 		try {
-			LinearModel lm = new LinearModel(ds, "yTrans ~ lnDt_corr + BAL + dbhCm", startingValues);
+			new LinearModel(ds, "yTrans ~ lnDt_corr + BAL + dbhCm", startingValues);
 		} catch (InvalidParameterException e) {
 			System.out.println(e.getMessage());
 			return;
 		}
 		Assert.fail("Should have thrown an invalid parameter exception since the starting parameters are not consistent!");
+	}
+
+	@Test
+	public void truncatedLinearModel() throws Exception {
+		String filename = ObjectUtility.getPackagePath(getClass()) + "datasetSingleObs.csv";
+		DataSet ds = new DataSet(filename, true);
+		Matrix startingValues = new Matrix(5, 1);
+		
+		startingValues.setValueAt(0, 0, -0.72);
+		startingValues.setValueAt(1, 0, 0.73);
+		startingValues.setValueAt(2, 0, -0.005);
+		startingValues.setValueAt(3, 0, -0.005);
+		startingValues.setValueAt(4, 0, 0.22);
+
+		LinearModelWithTruncatedGaussianErrorTerm lm = new LinearModelWithTruncatedGaussianErrorTerm(ds, "yTrans ~ lnDt_corr + BAL + dbhCm", startingValues, 0);
+		lm.doEstimation();
+		System.out.println(lm.getSummary());
+		double expectedIntercept = -1.82587351;
+		Assert.assertEquals("Testing intercept estimate", expectedIntercept, lm.getParameters().getValueAt(0, 0), 1E-8);
+		double expectedInterceptStd = 0.09970163;
+		double actualInterceptStd = Math.sqrt(lm.getEstimator().getParameterEstimates().getVariance().getValueAt(0, 0));
+		Assert.assertEquals("Testing intercept estimate std", expectedInterceptStd, actualInterceptStd, 1E-8);
 	}
 
 }
