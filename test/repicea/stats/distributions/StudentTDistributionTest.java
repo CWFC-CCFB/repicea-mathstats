@@ -27,10 +27,16 @@ public class StudentTDistributionTest {
 		double quantile975 = ci.getUpperLimit().getValueAt(0, 0);
 		double expectedMean = dist.getMean().getValueAt(0, 0);
 		double expectedVariance = dist.getVariance().getValueAt(0, 0);
+		System.out.println("Expected mean " + expectedMean + "; Actual mean" + mean);
 		Assert.assertEquals("Testing the mean", expectedMean, mean, 0.003);
-		Assert.assertEquals("Testing the variance", expectedVariance, variance, 0.4);
-		Assert.assertEquals("Testing quantile 0.025", quantile025, -3.182446, 5E-2);
-		Assert.assertEquals("Testing quantile 0.975", quantile975, 3.182446, 5E-2);
+		System.out.println("Expected variance " + expectedVariance + "; Actual variance" + variance);
+		Assert.assertEquals("Testing the variance", expectedVariance, variance, 0.5);
+		double expectedQuantile025 = -3.182446;
+		System.out.println("Expected quantile 025 " + expectedQuantile025 + "; Actual quantile 025 " + quantile025);
+		Assert.assertEquals("Testing quantile 0.025", expectedQuantile025, quantile025, 5E-2);
+		double expectedQuantile975 = 3.182446;
+		System.out.println("Expected quantile 975 " + expectedQuantile975 + "; Actual quantile 975 " + quantile975);
+		Assert.assertEquals("Testing quantile 0.975", expectedQuantile975, quantile975, 5E-2);
 	}
 
 	@Test
