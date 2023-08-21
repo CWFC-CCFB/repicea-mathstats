@@ -32,7 +32,7 @@ import repicea.serial.xml.XmlSerializerChangeMonitor;
 public abstract class AbstractGaussHermiteQuadrature extends AbstractGaussQuadrature {
 
 	static {
-		XmlSerializerChangeMonitor.registerClassNameChange("repicea.stats.integral.GaussQuadrature$NumberOfPoints", "repicea.stats.integral.AbstractGaussQuadrature$NumberOfPoints");
+		XmlSerializerChangeMonitor.registerClassNameChange("repicea.stats.integral.GaussQuadrature$NumberOfPoints", "repicea.math.integral.AbstractGaussQuadrature$NumberOfPoints");
 	}
 
 	protected static Map<NumberOfPoints, Set<QuadratureNode>> NODE_MAP = new HashMap<NumberOfPoints, Set<QuadratureNode>>();
