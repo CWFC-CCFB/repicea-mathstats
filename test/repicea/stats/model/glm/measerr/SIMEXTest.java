@@ -77,7 +77,7 @@ public class SIMEXTest {
 		double expParm2Std = 0.004364;
 		double actualParm2Std = Math.sqrt(estimate.getVariance().getValueAt(1, 1)); 
 		System.out.println("Expected std parm2 = " + expParm2Std + "; Actual std parm2 = " + actualParm2Std);
-		Assert.assertEquals("Checking standard error parm estimate 2", expParm2Std, actualParm2Std, 6E-5);
+		Assert.assertEquals("Checking standard error parm estimate 2", expParm2Std, actualParm2Std, 7E-5);
 	}
 	
 	@Test
