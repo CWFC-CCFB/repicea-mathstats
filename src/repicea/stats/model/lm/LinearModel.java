@@ -104,6 +104,8 @@ public class LinearModel extends AbstractStatisticalModel implements Predictable
 			throw new InvalidParameterException("The parameter modelDefinition cannot be null!");
 		}
 	}
+	
+	
 	/*
 	 * Useless (non-Javadoc)
 	 * @see repicea.stats.model.StatisticalModel#setParameters(repicea.math.Matrix)
@@ -133,6 +135,14 @@ public class LinearModel extends AbstractStatisticalModel implements Predictable
 					"Linear model fitted with maximum likelihood estimator";
 	}
 
+	/**
+	 * Calculate the mean predicted value on the original scale. <p>
+	 * It is assumed the transformation was a log transformation, i.e. w = log(y)
+	 * @return the mean predicted value on the original scale
+	 */
+	public Matrix getPredictedOriginalScale() {
+		return getPredicted().scalarAdd(0.5 * getResidualVariance()).expMatrix();
+	}
 
 	@Override
 	public Matrix getPredicted() {

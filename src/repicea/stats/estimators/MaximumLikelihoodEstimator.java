@@ -183,7 +183,7 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 			indices.add(i);
 		}
 		try {
-			REpiceaLogManager.logMessage(LOGGER_NAME, Level.INFO, LOGGER_NAME, "Starting optimization");
+			REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME, "Starting optimization");
 			nro.optimize(llk, indices);
 		} catch (OptimizationException e) {
 			REpiceaLogManager.logMessage(LOGGER_NAME, Level.SEVERE, LOGGER_NAME, e.getMessage());

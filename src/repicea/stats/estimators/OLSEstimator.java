@@ -118,6 +118,11 @@ public class OLSEstimator extends AbstractEstimator<OLSCompatibleModel> {
 		return dataSet;
 	}
 
-	
+	public String getReport() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(super.getReport());
+		sb.append("Residual variance: " + residualVariance.getMean().getValueAt(0, 0) + " with " + residualVariance.getDegreesOfFreedom() + " d.f.");
+		return sb.toString();
+	}
 	
 }
