@@ -23,7 +23,12 @@ import repicea.math.Matrix;
 import repicea.stats.data.DataSet;
 import repicea.util.ObjectUtility;
 
-public class CaseStudyTruncatedGaussian {
+/**
+ * Used for manuscript Fortin 2023. Log transformation and Regression.
+ * @author Mathieu Fortin - August 2023
+ *
+ */
+class CaseStudyTruncatedGaussian {
 
 	private static Object[] convertMatrixToObjectArray(Matrix m) {
 		Object[] predFieldValues = new Object[m.m_iRows];

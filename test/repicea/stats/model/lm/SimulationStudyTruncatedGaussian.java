@@ -34,6 +34,10 @@ import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataSet;
 import repicea.util.ObjectUtility;
 
+/**
+ * Used for manuscript Fortin 2023. Log transformation and Regression.
+ * @author Mathieu Fortin - August 2023
+ */
 class SimulationStudyTruncatedGaussian {
 
 	static final REpiceaRandom RANDOM = StatisticalUtility.getRandom();
