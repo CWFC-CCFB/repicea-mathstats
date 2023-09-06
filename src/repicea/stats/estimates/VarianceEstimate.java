@@ -38,6 +38,15 @@ public class VarianceEstimate extends Estimate<ChiSquaredDistribution> {
 		super(new ChiSquaredDistribution(degreesOfFreedom, mean));
 		estimatorType = EstimatorType.LikelihoodBased;
 	}
+	
+	/**
+	 * Provide the degrees of freedom associated with the variance estimate.
+	 * @return an integer
+	 */
+	public int getDegreesOfFreedom() {
+		return getDistribution().getDegreesOfFreedom();
+	}
+	
 
 	@Override
 	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {

@@ -22,6 +22,7 @@ package repicea.stats.model.lm;
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
+import repicea.math.integral.TrapezoidalRule;
 import repicea.math.utility.ErrorFunctionUtility;
 import repicea.math.utility.GaussianUtility;
 import repicea.stats.data.DataSet;
@@ -123,12 +124,38 @@ public class LinearModelWithTruncatedGaussianErrorTerm extends LinearModel {
 			Matrix additionalTerm = tf.getHessian();
 			return SymmetricMatrix.convertToSymmetricIfPossible(super.getHessian().add(additionalTerm));
 		}
-
-		
 		
 	}
+
+	class TrapezoidalRuleFunction extends AbstractMathematicalFunction {
+
+		@Override
+		public Double getValue() {
+			double mu = getParameterValue(0);
+			double F_t = getParameterValue(1);
+			double sigma2 = getParameterValue(2);
+			double w = getParameterValue(3);
+			return Math.exp(w) * GaussianUtility.getProbabilityDensity(w, mu, sigma2) / (1 - F_t);
+		}
+
+		/*
+		 * Useless for this class.
+		 */
+		@Override
+		public Matrix getGradient() {return null;}
+
+		/*
+		 * Useless for this class.
+		 */
+		@Override
+		public SymmetricMatrix getHessian() {return null;}
 		
+	}
+
+	private static double VERY_SMALL = 1E-8;
 	private final double truncation;
+	private final TrapezoidalRuleFunction trf; 
+	private final TrapezoidalRule tr;
 	
 	/**
 	 * Constructor for maximum likelihood estimation.
@@ -140,8 +167,68 @@ public class LinearModelWithTruncatedGaussianErrorTerm extends LinearModel {
 	public LinearModelWithTruncatedGaussianErrorTerm(DataSet dataSet, String modelDefinition, Matrix startingValues, double truncation) {
 		super(dataSet, modelDefinition, startingValues);
 		this.truncation = truncation;
+		this.tr = new TrapezoidalRule(.1);
+		this.trf = new TrapezoidalRuleFunction();
+	}
+	
+	@Override
+	public Matrix getPredicted() {		
+		Matrix xBeta = getXBeta();
+		Matrix parms = getParameters();
+		double sigma2 = parms.getValueAt(parms.m_iRows - 1, 0);
+		double sigma = Math.sqrt(sigma2);
+		Matrix pred = new Matrix(xBeta.m_iRows, 1);
+		for (int i = 0; i < xBeta.m_iRows; i++) {
+			double mu = xBeta.getValueAt(i, 0);
+			double prediction = mu + sigma2 * GaussianUtility.getProbabilityDensity(truncation, mu, sigma2) / (1 - GaussianUtility.getCumulativeProbability((truncation - mu)/sigma));
+			pred.setValueAt(i, 0, prediction);
+		}
+		return pred;
 	}
 
+	private Matrix getXBeta() {
+		Matrix xMatrix = getMatrixX();
+		Matrix parms = getParameters();
+		Matrix beta = parms.getSubMatrix(0, xMatrix.m_iCols - 1, 0, 0);
+		Matrix xBeta = xMatrix.multiply(beta);
+		return xBeta;
+	}
+	
+	@Override 
+	public Matrix getPredictedOriginalScale() {
+		Matrix parms = getParameters();
+		double sigma2 = parms.getValueAt(parms.m_iRows - 1, 0);
+		double sigma = Math.sqrt(sigma2);
+		Matrix xBeta = getXBeta();
+		Matrix meanValues = new Matrix(xBeta.m_iRows, 1);
+		for (int i = 0; i < xBeta.m_iRows; i++) {
+			double xBeta_i = xBeta.getValueAt(i, 0);
+			double F_t = GaussianUtility.getCumulativeProbability((truncation - xBeta_i)/sigma);
+			double meanValue;
+			if (F_t < VERY_SMALL) {
+				meanValue = Math.exp(xBeta_i + 0.5 * sigma2);
+			} else {
+				trf.setParameterValue(0, xBeta_i);
+				trf.setParameterValue(1, F_t);
+				if (i==0) {
+					trf.setParameterValue(2, sigma2);
+				}
+				trf.setParameterValue(3, truncation);
+				tr.setLowerBound(truncation);
+				tr.setUpperBound(xBeta_i + 5 * sigma);
+				meanValue = tr.getIntegralApproximation(trf, 3, true);
+			}
+			meanValues.setValueAt(i, 0, meanValue);
+		}
+		return meanValues;
+	}
+	
+	@Override
+	public String toString() {
+		return "Linear model with residual errors following a truncated Gaussian distribution (fitted with maximum likelihood estimator)";
+	}
+
+	
 	@Override
 	public CompositeLogLikelihood getCompleteLogLikelihood() {
 		return new CompositeLogLikelihoodWithExplanatoryVariables(new TruncatedGaussianIndividualLogLikelihood(getMatrixX().m_iCols, startingValues), getMatrixX(), getVectorY());
