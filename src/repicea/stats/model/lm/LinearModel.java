@@ -88,7 +88,7 @@ public class LinearModel extends AbstractStatisticalModel implements Predictable
 		try {
 			setModelDefinition(modelDefinition);
 			if (startingValues.m_iRows != matrixX.m_iCols + 1) {
-				throw new InvalidParameterException("Considering the model definition, the parameter startingValues should be a column vector of " + (matrixX.m_iCols + 1) + "elements. The last of them should be the residual variance!");
+				throw new InvalidParameterException("Considering the model definition, the parameter startingValues should be a column vector of " + (matrixX.m_iCols + 1) + " elements. The last of them should be the residual variance!");
 			}
 		} catch (StatisticalDataException e) {
 			System.out.println("Unable to define this model : " + modelDefinition);

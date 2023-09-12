@@ -99,6 +99,10 @@ public class LinearModelTest {
 
 		LinearModelWithTruncatedGaussianErrorTerm lm = new LinearModelWithTruncatedGaussianErrorTerm(ds, "yTrans ~ lnDt_corr + BAL + dbhCm", startingValues, 0);
 		lm.doEstimation();
+		Matrix pred = lm.getPredicted();
+		System.out.println("Predicted log scale = " + pred.getValueAt(0, 0));
+		Matrix predOriginalScale = lm.getPredictedOriginalScale();
+		System.out.println("Predicted original scale = " + predOriginalScale.getValueAt(0, 0));
 		System.out.println(lm.getSummary());
 		double expectedIntercept = -1.82587351;
 		Assert.assertEquals("Testing intercept estimate", expectedIntercept, lm.getParameters().getValueAt(0, 0), 1E-8);
