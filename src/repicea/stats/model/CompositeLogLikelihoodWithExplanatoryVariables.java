@@ -35,23 +35,28 @@ public class CompositeLogLikelihoodWithExplanatoryVariables extends SimpleCompos
 		this.xValues = xValues;
 	}
 		
+	@Override
 	protected void setValuesInLikelihoodFunction(int index) {
 		super.setValuesInLikelihoodFunction(index);
 		getOriginalFunction().setVariables(xValues.getSubMatrix(index, index, 0, xValues.m_iCols - 1));
 	}
 
 	/**
-	 * This method returns all the predicted values.
+	 * This method returns the predicted values for a particular design matrix.
+	 * @param xMatrix a new design matrix for predictions from new data or null to use the original design matrix of the sample.
 	 * @return a Matrix instance
 	 */
-	public Matrix getPredictions() {
-		Matrix predictedValues = new Matrix(xValues.m_iRows, 1);
-		for (int i = 0; i < xValues.m_iRows; i++) {
-			setValuesInLikelihoodFunction(i);
+	public Matrix getPredictions(Matrix xMatrix) {
+		Matrix xMat = xMatrix != null ? xMatrix : xValues;
+		Matrix predictedValues = new Matrix(xMat.m_iRows, 1);
+		for (int i = 0; i < xMat.m_iRows; i++) {
+			getOriginalFunction().setVariables(xMat.getSubMatrix(i, i, 0, xMat.m_iCols - 1));
 			predictedValues.setSubMatrix(getOriginalFunction().getPredictionVector(), i, 0);
 		}
 		return predictedValues;
 	}
+
+	
 	
 	/**
 	 * Resets this composite likelihood to its initial values.

@@ -138,15 +138,22 @@ public class LinearModel extends AbstractStatisticalModel implements Predictable
 	/**
 	 * Calculate the mean predicted value on the original scale. <p>
 	 * It is assumed the transformation was a log transformation, i.e. w = log(y)
+	 * @param xMatrix a design matrix if null the original design matrix is used
 	 * @return the mean predicted value on the original scale
 	 */
-	public Matrix getPredictedOriginalScale() {
-		return getPredicted().scalarAdd(0.5 * getResidualVariance()).expMatrix();
+	public Matrix getPredictedOriginalScale(Matrix xMatrix) {
+		return getPredicted(xMatrix).scalarAdd(0.5 * getResidualVariance()).expMatrix();
 	}
 
 	@Override
-	public Matrix getPredicted() {
-		return getMatrixX().multiply(getParameters());
+	public Matrix getPredicted(Matrix xMatrix) throws UnsupportedOperationException {
+		if (getEstimator().isConvergenceAchieved()) {
+			return xMatrix != null ? 
+					xMatrix.multiply(getParameters()) : 
+						getMatrixX().multiply(getParameters());
+		} else {
+			throw new UnsupportedOperationException("The estimator has not converged!");
+		}
 	}
 
 	@Override

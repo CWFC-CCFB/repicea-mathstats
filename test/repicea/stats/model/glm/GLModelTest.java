@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import repicea.math.Matrix;
 import repicea.math.optimizer.LikelihoodOptimizer;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
@@ -61,6 +62,37 @@ public class GLModelTest {
 		assertEquals(expectedLlk, actualLlk, 1E-5);
 	}
 
+	@Test
+    public void TestPredictionWithSimpleGLModel() throws Exception {
+		String filename = ObjectUtility.getPackagePath(FGMCopulaGLModelTest.class).concat("donneesR_min.csv");
+		DataSet dataSet = new DataSet(filename, true);
+		
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.Logit, "coupe ~ diffdhp + marchand:diffdhp + marchand:diffdhp2 +  essence");
+		glm.doEstimation();
+		Matrix pred = glm.getPredicted();
+		double expected = 0.14023798695823497;
+		assertEquals("Testing predicted values", expected, pred.getValueAt(0, 0), 1E-8);
+	}
+	
+	@Test
+    public void TestPredictionWithNewDataAndSimpleGLModel() throws Exception {
+		String filename = ObjectUtility.getPackagePath(FGMCopulaGLModelTest.class).concat("donneesR_min.csv");
+		DataSet dataSet = new DataSet(filename, true);
+		
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.Logit, "coupe ~ diffdhp + marchand:diffdhp + marchand:diffdhp2 +  essence");
+		glm.doEstimation();
+		Matrix newData = new Matrix(1,12);
+		newData.setValueAt(0, 0, 1d);
+		newData.setValueAt(0, 1, 16d);
+		newData.setValueAt(0, 2, 16d);
+		newData.setValueAt(0, 3, 256d);
+		newData.setValueAt(0, 4, 1d);
+		Matrix pred = glm.getPredicted(newData);
+		double expected = 0.31405162736091435;
+		assertEquals("Testing predicted values", expected, pred.getValueAt(0, 0), 1E-8);
+	}
+
+	
 	@Test
     public void TestWithOffset() throws Exception {
 		String filename = ObjectUtility.getPackagePath(FGMCopulaGLModelTest.class).concat("donneesR_min.csv");

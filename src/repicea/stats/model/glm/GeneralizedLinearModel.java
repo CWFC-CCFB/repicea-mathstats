@@ -258,12 +258,12 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	}
 
 	@Override
-	public Matrix getPredicted() {
+	public Matrix getPredicted(Matrix xMatrix) throws UnsupportedOperationException {
 		if (getEstimator().isConvergenceAchieved()) {
 			completeLLK.setParameters(getEstimator().getParameterEstimates().getMean());
-			return completeLLK.getPredictions();
+			return completeLLK.getPredictions(xMatrix);
 		} else {
-			return null;
+			throw new UnsupportedOperationException("The estimator has not converged!");
 		}
 	}
 
