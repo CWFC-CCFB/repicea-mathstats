@@ -117,18 +117,36 @@ class SimulationStudyTruncatedGaussian {
 	public void run() throws IOException {
 		CSVWriter writer = new CSVWriter(new File(filename), false);
 		List<FormatField> fields = new ArrayList<FormatField>();
+		List<String> secondPrefixes = Arrays.asList(new String[] {"Log", "Orig"});
 		fields.add(new CSVField("b0_trad"));
 		fields.add(new CSVField("b1_trad"));
 		fields.add(new CSVField("sigma2_trad"));
 		fields.add(new CSVField("b0_trad_var"));
 		fields.add(new CSVField("b1_trad_var"));
+		String prefix = "OLS";
+		for (String secPrefix : secondPrefixes) {
+			for (double i = 3; i <= 10; i = i + 0.5) {
+				fields.add(new CSVField(prefix + secPrefix + i));
+			}
+		}
+		
 		fields.add(new CSVField("b0_new"));
 		fields.add(new CSVField("b1_new"));
 		fields.add(new CSVField("sigma2_new"));
 		fields.add(new CSVField("b0_new_var"));
 		fields.add(new CSVField("b1_new_var"));
 		fields.add(new CSVField("sigma2_new_var"));
+		prefix = "MML";
+		for (String secPrefix : secondPrefixes) {
+			for (double i = 3; i <= 10; i = i + 0.5) {
+				fields.add(new CSVField(prefix + secPrefix + i));
+			}
+		}
 		writer.setFields(fields);
+		
+		Matrix xMat1 = new Matrix(15, 1, 1, 0);
+		Matrix xMat2 = new Matrix(15, 1, 3, 0.5);
+		Matrix newData = xMat1.matrixStack(xMat2, false);
 		
 		for (int i = 0; i < nbRealizations; i++) {
 			if ((i+1) % 100 == 0) {
@@ -142,12 +160,19 @@ class SimulationStudyTruncatedGaussian {
 			Matrix parmsTrad = new Matrix(p.m_iRows + 1, 1);
 			parmsTrad.setSubMatrix(p, 0, 0);
 			parmsTrad.setValueAt(parmsTrad.m_iRows - 1, 0, lm.getResidualVariance());
+			Matrix olsLogPred = lm.getPredicted(newData);
+			Matrix olsOrigPred = lm.getPredictedOriginalScale(newData);
+			
 			LinearModelWithTruncatedGaussianErrorTerm truncatedModel = new LinearModelWithTruncatedGaussianErrorTerm(ds, "w ~ x", parmsTrad, 0);
 			truncatedModel.doEstimation();
 			if (truncatedModel.getEstimator().isConvergenceAchieved()) {
 				Matrix truncatedParms = truncatedModel.getParameters();
 				Matrix truncatedVar = truncatedModel.getEstimator().getParameterEstimates().getVariance().diagonalVector();
-				Matrix output = parmsTrad.matrixStack(vTrad, true).matrixStack(truncatedParms, true).matrixStack(truncatedVar, true);
+				Matrix mmlLogPred = truncatedModel.getPredicted(newData);
+				Matrix mmlOrigPred = truncatedModel.getPredictedOriginalScale(newData);
+								
+				Matrix output = parmsTrad.matrixStack(vTrad, true).matrixStack(olsLogPred, true).matrixStack(olsOrigPred,true).
+						matrixStack(truncatedParms, true).matrixStack(truncatedVar, true).matrixStack(mmlLogPred, true).matrixStack(mmlOrigPred,true);
 				Object[] record = new Object[output.m_iRows];
 				for (int j = 0; j < output.m_iRows; j++) 
 					record[j] = output.getValueAt(j, 0);
@@ -192,23 +217,26 @@ class SimulationStudyTruncatedGaussian {
 	
 
 	public static void main(String[] args) throws IOException {
-		String filename = ObjectUtility.getPackagePath(SimulationStudyTruncatedGaussian.class) + "meanValues.csv";
-		filename = filename.replace("/bin", "");
-		System.out.println("Saving mean values in " + filename);
-		SimulationStudyTruncatedGaussian sim = new SimulationStudyTruncatedGaussian(10000, 500, 3, 10, filename);
-		sim.produceMeanValues(filename);
+		String filename = null;
+		SimulationStudyTruncatedGaussian sim = null;
 
-//		filename = ObjectUtility.getPackagePath(SimulationStudyTruncatedGaussian.class) + "Simulation100.csv";
+//		filename = ObjectUtility.getPackagePath(SimulationStudyTruncatedGaussian.class) + "meanValues.csv";
 //		filename = filename.replace("/bin", "");
-//		System.out.println("Saving simulation result in " + filename);
-//		sim = new SimulationStudyTruncatedGaussian(10000, 100, 3, 10, filename);
-//		sim.run();
-//
-//		filename = ObjectUtility.getPackagePath(SimulationStudyTruncatedGaussian.class) + "Simulation500.csv";
-//		filename = filename.replace("/bin", "");
-//		System.out.println("Saving simulation result in " + filename);
+//		System.out.println("Saving mean values in " + filename);
 //		sim = new SimulationStudyTruncatedGaussian(10000, 500, 3, 10, filename);
-//		sim.run();
+//		sim.produceMeanValues(filename);
+
+		filename = ObjectUtility.getPackagePath(SimulationStudyTruncatedGaussian.class) + "Simulation100.csv";
+		filename = filename.replace("/bin", "");
+		System.out.println("Saving simulation result in " + filename);
+		sim = new SimulationStudyTruncatedGaussian(10000, 100, 3, 10, filename);
+		sim.run();
+
+		filename = ObjectUtility.getPackagePath(SimulationStudyTruncatedGaussian.class) + "Simulation500.csv";
+		filename = filename.replace("/bin", "");
+		System.out.println("Saving simulation result in " + filename);
+		sim = new SimulationStudyTruncatedGaussian(10000, 500, 3, 10, filename);
+		sim.run();
 	}
 	
 	

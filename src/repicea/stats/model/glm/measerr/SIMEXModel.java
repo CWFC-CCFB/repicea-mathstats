@@ -378,7 +378,9 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 	}
 
 	@Override
-	public Matrix getPredicted() {return predGLM.getPredicted();}
+	public Matrix getPredicted(Matrix xMatrix) throws UnsupportedOperationException {
+		return predGLM.getPredicted(xMatrix);
+	}
 
 	@Override
 	public Matrix getResiduals() {return predGLM.getResiduals();}

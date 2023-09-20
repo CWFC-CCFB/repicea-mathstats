@@ -172,8 +172,8 @@ public class LinearModelWithTruncatedGaussianErrorTerm extends LinearModel {
 	}
 	
 	@Override
-	public Matrix getPredicted() {		
-		Matrix xBeta = getXBeta();
+	public Matrix getPredicted(Matrix xMatrix) {		
+		Matrix xBeta = getXBeta(xMatrix);
 		Matrix parms = getParameters();
 		double sigma2 = parms.getValueAt(parms.m_iRows - 1, 0);
 		double sigma = Math.sqrt(sigma2);
@@ -186,20 +186,22 @@ public class LinearModelWithTruncatedGaussianErrorTerm extends LinearModel {
 		return pred;
 	}
 
-	private Matrix getXBeta() {
-		Matrix xMatrix = getMatrixX();
+	private Matrix getXBeta(Matrix xMatrix) {
+		Matrix xMat = xMatrix != null ?
+				xMatrix :
+					getMatrixX();
 		Matrix parms = getParameters();
-		Matrix beta = parms.getSubMatrix(0, xMatrix.m_iCols - 1, 0, 0);
-		Matrix xBeta = xMatrix.multiply(beta);
+		Matrix beta = parms.getSubMatrix(0, xMat.m_iCols - 1, 0, 0);
+		Matrix xBeta = xMat.multiply(beta);
 		return xBeta;
 	}
 	
 	@Override 
-	public Matrix getPredictedOriginalScale() {
+	public Matrix getPredictedOriginalScale(Matrix xMatrix) {
 		Matrix parms = getParameters();
 		double sigma2 = parms.getValueAt(parms.m_iRows - 1, 0);
 		double sigma = Math.sqrt(sigma2);
-		Matrix xBeta = getXBeta();
+		Matrix xBeta = getXBeta(xMatrix);
 		Matrix meanValues = new Matrix(xBeta.m_iRows, 1);
 		for (int i = 0; i < xBeta.m_iRows; i++) {
 			double xBeta_i = xBeta.getValueAt(i, 0);

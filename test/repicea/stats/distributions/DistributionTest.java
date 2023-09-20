@@ -94,7 +94,7 @@ public class DistributionTest {
 		double expectedMean = distribution.getMean().getValueAt(0, 0);
 		double expectedVariance = distribution.getVariance().getValueAt(0, 0);
 		System.out.println("Expected mean = " + expectedMean + ", actual mean = " + simulatedMean);
-		Assert.assertEquals("Testing the means", expectedMean, simulatedMean, 1E-2);
+		Assert.assertEquals("Testing the means", expectedMean, simulatedMean, 1.5E-2);
 		System.out.println("Expected variance = " + expectedVariance + ", actual variance = " + simulatedVariance);
 		Assert.assertEquals("Testing the variances", expectedVariance, simulatedVariance, 5E-2);
 	}

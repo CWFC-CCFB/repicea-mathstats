@@ -44,6 +44,17 @@ public class LinearModelTest {
 		double expectedInterceptStd = 0.05541272279088098;
 		double actualInterceptStd = Math.sqrt(lm.getEstimator().getParameterEstimates().getVariance().getValueAt(0, 0));
 		Assert.assertEquals("Testing intercept estimate std", expectedInterceptStd, actualInterceptStd, 1E-8);
+		double expectedPrediction = 0.8096288447607224;
+		double actualPrediction = lm.getPredicted().getValueAt(0, 0);
+		Assert.assertEquals("Testing first prediction", expectedPrediction, actualPrediction, 1E-8);
+		Matrix newData = new Matrix(1,4);
+		newData.setValueAt(0, 0, 1d);
+		newData.setValueAt(0, 1, Math.log(5));
+		newData.setValueAt(0, 2, 10d);
+		newData.setValueAt(0, 3, 15d);
+		double expectedNewPrediction = 0.33750837874909523;
+		double actualNewPrediction = lm.getPredicted(newData).getValueAt(0, 0);
+		Assert.assertEquals("Testing new prediction", expectedNewPrediction, actualNewPrediction, 1E-8);
 	}
 	
 	@Test
@@ -101,7 +112,7 @@ public class LinearModelTest {
 		lm.doEstimation();
 		Matrix pred = lm.getPredicted();
 		System.out.println("Predicted log scale = " + pred.getValueAt(0, 0));
-		Matrix predOriginalScale = lm.getPredictedOriginalScale();
+		Matrix predOriginalScale = lm.getPredictedOriginalScale(null);
 		System.out.println("Predicted original scale = " + predOriginalScale.getValueAt(0, 0));
 		System.out.println(lm.getSummary());
 		double expectedIntercept = -1.82587351;

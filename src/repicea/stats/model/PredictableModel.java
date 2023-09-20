@@ -28,12 +28,27 @@ public interface PredictableModel {
 
 	
 	/**
-	 * Return a column vector of predicted values.
+	 * Produce a column vector of predicted values.<p>
+	 * These values are calculated from the sample.
 	 * @return a Matrix instance
+	 * @throws UnsupportedOperationException if the estimator has not converged
 	 */
-	public Matrix getPredicted();
+	public default Matrix getPredicted() throws UnsupportedOperationException {
+		return getPredicted(null);
+	}
 
-
+	/**
+	 * Produce a column vector of predicted values.<p>
+	 * These values are calculated using the xMatrix argument.
+	 * If this argument is null, then the predictions are calculated from 
+	 * the sample.
+	 * @param xMatrix a design matrix
+	 * @return a Matrix instance
+	 * @throws UnsupportedOperationException if the estimator has not converged
+	 */
+	public Matrix getPredicted(Matrix xMatrix) throws UnsupportedOperationException;
+	
+	
 	/**
 	 * Return a column vector of residuals, that is observed values minus predictions.
 	 * @return a Matrix instance
