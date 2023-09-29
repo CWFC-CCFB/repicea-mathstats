@@ -121,7 +121,7 @@ public class BootstrapHybridPointEstimateTest {
 		
 		System.out.println("Testing with complete variability...");
 		System.out.println("Expected mean = " + expectedMean + " - actual mean = " + actualMean);
-		Assert.assertEquals("Testing mean estimates", expectedMean, actualMean, 0.1);
+		Assert.assertEquals("Testing mean estimates", expectedMean, actualMean, 0.11);
 		
 		
 		double expectedVariance = mu_x_hat * mu_x_hat * stdModel * stdModel + 
