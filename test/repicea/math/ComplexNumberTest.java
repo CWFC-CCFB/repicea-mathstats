@@ -40,7 +40,7 @@ public class ComplexNumberTest {
 	public void performExpAndLn() {
 		ComplexNumber c1 = new ComplexNumber(4,1.4);
 		ComplexNumber exp = c1.exp();
-		ComplexNumber c2 = exp.ln();
+		ComplexNumber c2 = exp.log();
 		Assert.assertEquals("Comparing real parts", c1.realPart, c2.realPart, 1E-15);
 		Assert.assertEquals("Comparing imaginary parts", c1.imaginaryPart, c2.imaginaryPart, 1E-15);
 		Assert.assertTrue("Testing equals method", c1.equals(c2));
@@ -61,14 +61,6 @@ public class ComplexNumberTest {
 	public void constructorWithInvalidParameters1() {
 		try {
 			new ComplexNumber(4, Double.NaN);
-			Assert.fail("Should have thrown an InvalidParameterException instance.");
-		} catch (InvalidParameterException e) {}
-	}
-	
-	@Test
-	public void constructorWithInvalidParameters2() {
-		try {
-			new ComplexNumber(4, 0d);
 			Assert.fail("Should have thrown an InvalidParameterException instance.");
 		} catch (InvalidParameterException e) {}
 	}

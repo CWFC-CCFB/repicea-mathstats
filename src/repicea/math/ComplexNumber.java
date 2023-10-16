@@ -38,8 +38,7 @@ public final class ComplexNumber extends Number {
 	 * @param imaginaryPart a double that stands for the imaginary part of the complex number.
 	 */
 	public ComplexNumber(double realPart, double imaginaryPart) {
-		if (Double.isNaN(imaginaryPart)) {throw new InvalidParameterException("The imaginaryPart argument must be non null double!");}
-		if (imaginaryPart == 0) {throw new InvalidParameterException("The imaginaryPart argument must be non null double!");}
+		if (Double.isNaN(imaginaryPart)) {throw new InvalidParameterException("The imaginaryPart argument must be a double!");}
 		this.realPart = realPart;
 		this.imaginaryPart = imaginaryPart;
 	}
@@ -49,27 +48,23 @@ public final class ComplexNumber extends Number {
 	 * @param d a Number instance
 	 * @return a ComplexNumber instance if the imaginary part is different from 0. Otherwise, a double.
 	 */
-	public Number add(Number d) {
+	public ComplexNumber add(Number d) {
 		double iPart = d instanceof ComplexNumber ? 
 				imaginaryPart + ((ComplexNumber) d).imaginaryPart :
 					imaginaryPart;
-		return iPart != 0 ? 
-				new ComplexNumber(realPart + d.doubleValue(), iPart) : 
-					realPart + d.doubleValue();
+		return new ComplexNumber(realPart + d.doubleValue(), iPart);
 	}
 
 	/**
 	 * Subtract a Number instance to this complex number.
 	 * @param d a Number instance
-	 * @return a ComplexNumber instance if the imaginary part is different from 0. Otherwise, a double.
+	 * @return a ComplexNumber instance
 	 */
-	public Number subtract(Number d) {
+	public ComplexNumber subtract(Number d) {
 		double iPart = d instanceof ComplexNumber ? 
 				imaginaryPart - ((ComplexNumber) d).imaginaryPart :
 					imaginaryPart;
-		return iPart != 0 ? 
-				new ComplexNumber(realPart - d.doubleValue(), iPart) : 
-					realPart - d.doubleValue();
+		return new ComplexNumber(realPart - d.doubleValue(), iPart);
 	}
 
 	/**
@@ -111,7 +106,7 @@ public final class ComplexNumber extends Number {
 	 * The method relies on the polar form to make the calculation.
 	 * @return a ComplexNumber instance
 	 */
-	public ComplexNumber ln() {
+	public ComplexNumber log() {
 		double r = Math.sqrt(realPart * realPart + imaginaryPart * imaginaryPart);
 		double phi = Math.atan(imaginaryPart / realPart);
 		return new ComplexNumber(Math.log(r), phi);
@@ -121,17 +116,15 @@ public final class ComplexNumber extends Number {
 	/**
 	 * Compute the square root of this complex number.<p>
 	 * It may occasionally return a double if the imaginary part is equal to 0.
-	 * @return a Number instance
+	 * @return a ComplexNumber instance
 	 */
-	public Number sqrt() {
+	public ComplexNumber sqrt() {
 		double modulus = Math.sqrt(realPart * realPart + imaginaryPart * imaginaryPart);
 		double gamma = Math.sqrt((realPart + modulus) * .5);
 		double delta = imaginaryPart > 0 ?
 				Math.sqrt((-realPart + modulus) * .5) :
 					-Math.sqrt((-realPart + modulus) * .5);
-		return delta != 0 ? 
-				new ComplexNumber(gamma, delta) :
-					gamma;
+		return new ComplexNumber(gamma, delta);
 	}
 	
 	

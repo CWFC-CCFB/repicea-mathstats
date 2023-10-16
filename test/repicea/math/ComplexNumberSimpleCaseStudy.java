@@ -21,6 +21,7 @@ package repicea.math;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +32,12 @@ import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 import repicea.util.ObjectUtility;
 
-public class ComplexNumberCaseStudy2 {
+/**
+ * The ComplexNumberSimpleCaseStudy class implements a simulation study around 
+ * the exponential, square and log transformation of Gaussian variables.
+ * @author Mathieu Fortin - Oct 2023
+ */
+public class ComplexNumberSimpleCaseStudy {
 
 	
 	static class PopulationUnit {
@@ -46,6 +52,7 @@ public class ComplexNumberCaseStudy2 {
 	}
 
 	
+	@SuppressWarnings("serial")
 	static class Sample extends ArrayList<PopulationUnit> {
 		
 		static Sample createSample(Matrix trueBeta, double trueVariance, int sampleSize) {
@@ -83,7 +90,6 @@ public class ComplexNumberCaseStudy2 {
 			double sigma2Hat = sigma2 != null ?
 					sigma2 :
 						res.transpose().multiply(res).getValueAt(0, 0) / upsilon;
-			SymmetricMatrix omega = invXtX.scalarMultiply(sigma2Hat);
 			return new Model(betaHat, invXtX, sigma2Hat, upsilon);
 		}
 		
@@ -130,27 +136,50 @@ public class ComplexNumberCaseStudy2 {
 			
 			double chiSquareDeviate = StatisticalUtility.getRandom().nextChiSquare(upsilon);
 			ComplexNumber sigma2Hat_b = new ComplexNumber(sigma2Hat, sigma2Hat * (chiSquareDeviate - upsilon) / upsilon);
-			Number sigmaHat_b = sigma2Hat_b.sqrt();
+			ComplexNumber sigmaHat_b = sigma2Hat_b.sqrt();
 			
 			Matrix betaDeviatesMat = getOmegaChol().multiply(StatisticalUtility.drawRandomVector(betaHat.m_iRows, Distribution.Type.GAUSSIAN));
 			ComplexNumber betaDeviates = new ComplexNumber(0, xMat.multiply(betaDeviatesMat).getValueAt(0, 0));
 			betaDeviates = betaDeviates.multiply(sigmaHat_b);
 			
-			Number epsilon_b = sigmaHat_b instanceof ComplexNumber ? 
-					((ComplexNumber) sigmaHat_b).multiply(StatisticalUtility.getRandom().nextGaussian()) :
-						sigmaHat_b.doubleValue() * StatisticalUtility.getRandom().nextGaussian();
+			ComplexNumber epsilon_b = sigmaHat_b.multiply(StatisticalUtility.getRandom().nextGaussian());
 			
-			Number mean = betaDeviates.add(betaHat.getValueAt(0, 0) + betaHat.getValueAt(1, 0) * x);
-			return (ComplexNumber) ((ComplexNumber) mean).add(epsilon_b);
+			ComplexNumber mean = betaDeviates.add(betaHat.getValueAt(0, 0) + betaHat.getValueAt(1, 0) * x);
+			return mean.add(epsilon_b);
 		}
-
 	}
 	
-
-	public static void main(String[] arg) throws IOException {
-		int nbRealizations = 50000;
+	static enum Transformation {Sqr, Exp, Log, Sqrt}
+	
+	private static Number computeValue(Transformation t, Number originalValue) {
+		switch(t) {
+		case Sqr:
+			return originalValue instanceof ComplexNumber ?
+					((ComplexNumber) originalValue).square() :
+						originalValue.doubleValue() * originalValue.doubleValue();
+		case Exp:
+			return originalValue instanceof ComplexNumber ?
+					((ComplexNumber) originalValue).exp() :
+						Math.exp(originalValue.doubleValue());
+		case Log:
+			return originalValue instanceof ComplexNumber ?
+					((ComplexNumber) originalValue).log() :
+						Math.log(originalValue.doubleValue());
+		case Sqrt:
+			return originalValue instanceof ComplexNumber ?
+					((ComplexNumber) originalValue).sqrt() :
+						Math.sqrt(originalValue.doubleValue());
+		default:
+			throw new InvalidParameterException();
+		}
+	}
+	
+	
+	private static void doRun(Transformation t, int sampleSize) throws IOException {
+		System.out.println("Simulating " + t.name() + " with sample size n = " + sampleSize);
+		int nbRealizations = 10000;
 		int nbInnerReal = 10000;
-		String filename = ObjectUtility.getPackagePath(ComplexNumberCaseStudy2.class) + "caseStudy2.csv";
+		String filename = ObjectUtility.getPackagePath(ComplexNumberSimpleCaseStudy.class) + "caseStudy_" + t.name() + sampleSize +".csv";
 		filename = filename.replace("bin/", "");
 		CSVWriter writer = new CSVWriter(new File(filename), false);
 		List<FormatField> fields = new ArrayList<FormatField>();
@@ -158,38 +187,65 @@ public class ComplexNumberCaseStudy2 {
 		fields.add(new CSVField("b0"));
 		fields.add(new CSVField("b1"));
 		fields.add(new CSVField("sigma2"));
-		fields.add(new CSVField("y2OLD"));
-		fields.add(new CSVField("y2NEW"));
+		fields.add(new CSVField("yOLD"));
+		fields.add(new CSVField("yNEW"));
+		fields.add(new CSVField("yNEW_imag"));
 		writer.setFields(fields);
 		
 		Matrix trueBeta = new Matrix(2,1);
-		trueBeta.setValueAt(0, 0, 2);
-		trueBeta.setValueAt(1, 0, 1.5);
-		double trueVariance = 4d;
+		double trueVariance;
+		if (t == Transformation.Sqr || t == Transformation.Exp) {
+			trueBeta.setValueAt(0, 0, 2);
+			trueBeta.setValueAt(1, 0, 0.25);
+			trueVariance = 4d;
+		} else {
+			trueBeta.setValueAt(0, 0, 2.5);
+			trueBeta.setValueAt(1, 0, 4);
+			trueVariance = 12d;
+		}
 		
-		for (int real = 0; real < nbRealizations; real++) {
-			System.out.println("Running realization " + (real + 1));
-			Sample s = Sample.createSample(trueBeta, trueVariance, 30);
+		for (int real = 1; real <= nbRealizations; real++) {
+			if (real % 1000 == 0) {
+				System.out.println("Running realization " + real);
+			}
+			Sample s = Sample.createSample(trueBeta, trueVariance, sampleSize);
 			Model m = s.getModel(null); // null means we are relying on the estimated variance
 			double sumOLD = 0;
-			double sumNEW = 0;
+			ComplexNumber sumNEW = new ComplexNumber(0, 0);
 			for (int innerReal = 0; innerReal < nbInnerReal; innerReal++) {
-				Number n1 = m.getRandomDeviate(5);
-				sumOLD += Math.exp(n1.doubleValue());
+				double n1 = m.getRandomDeviate(5);
+				sumOLD += computeValue(t, n1).doubleValue();
 				ComplexNumber n2 = m.getComplexRandomDeviate(5);
-				sumNEW += n2.exp().doubleValue();
+				sumNEW = sumNEW.add(computeValue(t, n2));
 			}
 			sumOLD /= nbInnerReal;
-			sumNEW /= nbInnerReal;
-			Object[] record = new Object[6];
+			sumNEW = sumNEW.multiply(1d / nbInnerReal);
+			Object[] record = new Object[7];
 			record[0] = real;
 			record[1] = m.betaHat.getValueAt(0, 0);
 			record[2] = m.betaHat.getValueAt(1, 0);
 			record[3] = m.sigma2Hat;
 			record[4] = sumOLD;
-			record[5] = sumNEW;
+			record[5] = sumNEW.doubleValue();
+			record[6] = sumNEW.imaginaryPart;
 			writer.addRecord(record);
 		}
 		writer.close();
+
+	}
+	
+	public static void main(String[] arg) throws IOException {
+//		doRun(Transformation.Sqr, 50);
+//		doRun(Transformation.Sqr, 100);
+//		doRun(Transformation.Sqr, 200);
+//		doRun(Transformation.Exp, 50);
+//		doRun(Transformation.Exp, 100);
+//		doRun(Transformation.Exp, 200);
+		doRun(Transformation.Log, 50);
+		doRun(Transformation.Log, 100);
+		doRun(Transformation.Log, 200);
+		doRun(Transformation.Sqrt, 50);
+		doRun(Transformation.Sqrt, 100);
+		doRun(Transformation.Sqrt, 200);
 	}	
 }
