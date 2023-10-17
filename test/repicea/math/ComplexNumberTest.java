@@ -20,6 +20,8 @@
 package repicea.math;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -45,7 +47,6 @@ public class ComplexNumberTest {
 		Assert.assertEquals("Comparing imaginary parts", c1.imaginaryPart, c2.imaginaryPart, 1E-15);
 		Assert.assertTrue("Testing equals method", c1.equals(c2));
 	}
-
 	
 	@Test
 	public void testNumberInterfaceMethods() {
@@ -56,7 +57,6 @@ public class ComplexNumberTest {
 		Assert.assertEquals("Test long", 2, c1.longValue());
 	}
 	
-	
 	@Test
 	public void constructorWithInvalidParameters1() {
 		try {
@@ -64,5 +64,78 @@ public class ComplexNumberTest {
 			Assert.fail("Should have thrown an InvalidParameterException instance.");
 		} catch (InvalidParameterException e) {}
 	}
+	
+	@Test
+	public void performTwiceReciprocal() {
+		ComplexNumber c1 = new ComplexNumber(4,1.4);
+		ComplexNumber c2 = c1.getReciprocal();
+		Assert.assertTrue("Checking c2 is different from c1", !c1.equals(c2));
+		ComplexNumber c3 = c2.getReciprocal();
+		Assert.assertEquals("Comparing real parts", c1.realPart, c3.realPart, 1E-15);
+		Assert.assertEquals("Comparing imaginary parts", c1.imaginaryPart, c3.imaginaryPart, 1E-15);
+	}
+
+	@Test
+	public void performReciprocalAndThenMultiply() {
+		ComplexNumber c1 = new ComplexNumber(4,1.4);
+		ComplexNumber c2 = c1.getReciprocal();
+		Assert.assertTrue("Checking c2 is different from c1", !c1.equals(c2));
+		ComplexNumber c3 = c2.multiply(c1);
+		Assert.assertEquals("Comparing real parts", 1d, c3.realPart, 1E-15);
+		Assert.assertEquals("Comparing imaginary parts", 0d, c3.imaginaryPart, 1E-15);
+	}
+	
+	@Test
+	public void testAbsoluteValue() {
+		ComplexNumber c1 = new ComplexNumber(4,1.4);
+		ComplexNumber c2 = c1.multiply(c1.getComplexConjugate());
+		Assert.assertEquals("Comparing real parts", c1.absoluteValue * c1.absoluteValue, c2.realPart, 1E-15);
+		Assert.assertEquals("Comparing imaginary parts", 0d, c2.imaginaryPart, 1E-15);
+	}
+	
+	@Test
+	public void testDivideVsReciprocal() {
+		ComplexNumber c1 = new ComplexNumber(4,1.4);
+		ComplexNumber c2 = new ComplexNumber(5,0.8);
+		ComplexNumber c3 = c1.divide(c2);
+		ComplexNumber c4 = c1.multiply(c2.getReciprocal());
+		Assert.assertEquals("Comparing real parts", c3.realPart, c4.realPart, 1E-15);
+		Assert.assertEquals("Comparing imaginary parts", c3.imaginaryPart, c4.imaginaryPart, 1E-15);
+	}
+	
+	@Test
+	public void performDivideAndThenMultiply() {
+		ComplexNumber c1 = new ComplexNumber(4,1.4);
+		ComplexNumber c2 = new ComplexNumber(5,0.8);
+		ComplexNumber c3 = c1.divide(c2);
+		ComplexNumber c4 = c3.multiply(c2);
+		Assert.assertEquals("Comparing real parts", c1.realPart, c4.realPart, 1E-15);
+		Assert.assertEquals("Comparing imaginary parts", c1.imaginaryPart, c4.imaginaryPart, 1E-15);
+	}
+
+	@Test
+	public void testExpectation() {
+		List<ComplexNumber> sample = new ArrayList<ComplexNumber>();
+		sample.add(new ComplexNumber(2,1));
+		sample.add(new ComplexNumber(-1,1.5));
+		sample.add(new ComplexNumber(3,7));
+		ComplexNumber c = ComplexNumber.getExpectation(sample);
+		Assert.assertEquals("Comparing real part", 4d/3, c.realPart, 1E-15);
+		Assert.assertEquals("Comparing imaginary part", 9.5/3, c.imaginaryPart, 1E-15);
+	}
+	
+	@Test
+	public void testVariance() {
+		List<ComplexNumber> sample = new ArrayList<ComplexNumber>();
+		sample.add(new ComplexNumber(2,1));
+		sample.add(new ComplexNumber(-1,1.5));
+		sample.add(new ComplexNumber(3,7));
+		double c = ComplexNumber.getVariance(sample);
+		Assert.assertEquals("Testing variance", 4.3333333333333333333333 + 11.083333333333333333, c, 1E-15);
+	}
+	
+
+	
+	
 	
 }

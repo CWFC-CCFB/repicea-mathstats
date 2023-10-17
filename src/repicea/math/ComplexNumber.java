@@ -20,6 +20,7 @@
 package repicea.math;
 
 import java.security.InvalidParameterException;
+import java.util.List;
 
 /**
  * The ComplexNumber class implements a constructor and the methods 
@@ -31,6 +32,7 @@ public final class ComplexNumber extends Number {
 
 	final double realPart;
 	final double imaginaryPart;
+	final double absoluteValue;
 	
 	/**
 	 * Constructor.
@@ -41,6 +43,7 @@ public final class ComplexNumber extends Number {
 		if (Double.isNaN(imaginaryPart)) {throw new InvalidParameterException("The imaginaryPart argument must be a double!");}
 		this.realPart = realPart;
 		this.imaginaryPart = imaginaryPart;
+		this.absoluteValue = Math.sqrt(realPart * realPart + imaginaryPart * imaginaryPart); 
 	}
 	
 	/**
@@ -107,12 +110,59 @@ public final class ComplexNumber extends Number {
 	 * @return a ComplexNumber instance
 	 */
 	public ComplexNumber log() {
-		double r = Math.sqrt(realPart * realPart + imaginaryPart * imaginaryPart);
+		double r = absoluteValue;
 		double phi = Math.atan(imaginaryPart / realPart);
 		return new ComplexNumber(Math.log(r), phi);
 	}
 	
+	
+	/**
+	 * Return the absolute value of this complex number.<p>
+	 * That is the the square root of Re(z)^2 + Im(z)^2. The absolute value
+	 * is also known as the modulus or magnitude.
+	 * @return a double
+	 */
+	public double getAbsoluteValue() {
+		return absoluteValue;
+	}
 
+	/**
+	 * Return the reciprocal of this complex number, that is 1/z.
+	 * @return a ComplexNumber instance
+	 */
+	public ComplexNumber getReciprocal() {
+		double r2 = absoluteValue * absoluteValue;
+		return new ComplexNumber(realPart/r2, -imaginaryPart/r2);
+	}
+	
+	
+	/**
+	 * Return the division of this complex number by n.
+	 * @param n a Number instance (can be a ComplexNumber instance)
+	 * @return a ComplexNumber instance
+	 */
+	public ComplexNumber divide(Number n) {
+		if (n instanceof ComplexNumber) {
+			ComplexNumber cN = (ComplexNumber) n;
+			double r2 = cN.absoluteValue * cN.absoluteValue;
+			double real = realPart * cN.realPart + imaginaryPart * cN.imaginaryPart;
+			double imag = imaginaryPart * cN.realPart - realPart * cN.imaginaryPart;
+			return new ComplexNumber(real / r2, imag / r2);
+		} else {
+			return new ComplexNumber(realPart / n.doubleValue(), imaginaryPart / n.doubleValue());
+		}
+	}
+	
+
+	/**
+	 * Return the complex conjugate of this complex number. <p>
+	 * The complex conjugate of z is Re(z) - Im(z).
+	 * @return a ComplexNumber instance
+	 */
+	public ComplexNumber getComplexConjugate() {
+		return new ComplexNumber(realPart, -imaginaryPart);
+	}
+	
 	/**
 	 * Compute the square root of this complex number.<p>
 	 * It may occasionally return a double if the imaginary part is equal to 0.
@@ -129,7 +179,7 @@ public final class ComplexNumber extends Number {
 	
 	
 	/**
-	 * Returns the real part of this complex number as a double.
+	 * Return the real part of this complex number as a double.
 	 * @return a double
 	 */
 	@Override
@@ -138,7 +188,7 @@ public final class ComplexNumber extends Number {
 	}
 
 	/**
-	 * Returns the real part of this complex number as a float.<p>
+	 * Return the real part of this complex number as a float.<p>
 	 * This method implies a truncation.
 	 * @return a float
 	 */
@@ -148,7 +198,7 @@ public final class ComplexNumber extends Number {
 	}
 
 	/**
-	 * Returns the real part of this complex number as an integer.<p>
+	 * Return the real part of this complex number as an integer.<p>
 	 * This method implies a truncation.
 	 * @return an integer
 	 */
@@ -158,7 +208,7 @@ public final class ComplexNumber extends Number {
 	}
 
 	/**
-	 * Returns the real part of this complex number as a long.<p>
+	 * Return the real part of this complex number as a long.<p>
 	 * This method implies a truncation.
 	 * @return a long
 	 */
@@ -169,7 +219,7 @@ public final class ComplexNumber extends Number {
 
 	@Override
 	public String toString() {
-		return "" + realPart + " + i" + imaginaryPart; 
+		return "" + realPart + " + " + imaginaryPart + "i"; 
 	}
 	
 	@Override
@@ -179,6 +229,48 @@ public final class ComplexNumber extends Number {
 			return realPart == cn.realPart && imaginaryPart == cn.imaginaryPart; 
 		}
 		return false;
+	}
+
+	/**
+	 * Estimate the expectation of a sample of realizations of a complex random variable.
+	 * @param sample a List of ComplexNumber instances
+	 * @return a ComplexNumber instance
+	 */
+	public static ComplexNumber getExpectation(List<ComplexNumber> sample) {
+		if (sample == null || sample.isEmpty()) {
+			throw new InvalidParameterException("The sample argument must be a non empty List instance!");
+		}
+		double real = 0;
+		double imag = 0;
+		for (ComplexNumber c : sample) {
+			real += c.realPart;
+			imag += c.imaginaryPart;
+		}
+		return new ComplexNumber(real / sample.size(), imag / sample.size());
+	}
+
+	/**
+	 * Estimate the variance of a sample of realizations of a complex random variable.<p>
+	 * The variance is actually the sum of the variance of the real part and the variance
+	 * of the imaginary part.
+	 * @param sample a List of ComplexNumber instances
+	 * @return a double
+	 */
+	public static double getVariance(List<ComplexNumber> sample) {
+		if (sample == null || sample.size() <= 1) {
+			throw new InvalidParameterException("The sample argument must be a List instance of at least two elements!");
+		}
+		ComplexNumber mean = getExpectation(sample);
+		double diff2Real = 0;
+		double diff2Imag = 0;
+		for (ComplexNumber c : sample) {
+			double dReal = c.realPart - mean.realPart;
+			diff2Real += dReal * dReal;
+			double dImag = c.imaginaryPart - mean.imaginaryPart;
+			diff2Imag += dImag * dImag;
+		}
+		double df = sample.size() - 1;
+		return diff2Real / df + diff2Imag / df;
 	}
 	
 }
