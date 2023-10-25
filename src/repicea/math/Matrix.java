@@ -380,15 +380,62 @@ public class Matrix implements Serializable, DeepCloneable {
 		}
 		return mat;		
 	}
-	
+
 	/**
 	 * This method returns a sub matrix whose elements correspond to the indices listed in 
 	 * the row index list and the column index list.
+	 * 
+	 * @param rowIndex a List of integers (if null all the rows are selected)
+	 * @param columnIndex a List of integers (if null all the columns are selected)
+	 * @param sortIndices a boolean true to enable the sorting of the indices
+	 * @return a Matrix instance
+	 */
+	public final Matrix getSubMatrix(List<Integer> rowIndex, List<Integer> columnIndex, boolean sortIndices) { 
+		if (rowIndex != null && !rowIndex.isEmpty()) {
+			if (sortIndices)
+				Collections.sort(rowIndex);
+		} else {
+			rowIndex = new ArrayList<Integer>();
+			for (int i = 0; i < m_iRows; i++) {
+				rowIndex.add(i);
+			}
+		}
+		
+		if (columnIndex != null && !columnIndex.isEmpty()) {
+			if (sortIndices)
+				Collections.sort(columnIndex);
+		} else {
+			columnIndex = new ArrayList<Integer>();
+			for (int j = 0; j < m_iCols; j++) {
+				columnIndex.add(j);
+			}
+		}
+		
+		Matrix outputMatrix = new Matrix(rowIndex.size(), columnIndex.size());
+		for (int i = 0; i < rowIndex.size(); i++) {
+			for (int j = 0; j < columnIndex.size(); j++) {
+				outputMatrix.setValueAt(i, j, getValueAt(rowIndex.get(i), columnIndex.get(j)));
+			}
+		}
+	
+		return outputMatrix;
+	}
+
+	
+	/**
+	 * This method returns a sub matrix whose elements correspond to the indices listed in 
+	 * the row index list and the column index list. <p>
+	 *
+	 * This method sorts the indices before constructing the sub matrices. So if rowIndex = {1,3,2},
+	 * the rows of resulting submatrix will correspond to rows 1, 2, 3 in this order. It is a proxy for 
+	 * getSubMatrix(rowIndex, columnIndex, true). 
+	 *  
+	 * @see Matrix#getSubMatrix(List, List, boolean)
 	 * @param rowIndex a List of integers (if null all the rows are selected)
 	 * @param columnIndex a List of integers (if null all the columns are selected)
 	 * @return a Matrix instance
 	 */
-	public final Matrix getSubMatrix(List<Integer> rowIndex, List<Integer> columnIndex) {
+	public final Matrix getSubMatrix(List<Integer> rowIndex, List<Integer> columnIndex) { // it should not be sorted here?????
 		if (rowIndex != null && !rowIndex.isEmpty()) {
 			Collections.sort(rowIndex);
 		} else {

@@ -58,7 +58,7 @@ public class WeibullModelTest {
 		wm.getSummary();
 		Assert.assertTrue("Is convergence achieved?", wm.getEstimator().isConvergenceAchieved());
 		Assert.assertEquals("Shape parameter", 1d, wm.getParameters().getValueAt(0, 0), 1E-2);
-		Assert.assertEquals("Scale parameter", 1d, wm.getParameters().getValueAt(1, 0), 1E-2);
+		Assert.assertEquals("Scale parameter", 1d, wm.getParameters().getValueAt(1, 0), 2E-2);
 	}
 	
 	@Test

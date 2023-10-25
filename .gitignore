@@ -38,3 +38,5 @@ out/
 .vscode/
 
 logs/
+/test/repicea/math/caseStudy1.csv
+/test/repicea/math/caseStudy2.csv
