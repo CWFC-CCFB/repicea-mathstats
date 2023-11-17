@@ -21,7 +21,7 @@ package repicea.stats.distributions;
 import repicea.math.Matrix;
 import repicea.stats.Distribution;
 
-public interface ContinuousDistribution extends Distribution {
+public interface ContinuousDistribution extends Distribution<Matrix> {
 
 	/**
 	 * Return the probability density of the values parameter.

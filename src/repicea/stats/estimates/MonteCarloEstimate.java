@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.stats.distributions.EmpiricalDistribution;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
@@ -31,7 +32,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * This estimate contains the realizations of a Monte Carlo simulations.
  * @author Mathieu Fortin - October 2011
  */
-public class MonteCarloEstimate extends ResamplingBasedEstimate {
+public class MonteCarloEstimate extends ResamplingBasedEstimate<Matrix> {
 	
 	private static final long serialVersionUID = 20110912L;
 	
@@ -59,7 +60,7 @@ public class MonteCarloEstimate extends ResamplingBasedEstimate {
 	 * Constructor.
 	 */
 	public MonteCarloEstimate() {
-		super();
+		super(new EmpiricalDistribution());
 	}
 	
 	/**
@@ -159,7 +160,7 @@ public class MonteCarloEstimate extends ResamplingBasedEstimate {
 	}
 	
 	@Override
-	protected boolean isMergeableEstimate(Estimate<?> estimate) {
+	protected boolean isMergeableEstimate(Estimate<?,?> estimate) {
 		if (estimate instanceof MonteCarloEstimate) {
 			if (((MonteCarloEstimate) estimate).getNumberOfRealizations() == getNumberOfRealizations()) {
 				return true;
@@ -182,7 +183,7 @@ public class MonteCarloEstimate extends ResamplingBasedEstimate {
 	
 	
 	@Override
-	public Estimate<?> getDifferenceEstimate(Estimate<?> estimate2) {
+	public Estimate<?,?> getDifferenceEstimate(Estimate<?,?> estimate2) {
 		if (this.isMergeableEstimate(estimate2)) {
 			return subtract((MonteCarloEstimate) estimate2);
 		} else {
@@ -191,7 +192,7 @@ public class MonteCarloEstimate extends ResamplingBasedEstimate {
 	}
 
 	@Override
-	public Estimate<?> getSumEstimate(Estimate<?> estimate2) {
+	public Estimate<?,?> getSumEstimate(Estimate<?,?> estimate2) {
 		if (this.isMergeableEstimate(estimate2)) {
 			return add((MonteCarloEstimate) estimate2);
 		} else {
@@ -200,7 +201,7 @@ public class MonteCarloEstimate extends ResamplingBasedEstimate {
 	}
 
 	@Override
-	public Estimate<?> getProductEstimate(double scalar) {
+	public Estimate<?,?> getProductEstimate(double scalar) {
 		return multiply(scalar);
 	}
 

@@ -34,7 +34,7 @@ import repicea.stats.distributions.GaussianDistribution;
  * @author Mathieu Fortin - January 2021
  */
 @SuppressWarnings("serial")
-public class LogNormalEstimate extends Estimate<GaussianDistribution> implements CentralMomentsSettable, Serializable{
+public class LogNormalEstimate extends Estimate<Matrix, GaussianDistribution> implements CentralMomentsSettable, Serializable{
 
 	/**
 	 * Constructor.

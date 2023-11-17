@@ -56,7 +56,7 @@ public interface Estimator {
 	 * This method returns the parameter estimates.
 	 * @return an Estimate instance
 	 */
-	public Estimate<?> getParameterEstimates();
+	public Estimate<?,?> getParameterEstimates();
 
 	/**
 	 * Produces a DataSet instance with the convergence status.

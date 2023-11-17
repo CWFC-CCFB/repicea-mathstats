@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import repicea.math.AbstractMatrix;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.stats.Distribution;
@@ -33,36 +34,10 @@ import repicea.stats.StatisticalUtility;
  * @author Mathieu Fortin - May 2018
  *
  */
-public class EmpiricalDistribution implements Distribution, Serializable {
+public class EmpiricalDistribution extends AbstractEmpiricalDistribution<Matrix> {
 
 	private static final long serialVersionUID = 20120826L;
 	
-	private final List<Matrix> observations;
-
-	/**
-	 * Constructor.
-	 */
-	public EmpiricalDistribution() {
-		observations = new ArrayList<Matrix>();
-	}
-	
-	/**
-	 * This method returns the number of observations in this nonparametric distribution.
-	 * @return an integer
-	 */
-	public int getNumberOfRealizations() {return observations.size();}
-	
-	/**
-	 * This method sets a given observation of the nonparametric distribution.
-	 * @param value the value of the observation
-	 */
-	public void addRealization(Matrix value) {observations.add(value);}
-	
-	/**
-	 * This method returns the array that contains all the observations of this distribution.
-	 * @return an array of Matrix instances
-	 */
-	public List<Matrix> getRealizations() {return observations;}
 	
 	@Override
 	public Matrix getMean() {
@@ -98,37 +73,5 @@ public class EmpiricalDistribution implements Distribution, Serializable {
 		return convertedSse.scalarMultiply(1d / (observations.size()-1));
 	}
 
-	@Override
-	public boolean isParametric() {
-		return false;
-	}
-
-	@Override
-	public boolean isMultivariate() {
-		if (observations != null && observations.size() > 0) {
-			return observations.get(0) instanceof Matrix && observations.get(0).m_iRows > 1;
-		} else {
-			return false;
-		}
-	}
-
-	@Override
-	public Type getType() {
-		return Type.NONPARAMETRIC;
-	}
-
-
-//	@Override
-//	public double getQuantile(double... values) {
-//		if (observationsgetM)
-//		// TODO to be implemented
-//		return -1;
-//	}
-
-	@Override
-	public Matrix getRandomRealization() {
-		int observationIndex = (int) (StatisticalUtility.getRandom().nextDouble() * getNumberOfRealizations());
-		return getRealizations().get(observationIndex);
-	}
 
 }

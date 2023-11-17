@@ -20,6 +20,7 @@ package repicea.stats;
 
 import java.io.Serializable;
 
+import repicea.math.AbstractMatrix;
 import repicea.math.Matrix;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
@@ -33,7 +34,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * the repicea.stat.distribution.utility package.
  * @author Mathieu Fortin - August 2012
  */
-public interface Distribution extends CentralMomentsGettable, Serializable {
+public interface Distribution<P extends AbstractMatrix> extends CentralMomentsGettable, Serializable {
 
 	public enum Type implements TextableEnum {
 		GAUSSIAN("Gaussian", "Gaussienne"), 
@@ -92,7 +93,7 @@ public interface Distribution extends CentralMomentsGettable, Serializable {
 	 * This method draws a random realization from the distribution.
 	 * @return the observation in a Matrix instance
 	 */
-	public Matrix getRandomRealization();
+	public P getRandomRealization();
 
 
 }

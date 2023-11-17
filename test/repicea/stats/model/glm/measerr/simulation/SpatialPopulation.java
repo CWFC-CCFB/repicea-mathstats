@@ -115,7 +115,7 @@ class SpatialPopulation extends AbstractPopulation<SpatialPopulationUnit> {
 		
 		if (glm.getEstimator().isConvergenceAchieved()) {
 			record = new Object[8];
-			Estimate<?> est = glm.getEstimator().getParameterEstimates();
+			Estimate<?,?> est = glm.getEstimator().getParameterEstimates();
 			record[0] = trueBeta.getValueAt(0, 0);
 			record[1] = trueBeta.getValueAt(1, 0);
 			record[2] = est.getMean().getValueAt(0, 0);

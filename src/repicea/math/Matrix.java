@@ -33,7 +33,7 @@ import repicea.util.DeepCloneable;
  * This class implement most of the basic function in linear algebra
  * Authors: Jean-Francois Lavoie and Mathieu Fortin (June 2009)
  */
-public class Matrix implements Serializable, DeepCloneable {
+public class Matrix extends AbstractMatrix<Matrix> implements Serializable, DeepCloneable {
 
 	private static final long serialVersionUID = 20100804L;
 		
@@ -54,14 +54,12 @@ public class Matrix implements Serializable, DeepCloneable {
 	private static final double EPSILON = 1E-12;
 	
 	final double[][] m_afData;
-	public final int m_iRows;
-	public final int m_iCols;
 	
 	/**
 	 * Constructor 1. Creates a matrix from a two-dimension array.
 	 * @param data a two-dimension array of double
 	 */
-	public Matrix(double data[][]) {
+	public Matrix(double[][] data) {
 		this(data.length, data[0].length);
 		for (int i = 0; i < m_iRows; i++)
 			for (int j = 0; j < m_iCols; j++)
@@ -72,7 +70,7 @@ public class Matrix implements Serializable, DeepCloneable {
 	 * Constructor 2. Creates a column vector from an array of double
 	 * @param data an array of double instances.
 	 */
-	public Matrix(double data[]) {
+	public Matrix(double[] data) {
 		this(data.length, 1);
 		for (int i = 0; i < m_iRows; i++)
 			setValueAt(i, 0, data[i]);
@@ -126,20 +124,13 @@ public class Matrix implements Serializable, DeepCloneable {
 	 * By default, it is set to true.
 	 */
 	protected Matrix(int iRows, int iCols, boolean newImplementation) {
-		if (iRows <= 0 || iCols <= 0) {
-			throw new InvalidParameterException("The number of rows or columns must be equal to or greater than 1!");
-		}
+		super(iRows, iCols);
 		if (iCols == 1 && newImplementation) {
-//			m_afData = new double[iCols][iRows];		// the array is stored as a row vector for better memory management
 			m_afData = contructInternalArray(iCols, iRows);		// the array is stored as a row vector for better memory management
 		} else {
-//	  		m_afData = new double[iRows][iCols];
 			m_afData = contructInternalArray(iRows, iCols);
 		}
-		m_iRows = iRows;
-		m_iCols = iCols;
 	}
-
 	
 	protected double[][] contructInternalArray(int iRows, int iCols) {
 		return new double[iRows][iCols];
@@ -188,11 +179,7 @@ public class Matrix implements Serializable, DeepCloneable {
 		return isNewImplementationForColumnVector() ? m_afData[j][i] : m_afData[i][j];
 	}
 	
-	/**
-	 * This method add matrix m to the current matrix.
-	 * @param m the matrix to be added
-	 * @return the result in a new Matrix instance
-	 */
+	@Override
 	public Matrix add(Matrix m) {
 		if (!isTheSameDimension(m)) {
 			throw new UnsupportedOperationException("This instance and the Matrix m are not of the same dimension!");
@@ -435,7 +422,7 @@ public class Matrix implements Serializable, DeepCloneable {
 	 * @param columnIndex a List of integers (if null all the columns are selected)
 	 * @return a Matrix instance
 	 */
-	public final Matrix getSubMatrix(List<Integer> rowIndex, List<Integer> columnIndex) { // it should not be sorted here?????
+	public final Matrix getSubMatrix(List<Integer> rowIndex, List<Integer> columnIndex) { 
 		if (rowIndex != null && !rowIndex.isEmpty()) {
 			Collections.sort(rowIndex);
 		} else {
@@ -464,11 +451,11 @@ public class Matrix implements Serializable, DeepCloneable {
 		return outputMatrix;
 	}
 
-	/**
-	 * This method checks if this is a column vector
-	 * @return a boolean that is true if this is a column vector
-	 */
-	public final boolean isColumnVector() {return m_iCols == 1;}
+//	/**
+//	 * This method checks if this is a column vector
+//	 * @return a boolean that is true if this is a column vector
+//	 */
+//	public final boolean isColumnVector() {return m_iCols == 1;}
 	
 	/**
 	 * This method checks whether this matrix is a diagonal matrix, i.e. with all its off-diagonal 
@@ -493,17 +480,17 @@ public class Matrix implements Serializable, DeepCloneable {
 	}
 
 	
-	/**
-	 * This method checks if this is a row vector
-	 * @return a boolean that is true if this is a row vector
-	 */
-	public final boolean isRowVector() {return m_iRows == 1;}
-	
-	/**
-	 * This method checks if this is a square matrix
-	 * @return true if the matrix is square or false otherwise
-	 */
-	public final boolean isSquare() {return m_iRows == m_iCols;}
+//	/**
+//	 * This method checks if this is a row vector
+//	 * @return a boolean that is true if this is a row vector
+//	 */
+//	public final boolean isRowVector() {return m_iRows == 1;}
+//	
+//	/**
+//	 * This method checks if this is a square matrix
+//	 * @return true if the matrix is square or false otherwise
+//	 */
+//	public final boolean isSquare() {return m_iRows == m_iCols;}
 	
 	/**
 	 * This method tests whether the matrix is symmetric. 
@@ -535,20 +522,20 @@ public class Matrix implements Serializable, DeepCloneable {
 		return valid;
 	}
 
-	/**
-	 * This method checks whether or not this and m have the same dimensions
-	 * @param m a Matrix instance
-	 * @return boolean
-	 */
-	public final boolean isTheSameDimension(Matrix m) {
-		boolean output = false;
-		if (m_iCols == m.m_iCols) {
-			if (m_iRows == m.m_iRows) {
-				output = true;
-			}
-		}
-		return output;
-	}
+//	/**
+//	 * This method checks whether or not this and m have the same dimensions
+//	 * @param m a Matrix instance
+//	 * @return boolean
+//	 */
+//	public final boolean isTheSameDimension(Matrix m) {
+//		boolean output = false;
+//		if (m_iCols == m.m_iCols) {
+//			if (m_iRows == m.m_iRows) {
+//				output = true;
+//			}
+//		}
+//		return output;
+//	}
 
 	/**
 	 * Compute the logarithm of the elements of this matrix 
@@ -684,11 +671,7 @@ public class Matrix implements Serializable, DeepCloneable {
 		}
 	}
 	
-	/**
-	 * Add the scalar d to all the elements of the current matrix.
-	 * @param d the scalar to be added
-	 * @return the result in a new Matrix instance
-	 */
+	@Override
 	public Matrix scalarAdd(double d) {
 		Matrix mat = new Matrix(m_iRows, m_iCols);
 		for (int i = 0; i < m_iRows; i++) {
@@ -699,11 +682,7 @@ public class Matrix implements Serializable, DeepCloneable {
 		return mat;
 	}
 	
-	/**
-	 * Multiply the elements of the current matrix by the scalar d.
-	 * @param d the multiplier
-	 * @return the result in a new Matrix instance
-	 */
+	@Override
 	public Matrix scalarMultiply(double d) {
 		Matrix mat = new Matrix(m_iRows, m_iCols);
 		for (int i = 0; i < m_iRows; i++) {
@@ -715,12 +694,7 @@ public class Matrix implements Serializable, DeepCloneable {
 	}
 
 
-	/**
-	 * Replace some elements of the matrix by those that are contained in matrix m.
-	 * @param m a Matrix instance 
-	 * @param i the row index of the first element to be changed
-	 * @param j the column index of the first element to be changed
-	 */
+	@Override
 	public final void setSubMatrix(Matrix m, int i, int j) {
 		if (this instanceof SymmetricMatrix) {
 			throw new UnsupportedOperationException("This Matrix instance does not support the setSubMatrix method!");
@@ -758,8 +732,6 @@ public class Matrix implements Serializable, DeepCloneable {
 					for (int j = 0; j < subMat.m_iRows; j++) {
 						matrix.setValueAt(j, i, subMat.getValueAt(j, 0));
 					}
-//					matrix.setSubMatrix(getSubMatrix(pointer, pointer + i, 0, 0), 0, i);
-//					matrix.setSubMatrix(getSubMatrix(pointer, pointer + i, 0, 0).transpose(), i, 0);
 					pointer += i + 1; 
 				}
 				return matrix;
@@ -767,12 +739,7 @@ public class Matrix implements Serializable, DeepCloneable {
 		}
 	}
 	
-
-	/**
-	 * Subtract matrix m from this matrix.
-	 * @param m the matrix to be subtracted
-	 * @return the result in a new Matrix instance
-	 */
+	@Override
 	public Matrix subtract(Matrix m) {
 		if (!isTheSameDimension(m)) {
 			throw new UnsupportedOperationException("This instance and the Matrix m are not of the same dimension!");
@@ -801,10 +768,7 @@ public class Matrix implements Serializable, DeepCloneable {
 		return sum;
 	}
 
-	/**
-	 * Create a transposed matrix.
-	 * @return the transposed matrix in a new Matrix instance
-	 */
+	@Override
 	public Matrix transpose() {
 		Matrix matrix = new Matrix(m_iCols, m_iRows);
 		for (int i = 0; i < m_iRows; i++) {
@@ -1487,20 +1451,11 @@ public class Matrix implements Serializable, DeepCloneable {
 					}
 				}
 				return true;
-//				return !subtract(mat).getAbsoluteValue().anyElementLargerThan(1E-20);
 			}
 		} else {
 			return false;
 		}
 	}
 	
-	public static void main(String[] args) {
-		Matrix matrix = new Matrix(5,4, 1, 100);
-		System.out.println(matrix);
-		matrix = new Matrix(4,3, -0.05, 5E-2);
-		System.out.println(matrix);
-		matrix = new Matrix(5,1, 0, 2);
-		System.out.println(matrix);
-	}
-	
+
 }

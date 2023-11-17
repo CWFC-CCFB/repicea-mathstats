@@ -30,9 +30,12 @@ import java.util.Map;
 import repicea.io.FormatField;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
+import repicea.math.utility.GammaUtility;
+import repicea.math.utility.MathUtility;
 import repicea.stats.Distribution;
 import repicea.stats.Distribution.Type;
 import repicea.stats.StatisticalUtility;
+import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.stats.sampling.SamplingUtility;
 import repicea.util.ObjectUtility;
 
@@ -203,23 +206,49 @@ public class ComplexNumberSimpleCaseStudy {
 			return output;
 		}
 
+		private Matrix getBeauchampAndOlsonEstimatorVariance(List<Double> xValues) {
+			Matrix xMat = createMatrixX(xValues);
+			Matrix xBeta = getXBeta(xValues);
+			
+			Matrix output = new Matrix(xValues.size(), 1);
+			
+			for (int ii = 0; ii < xValues.size(); ii++) {
+				double term1 = Math.exp(2*xBeta.getValueAt(ii, 0) + sigma2Hat);
+				Matrix xMat_ii = xMat.getSubMatrix(ii, ii, 0, xMat.m_iCols - 1);
+				int n = upsilon + xMat_ii.m_iCols;
+				Matrix xInvXtXxT = xMat_ii.multiply(invXtX).multiply(xMat_ii.transpose());
+				double phi = xInvXtXxT.getValueAt(0, 0) * n;
+				double sigma2hat2 = sigma2Hat * sigma2Hat;
+				double term2 = Math.exp(sigma2Hat) * (1 - 2 * sigma2Hat * (phi + 2*sigma2Hat)/n + 
+						2* sigma2hat2 * (4*sigma2hat2 + 2 * (16d/3 + 2 * phi) * sigma2Hat + phi * phi + 4 * phi) / (n * n));
+				double term3 = 1 - sigma2Hat/n * (sigma2Hat + 2 * phi) + sigma2hat2 / (2*n*n) * (sigma2hat2 + (16d/3 + 4*phi) * sigma2Hat + 4 * phi * phi + 8 * phi);
+				output.setValueAt(ii, 0, term1 * (term2 - term3));
+			}
+			return output;
+		}
+
 		
 		private Matrix getBaskervilleEstimator(List<Double> xValues) {
 			Matrix xBeta = getXBeta(xValues);
 			return xBeta.scalarAdd(sigma2Hat * .5).expMatrix();
 		}
 		
-		private Matrix getSmearingEstimate(List<Double> xValues, Transformation t) {
-			Matrix xBeta = getXBeta(xValues);
-			Matrix res_hat = sample.getVectorY().subtract(sample.getMatrixX().multiply(betaHat));
-			Matrix result = null;
-			for (int i = 0; i < res_hat.m_iRows; i++) {
-				result = result == null ?
-						convertPredictionToOriginalScale(xBeta.scalarAdd(res_hat.getValueAt(i, 0)), t) :
-							result.add(convertPredictionToOriginalScale(xBeta.scalarAdd(res_hat.getValueAt(i, 0)), t));	
-			}
-			return result.scalarMultiply(1d / res_hat.m_iRows);
+		private Matrix getBaskervilleEstimatorVariance(List<Double> xValues) {
+			Matrix xBeta = getXBeta(xValues).scalarMultiply(2d).scalarAdd(sigma2Hat).expMatrix();
+			return xBeta.scalarMultiply(Math.exp(sigma2Hat) - 1);
 		}
+
+//		private Matrix getSmearingEstimate(List<Double> xValues, Transformation t) {
+//			Matrix xBeta = getXBeta(xValues);
+//			Matrix res_hat = sample.getVectorY().subtract(sample.getMatrixX().multiply(betaHat));
+//			Matrix result = null;
+//			for (int i = 0; i < res_hat.m_iRows; i++) {
+//				result = result == null ?
+//						convertPredictionToOriginalScale(xBeta.scalarAdd(res_hat.getValueAt(i, 0)), t) :
+//							result.add(convertPredictionToOriginalScale(xBeta.scalarAdd(res_hat.getValueAt(i, 0)), t));	
+//			}
+//			return result.scalarMultiply(1d / res_hat.m_iRows);
+//		}
 		
 		ComplexNumber[] getComplexRandomDeviate(List<Double> xValues, Transformation t, boolean useNonParametricMethod) {
 			double chiSquareDeviate = StatisticalUtility.getRandom().nextChiSquare(upsilon);
@@ -280,9 +309,8 @@ public class ComplexNumberSimpleCaseStudy {
 	}
 	
 
-	private static void doRun(Transformation t, int sampleSize) throws IOException {
+	private static void doRun(Transformation t, int sampleSize, int nbRealizations) throws IOException {
 		System.out.println("Simulating " + t.name() + " with sample size n = " + sampleSize);
-		int nbRealizations = 10000;
 		int nbInnerReal = 10000;
 		String filename = ObjectUtility.getPackagePath(ComplexNumberSimpleCaseStudy.class) + "caseStudy_" + t.name() + sampleSize +".csv";
 		filename = filename.replace("bin/", "");
@@ -294,17 +322,15 @@ public class ComplexNumberSimpleCaseStudy {
 		fields.add(new CSVField("sigma2"));
 		fields.add(new CSVField("x"));
 		fields.add(new CSVField("MC_OLD"));
-//		fields.add(new CSVField("MC_OLD_np"));
+		fields.add(new CSVField("MC_OLDVar"));
 		fields.add(new CSVField("MC_NEW"));
 		fields.add(new CSVField("MC_NEW_imag"));
-//		fields.add(new CSVField("MC_NEW_np"));
-//		fields.add(new CSVField("MC_NEW_np_imag"));
 		if (t == Transformation.Exp) {
 			fields.add(new CSVField("Beauchamp"));
+			fields.add(new CSVField("BeauchampVar"));
 			fields.add(new CSVField("Baskerville"));
-			fields.add(new CSVField("Smearing"));
+			fields.add(new CSVField("BaskervilleVar"));
 		} else if (t == Transformation.Sqr) {
-			fields.add(new CSVField("Smearing"));
 			fields.add(new CSVField("Gregoire"));
 		}
 		writer.setFields(fields);
@@ -335,46 +361,36 @@ public class ComplexNumberSimpleCaseStudy {
 			Sample s = Sample.createSample(trueBeta, trueVariance, sampleSize);
 			Model m = s.getModel(null); // null means we are relying on the estimated variance
 			Matrix beauchampAndOlsonEstimator = null;
+			Matrix beauchampAndOlsonEstimatorVar = null;
 			Matrix baskervilleEstimator = null;
-			Matrix smearingEstimate = null;
+			Matrix baskervilleEstimatorVar = null;
 			Matrix gregoireEstimator = null;
 			if (t == Transformation.Exp) {
 				beauchampAndOlsonEstimator = m.getBeauchampAndOlsonEstimator(xValues);
+				beauchampAndOlsonEstimatorVar = m.getBeauchampAndOlsonEstimatorVariance(xValues);
 				baskervilleEstimator = m.getBaskervilleEstimator(xValues);
-				smearingEstimate = m.getSmearingEstimate(xValues, t);
+				baskervilleEstimatorVar = m.getBaskervilleEstimatorVariance(xValues);
 			} else if (t == Transformation.Sqr) {
-				smearingEstimate = m.getSmearingEstimate(xValues, t);
 				gregoireEstimator = m.getGregoireEstimator(xValues);
 			}
 						
-			Matrix sumOLD = new Matrix(xValues.size(), 1);
-//			Matrix sumOLD_np = new Matrix(xValues.size(), 1);
+			MonteCarloEstimate mcEstimator = new MonteCarloEstimate();
 			ComplexNumber[] sumNEW = new ComplexNumber[xValues.size()];
 			for (int ii = 0; ii < sumNEW.length; ii++) {
 				sumNEW[ii] = new ComplexNumber(0,0);
 			}
-//			ComplexNumber[] sumNEW_np = new ComplexNumber[xValues.size()];
-//			for (int ii = 0; ii < sumNEW.length; ii++) {
-//				sumNEW_np[ii] = new ComplexNumber(0,0);
-//			}
 
 			for (int innerReal = 0; innerReal < nbInnerReal; innerReal++) {
-				sumOLD = sumOLD.add(m.getRandomDeviate(xValues, t, false)); // false: regular parametric method
-//				sumOLD_np = sumOLD_np.add(m.getRandomDeviate(xValues, t, true)); // true: non parametric method
+				mcEstimator.addRealization(m.getRandomDeviate(xValues, t, false)); // false: regular parametric method
 				ComplexNumber[] n2 = m.getComplexRandomDeviate(xValues, t, false); // false : regular parametric method
 				addComplexNumberArray(sumNEW, n2);
-//				ComplexNumber[] n2_np = m.getComplexRandomDeviate(xValues, t, true); // true : non parametric method
-//				addComplexNumberArray(sumNEW_np, n2_np);
 			}
 			
-			sumOLD = sumOLD.scalarMultiply(1d / nbInnerReal);
-//			sumOLD_np = sumOLD_np.scalarMultiply(1d / nbInnerReal);
 			for (int ii = 0; ii < sumNEW.length; ii++) {
 				sumNEW[ii] = sumNEW[ii].multiply(1d / nbInnerReal);
 			}
-//			for (int ii = 0; ii < sumNEW_np.length; ii++) {
-//				sumNEW_np[ii] = sumNEW_np[ii].multiply(1d / nbInnerReal);
-//			}
+			Matrix mcMean = mcEstimator.getMean();
+			Matrix mcVar = mcEstimator.getVariance();
 			
 			for (int ii = 0; ii < xValues.size(); ii++) {
 				Object[] record = new Object[fields.size()];
@@ -383,18 +399,16 @@ public class ComplexNumberSimpleCaseStudy {
 				record[2] = m.betaHat.getValueAt(1, 0);
 				record[3] = m.sigma2Hat;
 				record[4] = xValues.get(ii);
-				record[5] = sumOLD.getValueAt(ii, 0);
-//				record[6] = sumOLD_np.getValueAt(ii, 0);
-				record[6] = sumNEW[ii].doubleValue();
-				record[7] = sumNEW[ii].imaginaryPart;
-//				record[9] = sumNEW_np[ii].doubleValue();
-//				record[10] = sumNEW_np[ii].imaginaryPart;
+				record[5] = mcMean.getValueAt(ii, 0);
+				record[6] = mcVar.getValueAt(ii, ii);
+				record[7] = sumNEW[ii].doubleValue();
+				record[8] = sumNEW[ii].imaginaryPart;
 				if (t == Transformation.Exp) {
-					record[8] = beauchampAndOlsonEstimator.getValueAt(ii, 0);
-					record[9] = baskervilleEstimator.getValueAt(ii, 0);
-					record[10] = smearingEstimate.getValueAt(ii, 0);
+					record[9] = beauchampAndOlsonEstimator.getValueAt(ii, 0);
+					record[10] = beauchampAndOlsonEstimatorVar.getValueAt(ii, 0);
+					record[11] = baskervilleEstimator.getValueAt(ii, 0);
+					record[12] = baskervilleEstimatorVar.getValueAt(ii, 0);
 				} else  if (t == Transformation.Sqr) {
-					record[8] = smearingEstimate.getValueAt(ii, 0);
 					record[9] = gregoireEstimator.getValueAt(ii, 0);
 				}
 				writer.addRecord(record);
@@ -404,18 +418,51 @@ public class ComplexNumberSimpleCaseStudy {
 
 	}
 	
+//	private static void runSimulationChiSquare(int nReal) {
+//		int upsilon = 50;
+//		double A_j = 0.8;
+//		double sigma2_hat = 1;
+//		double realPart = 0;
+//		double imagPart = 0;
+//		for (int i = 0; i < nReal; i++) {
+//			ComplexNumber exponent = new ComplexNumber(0, A_j * sigma2_hat / upsilon * (StatisticalUtility.getRandom().nextChiSquare(upsilon) - upsilon));
+//			ComplexNumber result = exponent.exp();
+//			realPart += result.realPart;
+//			imagPart += result.imaginaryPart;
+//		}
+//		System.out.println("Real part = " + (realPart/nReal));
+//		System.out.println("Imaginary part = " + (imagPart/nReal));
+//		double approx = Math.exp(- A_j * A_j * sigma2_hat * sigma2_hat / upsilon); 
+//		System.out.println("Approximation = " + approx);
+//	}
+
+	
+	private static void runSimulationChiSquareToSeries(int nReal) {
+		int upsilon = 100;
+		double sigma2 = 2d;
+		double mean = 0d;
+		for (int i = 0; i < nReal; i++) {
+			double sigma2_hat = sigma2 * StatisticalUtility.getRandom().nextChiSquare(upsilon) / upsilon;
+			mean += Math.exp(sigma2_hat/2);
+		}
+		System.out.println("Monte Carlo = " + (mean/nReal));
+
+		double series = 0d;
+		for (int k = 0; k < 20; k++) {
+			series += Math.pow(sigma2/2, k) / MathUtility.Factorial(k) * Math.pow(2,k) * GammaUtility.gamma(k + 0.5 * upsilon) / (Math.pow(upsilon, k) * GammaUtility.gamma(0.5 * upsilon));
+			System.out.println("Series (k = " + k + ") = " + series);
+		}
+		System.out.println("With sigma2 = " + (Math.exp(sigma2/2)));
+	}
+
 	public static void main(String[] arg) throws IOException {
-		doRun(Transformation.Exp, 50);
-		doRun(Transformation.Exp, 100);
-		doRun(Transformation.Exp, 200);
-		doRun(Transformation.Sqr, 50);
-		doRun(Transformation.Sqr, 100);
-		doRun(Transformation.Sqr, 200);
-//		doRun(Transformation.Log, 50);
-//		doRun(Transformation.Log, 100);
-//		doRun(Transformation.Log, 200);
-//		doRun(Transformation.Sqrt, 50);
-//		doRun(Transformation.Sqrt, 100);
-//		doRun(Transformation.Sqrt, 200);
+//		runSimulationChiSquareToSeries(1000000);
+//		runSimulationChiSquare(1000000);
+		doRun(Transformation.Exp, 50, 1000);
+//		doRun(Transformation.Exp, 100);
+//		doRun(Transformation.Exp, 200);
+//		doRun(Transformation.Sqr, 50);
+//		doRun(Transformation.Sqr, 100);
+//		doRun(Transformation.Sqr, 200);
 	}	
 }

@@ -261,7 +261,7 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 	public boolean isConvergenceAchieved() {return convergenceAchieved;}
 
 	@Override
-	public Estimate<?> getParameterEstimates() {return parameterEstimates;}
+	public Estimate<?,?> getParameterEstimates() {return parameterEstimates;}
 
 	
 	@Override

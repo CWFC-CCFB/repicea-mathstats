@@ -23,6 +23,7 @@ import java.security.InvalidParameterException;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.stats.StatisticalUtility;
+import repicea.stats.distributions.EmpiricalDistribution;
 
 /**
  * The JackknifeEstimate class implements the variance calculation typical of
@@ -30,7 +31,7 @@ import repicea.stats.StatisticalUtility;
  * @author Mathieu Fortin - February 2019
  */
 @SuppressWarnings("serial")
-public class JackknifeEstimate extends ResamplingBasedEstimate {
+public class JackknifeEstimate extends ResamplingBasedEstimate<Matrix> {
 
 	private final int n;
 	private final int d;		// delete d observations here
@@ -41,7 +42,7 @@ public class JackknifeEstimate extends ResamplingBasedEstimate {
 	 * @param d the number of left-out observations
 	 */
 	public JackknifeEstimate(int n, int d) {
-		super();
+		super(new EmpiricalDistribution());
 		this.d = d;
 		this.n = n;
 	}

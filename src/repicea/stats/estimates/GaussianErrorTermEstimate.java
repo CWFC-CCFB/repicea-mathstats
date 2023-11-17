@@ -33,7 +33,7 @@ import repicea.stats.distributions.GaussianErrorTermList;
  * @author Mathieu Fortin - August 2014
  */
 @SuppressWarnings("serial")
-public final class GaussianErrorTermEstimate extends Estimate<CenteredGaussianDistribution> {
+public final class GaussianErrorTermEstimate extends Estimate<Matrix, CenteredGaussianDistribution> {
 
 	/**
 	 * General constructor.

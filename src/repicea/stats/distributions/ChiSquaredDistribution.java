@@ -29,7 +29,7 @@ import repicea.stats.StatisticalUtility;
  * The ChiSquareDistribution class represents a univariate Chi Square distribution with a given degrees of freedom.
  * @author Mathieu Fortin - November 2012
  */
-public final class ChiSquaredDistribution implements Distribution {
+public final class ChiSquaredDistribution implements Distribution<Matrix> {
 
 	private static final long serialVersionUID = 20121114L;
 

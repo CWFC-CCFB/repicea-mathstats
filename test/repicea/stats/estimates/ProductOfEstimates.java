@@ -18,7 +18,7 @@ public class ProductOfEstimates {
 	private static enum Method {Naive, Propagation}
 
 
-	private static SimpleEstimate getEstimate(List<Estimate> estimates, Method method) {
+	private static SimpleEstimate getEstimate(List<Estimate<Matrix, ?>> estimates, Method method) {
 		Estimate currentEstimate = null;
 		for (int i = 1; i < estimates.size(); i++) {
 			if (i == 1) {
@@ -44,7 +44,7 @@ public class ProductOfEstimates {
 		return (SimpleEstimate) currentEstimate;
 	}
 
-	private static MonteCarloEstimate getMonteCarloEstimate(List<Estimate> estimates, int nbRealizations) {
+	private static MonteCarloEstimate getMonteCarloEstimate(List<Estimate<Matrix,?>> estimates, int nbRealizations) {
 		MonteCarloEstimate est = new MonteCarloEstimate(); 
 		for (int real = 0; real < nbRealizations; real++) {
 			double currentProduct = -1;
@@ -62,7 +62,7 @@ public class ProductOfEstimates {
 		return est;
 	}
 
-	private static Estimate getEstimate(Estimate trueMean, VarianceEstimate trueVariance, boolean isLogNormal) {
+	private static Estimate getEstimate(Estimate<Matrix, ?> trueMean, VarianceEstimate trueVariance, boolean isLogNormal) {
 		double mean = trueMean.getRandomDeviate().getValueAt(0, 0);
 		double variance = trueVariance.getRandomDeviate().getValueAt(0, 0);
 		if (isLogNormal) {
@@ -154,7 +154,7 @@ public class ProductOfEstimates {
 			if (real%1000 == 0) {
 				System.out.println("Realization " + real);
 			}
-			List<Estimate> estimates = new ArrayList<Estimate>();
+			List<Estimate<Matrix,?>> estimates = new ArrayList<Estimate<Matrix,?>>();
 			estimates.add(getEstimate(expectedAlpha, trueVarAlpha, useLogNormal));
 			estimates.add(getEstimate(expectedBeta, trueVarBeta, useLogNormal));
 			estimates.add(getEstimate(expectedGamma, trueVarGamma, useLogNormal));

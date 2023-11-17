@@ -52,7 +52,7 @@ public class OLSEstimator extends AbstractEstimator<OLSCompatibleModel> {
 	
 	private VarianceEstimate residualVariance;
 	private boolean hasConverged;
-	private Estimate<?> betaVector;
+	private Estimate<?,?> betaVector;
 	
 	/**
 	 * Constructor.
@@ -97,7 +97,7 @@ public class OLSEstimator extends AbstractEstimator<OLSCompatibleModel> {
 	public boolean isConvergenceAchieved() {return hasConverged;}
 
 	@Override
-	public Estimate<?> getParameterEstimates() {
+	public Estimate<?,?> getParameterEstimates() {
 		return betaVector;
 	}
 

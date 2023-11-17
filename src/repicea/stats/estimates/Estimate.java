@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import repicea.math.AbstractMatrix;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.serial.xml.XmlSerializerChangeMonitor;
@@ -33,9 +34,10 @@ import repicea.stats.RandomVariable;
 /**
  * The Estimate class is the basic class for all estimates.
  * @author Mathieu Fortin - March 2012
+ * @param <P> an AbstractMatrix-derived class 
  * @param <D> a Distribution derived instance which represents the assumed distribution for the estimate
  */
-public abstract class Estimate<D extends Distribution> extends RandomVariable<D> {
+public abstract class Estimate<P extends AbstractMatrix, D extends Distribution<P>> extends RandomVariable<D> {
 	
 	static {
 		XmlSerializerChangeMonitor.registerEnumNameChange("repicea.stats.estimates.Estimate$EstimatorType", "MonteCarlo", "Resampling");
@@ -47,8 +49,6 @@ public abstract class Estimate<D extends Distribution> extends RandomVariable<D>
 	protected EstimatorType estimatorType;
 
 	protected final List<String> rowIndex;
-	
-//	protected final List<List<String>> collapseIndexList;
 	
 	/**
 	 * The type of estimator.
@@ -104,7 +104,7 @@ s	 */
 	 * is useful for Monte Carlo simulations.
 	 * @return a deviate from the underlying distribution as a Matrix instance
 	 */
-	public Matrix getRandomDeviate() {
+	public P getRandomDeviate() {
 		return getDistribution().getRandomRealization();
 	}
 
@@ -114,7 +114,7 @@ s	 */
 	 * @param estimate2 an Estimate to be subtracted from this estimate.
 	 * @return an Estimate
 	 */
-	public Estimate<?> getDifferenceEstimate(Estimate<?> estimate2) {
+	public Estimate<?,?> getDifferenceEstimate(Estimate<?,?> estimate2) {
 		Matrix diff = getMean().subtract(estimate2.getMean());
 		Matrix variance = getVariance().add(estimate2.getVariance());
 		if (variance instanceof SymmetricMatrix) {
@@ -129,7 +129,7 @@ s	 */
 	 * @param estimate2 an Estimate to be added to this estimate.
 	 * @return an Estimate
 	 */
-	public Estimate<?> getSumEstimate(Estimate<?> estimate2) {
+	public Estimate<?,?> getSumEstimate(Estimate<?,?> estimate2) {
 		Matrix diff = getMean().add(estimate2.getMean());
 		Matrix variance = getVariance().add(estimate2.getVariance());
 		if (variance instanceof SymmetricMatrix) {
@@ -146,7 +146,7 @@ s	 */
 	 * @param scalar a double to be multiplied by this estimate
 	 * @return an Estimate
 	 */
-	public Estimate<?> getProductEstimate(double scalar) {
+	public Estimate<?,?> getProductEstimate(double scalar) {
 		Matrix diff = getMean().scalarMultiply(scalar);
 		SymmetricMatrix variance = getVariance().scalarMultiply(scalar * scalar);
 		return new GaussianEstimate(diff, variance);
@@ -167,7 +167,7 @@ s	 */
 	 * @param estimate an Estimate instance
 	 * @return a boolean
 	 */
-	protected boolean isMergeableEstimate(Estimate<?> estimate) {
+	protected boolean isMergeableEstimate(Estimate<?,?> estimate) {
 		return false;
 	}
 	
@@ -178,7 +178,7 @@ s	 */
 	 * @param estimate an Estimate instance
 	 * @return a SimpleEstimate instance
 	 */
-	public SimpleEstimate getProductEstimate(Estimate<?> estimate) {
+	public SimpleEstimate getProductEstimate(Estimate<?,?> estimate) {
 		if (estimate.getDistribution().isUnivariate() && getDistribution().isUnivariate()) {
 			Matrix alphaMean = getMean();
 			Matrix betaMean = estimate.getMean();
@@ -193,7 +193,7 @@ s	 */
 		throw new InvalidParameterException("The getProductEstimate is only implemented for parametric univariate distribution ");
 	}
 	
-	public static SimpleEstimate getProductOfManyEstimates(List<Estimate> estimates) {
+	public static SimpleEstimate getProductOfManyEstimates(List<Estimate<Matrix, ?>> estimates) {
 		Estimate currentEstimate = null;
 		for (int i = 1; i < estimates.size(); i++) {
 			if (i == 1) {
@@ -215,11 +215,11 @@ s	 */
 	 * the values being lists of indices to be collapsed.
 	 * @return an Estimate instance
 	 */
-	public Estimate<?> collapseEstimate(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
+	public Estimate<?,?> collapseEstimate(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
 		return collapseMeanAndVariance(desiredIndicesForCollapsing);
 	}
 	
-	protected final Estimate<?> collapseMeanAndVariance(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
+	protected final Estimate<?,?> collapseMeanAndVariance(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
 		if (rowIndex.isEmpty()) {
 			throw new InvalidParameterException("The row indices have not been set yet!");
 		}
@@ -244,7 +244,7 @@ s	 */
 		Matrix oldVariance = getVariance();
 		Matrix newVariance = collapseSquareMatrix(oldVariance, desiredIndicesForCollapsing);
 		
-		Estimate<?> outputEstimate = new SimpleEstimate(newMean, SymmetricMatrix.convertToSymmetricIfPossible(newVariance));
+		Estimate<?,?> outputEstimate = new SimpleEstimate(newMean, SymmetricMatrix.convertToSymmetricIfPossible(newVariance));
 		
 		List<String> newIndexRow = new ArrayList<String>(desiredIndicesForCollapsing.keySet());
 		Collections.sort(newIndexRow);

@@ -59,7 +59,7 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 		 */
 		final class FakeEstimator implements Estimator {
 
-			Estimate<?> parameterEstimates;
+			Estimate<?,?> parameterEstimates;
 			
 			@Override
 			public boolean doEstimation() throws EstimatorException {return true;}
@@ -68,7 +68,7 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 			public boolean isConvergenceAchieved() {return true;}
 
 			@Override
-			public Estimate<?> getParameterEstimates() {return parameterEstimates;}
+			public Estimate<?,?> getParameterEstimates() {return parameterEstimates;}
 
 			@Override
 			public DataSet getParameterEstimatesReport() {return null;}

@@ -28,7 +28,7 @@ import repicea.stats.distributions.UniformDistribution;
  *
  */
 @SuppressWarnings("serial")
-public class UniformEstimate extends Estimate<UniformDistribution> implements BoundedDistribution {
+public class UniformEstimate extends Estimate<Matrix, UniformDistribution> implements BoundedDistribution {
 
 	public UniformEstimate(Matrix lowerBoundValue, Matrix upperBoundValue) {
 		super(new UniformDistribution(lowerBoundValue, upperBoundValue));

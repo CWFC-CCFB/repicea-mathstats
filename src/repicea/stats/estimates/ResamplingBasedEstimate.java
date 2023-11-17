@@ -3,7 +3,9 @@ package repicea.stats.estimates;
 import java.security.InvalidParameterException;
 import java.util.List;
 
+import repicea.math.AbstractMatrix;
 import repicea.math.Matrix;
+import repicea.stats.distributions.AbstractEmpiricalDistribution;
 import repicea.stats.distributions.EmpiricalDistribution;
 
 /*
@@ -25,13 +27,13 @@ import repicea.stats.distributions.EmpiricalDistribution;
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
 @SuppressWarnings("serial")
-abstract class ResamplingBasedEstimate extends Estimate<EmpiricalDistribution> implements NumberOfRealizationsProvider {
+abstract class ResamplingBasedEstimate<P extends AbstractMatrix> extends Estimate<P, AbstractEmpiricalDistribution<P>> implements NumberOfRealizationsProvider {
 	
 	/**
 	 * Constructor.
 	 */
-	protected ResamplingBasedEstimate() {
-		super(new EmpiricalDistribution());
+	protected ResamplingBasedEstimate(AbstractEmpiricalDistribution<P> dist) {
+		super(dist);
 		estimatorType = EstimatorType.Resampling;
 	}
 
@@ -41,7 +43,7 @@ abstract class ResamplingBasedEstimate extends Estimate<EmpiricalDistribution> i
 	 * new realization is checked before adding it.
 	 * @param value a Matrix
 	 */
-	public void addRealization(Matrix value) {
+	public void addRealization(P value) {
 		if (checkConformity(value)) {
 			getDistribution().addRealization(value);
 		} else {
@@ -49,12 +51,12 @@ abstract class ResamplingBasedEstimate extends Estimate<EmpiricalDistribution> i
 		}
 	}
 
-	private boolean checkConformity(Matrix value) {
-		List<Matrix> observations = getDistribution().getRealizations();
+	private boolean checkConformity(P value) {
+		List<P> observations = getDistribution().getRealizations();
 		if (observations.isEmpty()) {
 			return true; 
 		} else {
-			Matrix firstObservation = observations.get(0);
+			P firstObservation = observations.get(0);
 			if (value == null || firstObservation == null) {
 				int u = 0;
 			}
@@ -67,7 +69,7 @@ abstract class ResamplingBasedEstimate extends Estimate<EmpiricalDistribution> i
 	 * This method returns the list of realizations in the empirical distribution.
 	 * @return a List of Matrix instance
 	 */
-	public List<Matrix> getRealizations() {return getDistribution().getRealizations();}
+	public List<P> getRealizations() {return getDistribution().getRealizations();}
 
 	@Override
 	public int getNumberOfRealizations() {return getDistribution().getNumberOfRealizations();}

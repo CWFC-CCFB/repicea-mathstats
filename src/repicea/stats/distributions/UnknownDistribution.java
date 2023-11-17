@@ -29,7 +29,7 @@ import repicea.stats.Distribution;
  * @author Mathieu Fortin - August 2012
  */
 @SuppressWarnings("serial")
-public class UnknownDistribution implements Distribution, CentralMomentsSettable {
+public class UnknownDistribution implements Distribution<Matrix>, CentralMomentsSettable {
 
 	private Matrix mean;
 	private SymmetricMatrix variance;

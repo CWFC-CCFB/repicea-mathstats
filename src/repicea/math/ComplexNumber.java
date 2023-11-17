@@ -28,7 +28,7 @@ import java.util.List;
  * @author Mathieu Fortin - Sept 2023
  */
 @SuppressWarnings("serial")
-public final class ComplexNumber extends Number {
+public final class ComplexNumber extends Number implements Cloneable {
 
 	final double realPart;
 	final double imaginaryPart;
@@ -271,6 +271,11 @@ public final class ComplexNumber extends Number {
 		}
 		double df = sample.size() - 1;
 		return diff2Real / df + diff2Imag / df;
+	}
+	
+	@Override
+	public ComplexNumber clone() {
+		return new ComplexNumber(realPart, imaginaryPart);
 	}
 	
 }
