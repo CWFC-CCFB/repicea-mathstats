@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataSet;
@@ -59,7 +60,7 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 		 */
 		final class FakeEstimator implements Estimator {
 
-			Estimate<?,?> parameterEstimates;
+			Estimate<Matrix, SymmetricMatrix, ?> parameterEstimates;
 			
 			@Override
 			public boolean doEstimation() throws EstimatorException {return true;}
@@ -68,7 +69,7 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 			public boolean isConvergenceAchieved() {return true;}
 
 			@Override
-			public Estimate<?,?> getParameterEstimates() {return parameterEstimates;}
+			public Estimate<Matrix, SymmetricMatrix, ?> getParameterEstimates() {return parameterEstimates;}
 
 			@Override
 			public DataSet getParameterEstimatesReport() {return null;}

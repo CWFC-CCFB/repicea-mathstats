@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.Distribution.Type;
 import repicea.stats.StatisticalUtility;
 
@@ -34,7 +35,7 @@ public class MultivariateAndCollapseTest {
 		est.setRowIndex(rowIndex);
 		LinkedHashMap<String, List<String>> collapseIndices = new LinkedHashMap<String, List<String>>();
 		collapseIndices.put("all", rowIndex);
-		Estimate<?,?> collapsedEstimate = est.collapseEstimate(collapseIndices);
+		Estimate<Matrix, SymmetricMatrix, ?> collapsedEstimate = est.collapseEstimate(collapseIndices);
 		
 		Matrix collapsedMean = collapsedEstimate.getMean();
 		Assert.assertTrue("Testing we have 1 row", collapsedMean.m_iRows == 1);
@@ -75,7 +76,7 @@ public class MultivariateAndCollapseTest {
 			}
 		}
 			
-		Estimate<?,?> collapsedEstimate = est.collapseEstimate(collapseIndices);
+		Estimate<Matrix, SymmetricMatrix, ?> collapsedEstimate = est.collapseEstimate(collapseIndices);
 		
 		Matrix collapsedMean = collapsedEstimate.getMean();
 		Assert.assertTrue("Testing we have 2 rows", collapsedMean.m_iRows == 2);

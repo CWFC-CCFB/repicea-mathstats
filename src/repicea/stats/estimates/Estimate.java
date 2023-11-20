@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import repicea.math.AbstractMatrix;
+import repicea.math.ComplexMatrix;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.serial.xml.XmlSerializerChangeMonitor;
@@ -34,10 +35,12 @@ import repicea.stats.RandomVariable;
 /**
  * The Estimate class is the basic class for all estimates.
  * @author Mathieu Fortin - March 2012
- * @param <P> an AbstractMatrix-derived class 
+ * @param <M> an AbstractMatrix-derived class that stands for the mean
+ * @param <V> an AbstractMatrix-derived class that stands for the variance
  * @param <D> a Distribution derived instance which represents the assumed distribution for the estimate
  */
-public abstract class Estimate<P extends AbstractMatrix, D extends Distribution<P>> extends RandomVariable<D> {
+@SuppressWarnings("rawtypes")
+public abstract class Estimate<M extends AbstractMatrix, V extends AbstractMatrix, D extends Distribution<M,V>> extends RandomVariable<M,V,D> {
 	
 	static {
 		XmlSerializerChangeMonitor.registerEnumNameChange("repicea.stats.estimates.Estimate$EstimatorType", "MonteCarlo", "Resampling");
@@ -104,7 +107,7 @@ s	 */
 	 * is useful for Monte Carlo simulations.
 	 * @return a deviate from the underlying distribution as a Matrix instance
 	 */
-	public P getRandomDeviate() {
+	public M getRandomDeviate() {
 		return getDistribution().getRandomRealization();
 	}
 
@@ -114,11 +117,15 @@ s	 */
 	 * @param estimate2 an Estimate to be subtracted from this estimate.
 	 * @return an Estimate
 	 */
-	public Estimate<?,?> getDifferenceEstimate(Estimate<?,?> estimate2) {
-		Matrix diff = getMean().subtract(estimate2.getMean());
-		Matrix variance = getVariance().add(estimate2.getVariance());
+	@SuppressWarnings("unchecked")
+	public Estimate<M, V, ?> getDifferenceEstimate(Estimate<M, V, ?> estimate2) {
+		M diff = (M) getMean().subtract(estimate2.getMean());
+		if (diff instanceof ComplexMatrix) {
+			throw new UnsupportedOperationException("The method getDifferenceEstimate has not been implemented for ComplexMatrix yet!");
+		}
+		Matrix variance = (Matrix) getVariance().add(estimate2.getVariance());
 		if (variance instanceof SymmetricMatrix) {
-			return new GaussianEstimate(diff, (SymmetricMatrix) variance);
+			return (Estimate<M, V, ?>) new GaussianEstimate((Matrix) diff, (SymmetricMatrix) variance);
 		} else {
 			throw new UnsupportedOperationException("The variance object is not a SymmetricMatrix instance!");
 		}
@@ -129,11 +136,15 @@ s	 */
 	 * @param estimate2 an Estimate to be added to this estimate.
 	 * @return an Estimate
 	 */
-	public Estimate<?,?> getSumEstimate(Estimate<?,?> estimate2) {
-		Matrix diff = getMean().add(estimate2.getMean());
-		Matrix variance = getVariance().add(estimate2.getVariance());
+	@SuppressWarnings("unchecked")
+	public Estimate<M, V, ?> getSumEstimate(Estimate<M, V, ?> estimate2) {
+		M diff = (M) getMean().add(estimate2.getMean());
+		if (diff instanceof ComplexMatrix) {
+			throw new UnsupportedOperationException("The method getSumEstimate has not been implemented for ComplexMatrix yet!");
+		}
+		Matrix variance = (Matrix) getVariance().add(estimate2.getVariance());
 		if (variance instanceof SymmetricMatrix) {
-			return new GaussianEstimate(diff, (SymmetricMatrix) variance);
+			return (Estimate<M, V, ?>) new GaussianEstimate((Matrix) diff, (SymmetricMatrix) variance);
 		} else {
 			throw new UnsupportedOperationException("The variance object is not a SymmetricMatrix instance!");
 		}
@@ -146,10 +157,14 @@ s	 */
 	 * @param scalar a double to be multiplied by this estimate
 	 * @return an Estimate
 	 */
-	public Estimate<?,?> getProductEstimate(double scalar) {
-		Matrix diff = getMean().scalarMultiply(scalar);
-		SymmetricMatrix variance = getVariance().scalarMultiply(scalar * scalar);
-		return new GaussianEstimate(diff, variance);
+	@SuppressWarnings("unchecked")
+	public Estimate<M, V, ?> getProductEstimate(double scalar) {
+		M diff = (M) getMean().scalarMultiply(scalar);
+		if (diff instanceof ComplexMatrix) {
+			throw new UnsupportedOperationException("The method getProductEstimate has not been implemented for ComplexMatrix yet!");
+		}
+		SymmetricMatrix variance = (SymmetricMatrix) getVariance().scalarMultiply(scalar * scalar);
+		return (Estimate<M, V, ?>) new GaussianEstimate((Matrix) diff, variance);
 	}
 
 	/**
@@ -167,7 +182,7 @@ s	 */
 	 * @param estimate an Estimate instance
 	 * @return a boolean
 	 */
-	protected boolean isMergeableEstimate(Estimate<?,?> estimate) {
+	protected boolean isMergeableEstimate(Estimate<?,?,?> estimate) {
 		return false;
 	}
 	
@@ -178,12 +193,17 @@ s	 */
 	 * @param estimate an Estimate instance
 	 * @return a SimpleEstimate instance
 	 */
-	public SimpleEstimate getProductEstimate(Estimate<?,?> estimate) {
+	public SimpleEstimate getProductEstimate(Estimate<M, V, ?> estimate) {
 		if (estimate.getDistribution().isUnivariate() && getDistribution().isUnivariate()) {
-			Matrix alphaMean = getMean();
-			Matrix betaMean = estimate.getMean();
-			Matrix alphaVariance = getVariance();
-			Matrix betaVariance = estimate.getVariance();
+			M alphaMu = getMean();
+			M betaMu = estimate.getMean();
+			if (alphaMu instanceof ComplexMatrix || betaMu instanceof ComplexMatrix) {
+				throw new UnsupportedOperationException("The method getProductEstimate has not been implemented for ComplexMatrix yet!");
+			}
+			Matrix alphaMean = (Matrix) alphaMu;
+			Matrix betaMean = (Matrix) betaMu;
+			Matrix alphaVariance = (Matrix) getVariance();
+			Matrix betaVariance = (Matrix) estimate.getVariance();
 			Matrix newMean = alphaMean.multiply(betaMean);
 			Matrix newVariance = alphaMean.elementWisePower(2d).multiply(betaVariance).
 					add(betaMean.elementWisePower(2d).multiply(alphaVariance)).
@@ -193,8 +213,8 @@ s	 */
 		throw new InvalidParameterException("The getProductEstimate is only implemented for parametric univariate distribution ");
 	}
 	
-	public static SimpleEstimate getProductOfManyEstimates(List<Estimate<Matrix, ?>> estimates) {
-		Estimate currentEstimate = null;
+	public static SimpleEstimate getProductOfManyEstimates(List<Estimate<Matrix, SymmetricMatrix, ?>> estimates) {
+		Estimate<Matrix, SymmetricMatrix, ?> currentEstimate = null;
 		for (int i = 1; i < estimates.size(); i++) {
 			if (i == 1) {
 				currentEstimate = estimates.get(i-1);
@@ -215,15 +235,20 @@ s	 */
 	 * the values being lists of indices to be collapsed.
 	 * @return an Estimate instance
 	 */
-	public Estimate<?,?> collapseEstimate(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
+	public Estimate<Matrix, SymmetricMatrix, ?> collapseEstimate(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
 		return collapseMeanAndVariance(desiredIndicesForCollapsing);
 	}
 	
-	protected final Estimate<?,?> collapseMeanAndVariance(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
+	protected final Estimate<Matrix, SymmetricMatrix, ?> collapseMeanAndVariance(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
+		M m = getMean();
+		if (!(m instanceof Matrix)) {
+			throw new UnsupportedOperationException("The collapseEstimate method is meant for Estimate based on Matrix instance!");
+		}
+		Matrix mean = (Matrix) m;
 		if (rowIndex.isEmpty()) {
 			throw new InvalidParameterException("The row indices have not been set yet!");
 		}
-		if (rowIndex.size() != getMean().m_iRows) {
+		if (rowIndex.size() != mean.m_iRows) {
 			throw new InvalidParameterException("The size of the list is incompatible with tne dimension of the estimate!");
 		}
 		List<String> copyOfIndex = new ArrayList<String>();
@@ -238,13 +263,13 @@ s	 */
 			throw new InvalidParameterException("Some indices are missing in the desiredIndicesForCollapsing or cannot be found in the row indices!");
 		} 
 
-		Matrix oldMean = getMean();
-		Matrix newMean = collapseRowVector(oldMean, desiredIndicesForCollapsing);
+//		P oldMean = getMean();
+		Matrix newMean = collapseRowVector(mean, desiredIndicesForCollapsing);
 		
-		Matrix oldVariance = getVariance();
+		Matrix oldVariance = (Matrix) getVariance();
 		Matrix newVariance = collapseSquareMatrix(oldVariance, desiredIndicesForCollapsing);
 		
-		Estimate<?,?> outputEstimate = new SimpleEstimate(newMean, SymmetricMatrix.convertToSymmetricIfPossible(newVariance));
+		Estimate<Matrix, SymmetricMatrix, ?> outputEstimate = new SimpleEstimate(newMean, SymmetricMatrix.convertToSymmetricIfPossible(newVariance));
 		
 		List<String> newIndexRow = new ArrayList<String>(desiredIndicesForCollapsing.keySet());
 		Collections.sort(newIndexRow);
@@ -295,12 +320,12 @@ s	 */
 	}
 	
 	@Override
-	public final Matrix getMean() {
+	public final M getMean() {
 		return super.getMean();
 	}
 
 	@Override
-	public final SymmetricMatrix getVariance() {
+	public final V getVariance() {
 		return super.getVariance();
 	}
 	

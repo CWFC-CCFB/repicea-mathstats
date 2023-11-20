@@ -18,15 +18,8 @@
  */
 package repicea.stats.distributions;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import repicea.math.AbstractMatrix;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
-import repicea.stats.Distribution;
-import repicea.stats.StatisticalUtility;
 
 /**
  * The EmpiricalDistribution class handles empirical distribution from observations
@@ -34,7 +27,7 @@ import repicea.stats.StatisticalUtility;
  * @author Mathieu Fortin - May 2018
  *
  */
-public class EmpiricalDistribution extends AbstractEmpiricalDistribution<Matrix> {
+public class EmpiricalDistribution extends AbstractEmpiricalDistribution<Matrix, SymmetricMatrix> {
 
 	private static final long serialVersionUID = 20120826L;
 	

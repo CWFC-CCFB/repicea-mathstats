@@ -27,6 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.math.optimizer.LikelihoodOptimizer;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimates.Estimate;
@@ -61,7 +62,7 @@ public class SIMEXTest {
 		s.setNumberOfBootstrapRealizations(200);
 		s.doEstimation();
 		Assert.assertTrue("Checking if successfully extrapolated", s.getEstimator().isConvergenceAchieved());
-		Estimate<?,?> estimate = s.getEstimator().getParameterEstimates();
+		Estimate<Matrix, SymmetricMatrix, ?> estimate = s.getEstimator().getParameterEstimates();
 		double expParm1 = -0.1687;
 		double actualParm1 = estimate.getMean().getValueAt(0, 0);
 		System.out.println("Expected parm1 = " + expParm1 + "; Actual parm1 = " + actualParm1);
@@ -90,7 +91,7 @@ public class SIMEXTest {
 		s.setNumberOfBootstrapRealizations(200);
 		s.doEstimation();
 		Assert.assertTrue("Checking if successfully extrapolated", s.getEstimator().isConvergenceAchieved());
-		Estimate<?,?> estimate = s.getEstimator().getParameterEstimates();
+		Estimate<Matrix, SymmetricMatrix, ?> estimate = s.getEstimator().getParameterEstimates();
 		Assert.assertEquals("Checking parm 2", -0.062640, estimate.getMean().getValueAt(1, 0), 5E-3);
 		Assert.assertEquals("Checking standard error parm estimate 2", 0.020396, Math.sqrt(estimate.getVariance().getValueAt(1, 1)), 1E-3);
 	}
@@ -113,7 +114,7 @@ public class SIMEXTest {
 		Assert.assertTrue("Testing that the dataset is not null", dsPred != null);
 		int index = dsPred.getIndexOfThisField("pred");
 		double parmValue = Double.parseDouble(dsPred.getObservations().get(0).getValueAt(index).toString());
-		Estimate<?,?> estimate = s.getEstimator().getParameterEstimates();
+		Estimate<Matrix, SymmetricMatrix, ?> estimate = s.getEstimator().getParameterEstimates();
 		Assert.assertEquals("Checking parm estimate 1", estimate.getMean().getValueAt(0, 0), parmValue, 1E-8);
 	}
 

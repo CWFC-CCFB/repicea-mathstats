@@ -35,6 +35,7 @@ import repicea.math.utility.MathUtility;
 import repicea.stats.Distribution;
 import repicea.stats.Distribution.Type;
 import repicea.stats.StatisticalUtility;
+import repicea.stats.estimates.ComplexMonteCarloEstimate;
 import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.stats.sampling.SamplingUtility;
 import repicea.util.ObjectUtility;
@@ -250,7 +251,7 @@ public class ComplexNumberSimpleCaseStudy {
 //			return result.scalarMultiply(1d / res_hat.m_iRows);
 //		}
 		
-		ComplexNumber[] getComplexRandomDeviate(List<Double> xValues, Transformation t, boolean useNonParametricMethod) {
+		ComplexMatrix getComplexRandomDeviate(List<Double> xValues, Transformation t, boolean useNonParametricMethod) {
 			double chiSquareDeviate = StatisticalUtility.getRandom().nextChiSquare(upsilon);
 			ComplexNumber sigma2Hat_b = new ComplexNumber(sigma2Hat, sigma2Hat * (chiSquareDeviate - upsilon) / upsilon);
 			ComplexNumber sigmaHat_b = sigma2Hat_b.sqrt();
@@ -288,7 +289,7 @@ public class ComplexNumberSimpleCaseStudy {
 					throw new InvalidParameterException("The transformation " + t.name() + " is not supported!");
 				}
 			}
-			return cnArray;
+			return new ComplexMatrix(cnArray);
 		}
 
 		private Matrix getGregoireEstimator(List<Double> xValues) {
@@ -302,11 +303,6 @@ public class ComplexNumberSimpleCaseStudy {
 	
 	static enum Transformation {Sqr, Exp, Log, Sqrt}
 	
-	private static void addComplexNumberArray(ComplexNumber[] originalArray, ComplexNumber[] newArray) {
-		for (int ii = 0; ii < originalArray.length; ii++) {
-			originalArray[ii] = originalArray[ii].add(newArray[ii]);
-		}
-	}
 	
 
 	private static void doRun(Transformation t, int sampleSize, int nbRealizations) throws IOException {
@@ -325,6 +321,8 @@ public class ComplexNumberSimpleCaseStudy {
 		fields.add(new CSVField("MC_OLDVar"));
 		fields.add(new CSVField("MC_NEW"));
 		fields.add(new CSVField("MC_NEW_imag"));
+		fields.add(new CSVField("MC_NEWVar_real"));
+		fields.add(new CSVField("MC_NEWVar_imag"));
 		if (t == Transformation.Exp) {
 			fields.add(new CSVField("Beauchamp"));
 			fields.add(new CSVField("BeauchampVar"));
@@ -375,22 +373,19 @@ public class ComplexNumberSimpleCaseStudy {
 			}
 						
 			MonteCarloEstimate mcEstimator = new MonteCarloEstimate();
-			ComplexNumber[] sumNEW = new ComplexNumber[xValues.size()];
-			for (int ii = 0; ii < sumNEW.length; ii++) {
-				sumNEW[ii] = new ComplexNumber(0,0);
-			}
+			ComplexMonteCarloEstimate cmcEstimator = new ComplexMonteCarloEstimate();
 
 			for (int innerReal = 0; innerReal < nbInnerReal; innerReal++) {
 				mcEstimator.addRealization(m.getRandomDeviate(xValues, t, false)); // false: regular parametric method
-				ComplexNumber[] n2 = m.getComplexRandomDeviate(xValues, t, false); // false : regular parametric method
-				addComplexNumberArray(sumNEW, n2);
+				cmcEstimator.addRealization(m.getComplexRandomDeviate(xValues, t, false)); // false : regular parametric method
 			}
 			
-			for (int ii = 0; ii < sumNEW.length; ii++) {
-				sumNEW[ii] = sumNEW[ii].multiply(1d / nbInnerReal);
-			}
 			Matrix mcMean = mcEstimator.getMean();
 			Matrix mcVar = mcEstimator.getVariance();
+			
+			ComplexMatrix cmcMean = cmcEstimator.getMean();
+			Matrix cmcRealPart = cmcEstimator.getVarianceRealPart();
+			Matrix cmcImagPart = cmcEstimator.getVarianceImaginaryPart();
 			
 			for (int ii = 0; ii < xValues.size(); ii++) {
 				Object[] record = new Object[fields.size()];
@@ -401,13 +396,15 @@ public class ComplexNumberSimpleCaseStudy {
 				record[4] = xValues.get(ii);
 				record[5] = mcMean.getValueAt(ii, 0);
 				record[6] = mcVar.getValueAt(ii, ii);
-				record[7] = sumNEW[ii].doubleValue();
-				record[8] = sumNEW[ii].imaginaryPart;
+				record[7] = cmcMean.getValueAt(ii, 0).realPart;
+				record[8] = cmcMean.getValueAt(ii, 0).imaginaryPart;
+				record[9] = cmcRealPart.getValueAt(ii, 0);
+				record[10] = cmcImagPart.getValueAt(ii, 0);
 				if (t == Transformation.Exp) {
-					record[9] = beauchampAndOlsonEstimator.getValueAt(ii, 0);
-					record[10] = beauchampAndOlsonEstimatorVar.getValueAt(ii, 0);
-					record[11] = baskervilleEstimator.getValueAt(ii, 0);
-					record[12] = baskervilleEstimatorVar.getValueAt(ii, 0);
+					record[11] = beauchampAndOlsonEstimator.getValueAt(ii, 0);
+					record[12] = beauchampAndOlsonEstimatorVar.getValueAt(ii, 0);
+					record[13] = baskervilleEstimator.getValueAt(ii, 0);
+					record[14] = baskervilleEstimatorVar.getValueAt(ii, 0);
 				} else  if (t == Transformation.Sqr) {
 					record[9] = gregoireEstimator.getValueAt(ii, 0);
 				}
@@ -458,7 +455,7 @@ public class ComplexNumberSimpleCaseStudy {
 	public static void main(String[] arg) throws IOException {
 //		runSimulationChiSquareToSeries(1000000);
 //		runSimulationChiSquare(1000000);
-		doRun(Transformation.Exp, 50, 1000);
+		doRun(Transformation.Exp, 50, 10000);
 //		doRun(Transformation.Exp, 100);
 //		doRun(Transformation.Exp, 200);
 //		doRun(Transformation.Sqr, 50);

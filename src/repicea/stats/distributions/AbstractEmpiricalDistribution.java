@@ -34,18 +34,19 @@ import repicea.stats.StatisticalUtility;
  * 
  * @author Mathieu Fortin - November 2023
  *
- * @param <P> Matrix or ComplexMatrix
+ * @param <M> an AbstractMatrix-derived class that stands for the mean
+ * @param <V> an AbstractMatrix-derived class that stands for the variance
  */
 @SuppressWarnings({ "rawtypes", "serial" })
-public abstract class AbstractEmpiricalDistribution<P extends AbstractMatrix> implements Distribution<P>, Serializable {
+public abstract class AbstractEmpiricalDistribution<M extends AbstractMatrix, V extends AbstractMatrix> implements Distribution<M,V>, Serializable {
 
-	protected final List<P> observations;
+	protected final List<M> observations;
 
 	/**
 	 * Constructor.
 	 */
 	public AbstractEmpiricalDistribution() {
-		observations = new ArrayList<P>();
+		observations = new ArrayList<M>();
 	}
 	
 	/**
@@ -58,13 +59,13 @@ public abstract class AbstractEmpiricalDistribution<P extends AbstractMatrix> im
 	 * This method sets a given observation of the nonparametric distribution.
 	 * @param value the value of the observation
 	 */
-	public void addRealization(P value) {observations.add(value);}
+	public void addRealization(M value) {observations.add(value);}
 	
 	/**
 	 * This method returns the array that contains all the observations of this distribution.
 	 * @return an array of Matrix instances
 	 */
-	public List<P> getRealizations() {return observations;}
+	public List<M> getRealizations() {return observations;}
 
 	@Override
 	public boolean isParametric() {
@@ -92,7 +93,7 @@ public abstract class AbstractEmpiricalDistribution<P extends AbstractMatrix> im
 //	}
 
 	@Override
-	public P getRandomRealization() {
+	public M getRandomRealization() {
 		int observationIndex = (int) (StatisticalUtility.getRandom().nextDouble() * getNumberOfRealizations());
 		return getRealizations().get(observationIndex);
 	}

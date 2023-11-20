@@ -67,11 +67,12 @@ public class ComplexMatrix extends AbstractMatrix<ComplexMatrix> {
 	}
 
 	/**
-	 * Basic constructor. Creates a matrix with all elements set to 0.
+	 * Basic constructor.<p>
+	 * It creates a complex matrix with all elements set to null. The matrix must be populated afterwards.
 	 * @param iRows number of rows
 	 * @param iCols number of columns
 	 */
-	private ComplexMatrix(int iRows, int iCols) {
+	protected ComplexMatrix(int iRows, int iCols) {
 		super(iRows, iCols);
 		if (iCols == 1) {
 			m_afData = contructInternalArray(iCols, iRows);		// the array is stored as a row vector for better memory management
@@ -136,6 +137,26 @@ public class ComplexMatrix extends AbstractMatrix<ComplexMatrix> {
 		}
 		return matrix;
 	}
+
+	/**
+	 * This method tests whether the matrix is symmetric. 
+	 * @return true if the matrix is symmetric or false otherwise
+	 */
+	public boolean isSymmetric() {
+		if (!isSquare()) {
+			return false;
+		}
+		
+		for (int i = 0; i < m_iRows; i++) {
+			for (int j = i + 1; j < m_iCols; j++) {
+				if (!getValueAt(j, i).equals(getValueAt(i, j))) {
+						return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	
 	/**
 	 * This method returns a submatrix of this matrix. 
@@ -240,38 +261,6 @@ public class ComplexMatrix extends AbstractMatrix<ComplexMatrix> {
 		return outputMatrix;
 	}
 
-//	/**
-//	 * This method checks if this is a column vector
-//	 * @return a boolean that is true if this is a column vector
-//	 */
-//	public final boolean isColumnVector() {return m_iCols == 1;}
-//	
-//	/**
-//	 * This method checks if this is a row vector
-//	 * @return a boolean that is true if this is a row vector
-//	 */
-//	public final boolean isRowVector() {return m_iRows == 1;}
-//	
-//	/**
-//	 * This method checks if this is a square matrix
-//	 * @return true if the matrix is square or false otherwise
-//	 */
-//	public final boolean isSquare() {return m_iRows == m_iCols;}
-	
-//	/**
-//	 * This method checks whether or not this and m have the same dimensions
-//	 * @param m a ComplexMatrix instance
-//	 * @return boolean
-//	 */
-//	public final boolean isTheSameDimension(ComplexMatrix m) {
-//		boolean output = false;
-//		if (m_iCols == m.m_iCols) {
-//			if (m_iRows == m.m_iRows) {
-//				output = true;
-//			}
-//		}
-//		return output;
-//	}
 
 	/**
 	 * Compute the logarithm of the elements of this matrix 
@@ -411,46 +400,49 @@ public class ComplexMatrix extends AbstractMatrix<ComplexMatrix> {
 		return oMat;
 	}
 	
-//	/**
-//	 * Returns a representation of the matrix content.
-//	 */
-//	@Override
-//	public final String toString() {
-//		String outputString = "{";
-//		for (int i = 0; i < m_iRows; i ++) {
-//			outputString += convertArrayToString(i);
-//			if (i == m_iRows - 1) {
-//				outputString += "}";
-//			} else {
-//				if (isColumnVector()) {
-//					outputString += ", ";
-//				} else {
-//					outputString += ", \n";
-//				}
-//			}
-//			if (outputString.length() > 5000) {
-//				outputString += "...";
-//				break;
-//			}
-//		}
-//		return outputString;
-//	}
-//
-//	private String convertArrayToString(int i) {
-//		String outputString = "";
-//		for (int j = 0; j < m_iCols; j++) {
-//			if (j > 0) {
-//				outputString = outputString.concat(" ");
-//			}
-//			double absValue = Math.abs(getValueAt(i, j));
-//			if (absValue > 0.1 && absValue < 1E3) {
-//				outputString = outputString.concat("[" + SimpleDecimalFormatter.format(getValueAt(i, j)) + "]");
-//			} else {
-//				outputString = outputString.concat("[" + ScientificFormatter.format(getValueAt(i, j)) + "]");
-//			}
-//		}
-//		return outputString;
-//	}
+	/**
+	 * Compute the conjugate matrix of this matrix. <p>
+	 * The conjugate is obtained by inverting the sign before the 
+	 * imaginary part. For instance, x - iy is the conjugate of
+	 * x + iy. 
+	 * @return a ComplexMatrix instance
+	 */
+	public ComplexMatrix getComplexConjugate() {
+		ComplexMatrix m = new ComplexMatrix(m_iRows, m_iCols);
+		for (int i = 0; i < m_iRows; i++) {
+			for (int j = 0; j < m_iCols; j++) {
+				m.setValueAt(i, j, getValueAt(i,j).getComplexConjugate());
+			}
+		}
+		return m;
+	}
+	
+	
+	/**
+	 * Compute the matrix product of this by m
+	 * @param m a Matrix type object 
+	 * @return a matrix type object that contains the result of the matrix multiplication
+	 */
+	public ComplexMatrix multiply(ComplexMatrix m) {
+		if (m_iCols != m.m_iRows) {
+			throw new UnsupportedOperationException("The matrix m cannot multiply the current matrix for the number of rows is incompatible!");
+		} else {
+			ComplexMatrix mat = new ComplexMatrix(m_iRows, m.m_iCols);
+			for (int i_this = 0; i_this < m_iRows; i_this++) {
+				for (int j_m = 0; j_m < m.m_iCols; j_m++ ) {
+					ComplexNumber sum = null;
+					for (int j_this = 0; j_this < m_iCols; j_this++) {
+						int i_m = j_this;
+						ComplexNumber twoElementsProduct = getValueAt(i_this, j_this).multiply(m.getValueAt(i_m, j_m));
+						sum = sum == null ? twoElementsProduct : sum.add(twoElementsProduct);
+					}
+					mat.setValueAt(i_this, j_m, sum);
+				}
+			}
+			return mat;
+		}
+	}
+
 	
 	@Override
 	public final boolean equals(Object obj) {
@@ -477,4 +469,17 @@ public class ComplexMatrix extends AbstractMatrix<ComplexMatrix> {
 		}
 	}
 	
+	
+	@Override
+	protected String convertArrayToString(int rowIndex) {
+		StringBuilder outputString = new StringBuilder();
+		for (int j = 0; j < m_iCols; j++) {
+			if (j > 0) {
+				outputString.append(" ");
+			}
+			outputString.append("[" + getValueAt(rowIndex, j).getFormattedString() + "]");
+		}
+		return outputString.toString();
+	}
+
 }

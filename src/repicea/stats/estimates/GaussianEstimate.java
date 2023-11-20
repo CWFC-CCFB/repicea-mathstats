@@ -30,7 +30,7 @@ import repicea.stats.distributions.GaussianDistribution;
  * This class contains the elements related to the random effects, i.e. the best linear unbiased predictors (blups) as well as their variances.
  * @author Mathieu Fortin - October 2011
  */
-public class GaussianEstimate extends Estimate<Matrix, GaussianDistribution> implements CentralMomentsSettable, Serializable {
+public class GaussianEstimate extends Estimate<Matrix, SymmetricMatrix, GaussianDistribution> implements CentralMomentsSettable, Serializable {
 
 	private static final long serialVersionUID = 20120725L;
 	

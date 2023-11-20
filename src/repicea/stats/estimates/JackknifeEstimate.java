@@ -31,7 +31,7 @@ import repicea.stats.distributions.EmpiricalDistribution;
  * @author Mathieu Fortin - February 2019
  */
 @SuppressWarnings("serial")
-public class JackknifeEstimate extends ResamplingBasedEstimate<Matrix> {
+public class JackknifeEstimate extends ResamplingBasedEstimate<Matrix, SymmetricMatrix> {
 
 	private final int n;
 	private final int d;		// delete d observations here

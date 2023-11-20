@@ -99,7 +99,7 @@ public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUne
 
 	
 	@Override
-	protected boolean isMergeableEstimate(Estimate<?,?> estimate) {
+	protected boolean isMergeableEstimate(Estimate<?,?,?> estimate) {
 		boolean isMergeable = super.isMergeableEstimate(estimate);
 		if (isMergeable) {
 			PopulationTotalEstimate est = (PopulationTotalEstimate) estimate;

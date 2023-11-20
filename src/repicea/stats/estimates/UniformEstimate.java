@@ -19,6 +19,7 @@
 package repicea.stats.estimates;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.distributions.BoundedDistribution;
 import repicea.stats.distributions.UniformDistribution;
 
@@ -28,7 +29,7 @@ import repicea.stats.distributions.UniformDistribution;
  *
  */
 @SuppressWarnings("serial")
-public class UniformEstimate extends Estimate<Matrix, UniformDistribution> implements BoundedDistribution {
+public class UniformEstimate extends Estimate<Matrix, SymmetricMatrix, UniformDistribution> implements BoundedDistribution {
 
 	public UniformEstimate(Matrix lowerBoundValue, Matrix upperBoundValue) {
 		super(new UniformDistribution(lowerBoundValue, upperBoundValue));

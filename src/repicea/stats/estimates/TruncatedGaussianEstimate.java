@@ -19,6 +19,7 @@
 package repicea.stats.estimates;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.distributions.BoundedDistribution;
 import repicea.stats.distributions.TruncatedGaussianDistribution;
 
@@ -29,7 +30,7 @@ import repicea.stats.distributions.TruncatedGaussianDistribution;
  * available for univariate distributions.
  * @author Mathieu Fortin - August 2015
  */
-public class TruncatedGaussianEstimate extends Estimate<Matrix, TruncatedGaussianDistribution> implements BoundedDistribution {
+public class TruncatedGaussianEstimate extends Estimate<Matrix, SymmetricMatrix, TruncatedGaussianDistribution> implements BoundedDistribution {
 
 	private static final long serialVersionUID = -1426033536030992926L;
 

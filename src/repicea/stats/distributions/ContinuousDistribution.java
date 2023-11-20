@@ -19,9 +19,10 @@
 package repicea.stats.distributions;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.Distribution;
 
-public interface ContinuousDistribution extends Distribution<Matrix> {
+public interface ContinuousDistribution extends Distribution<Matrix, SymmetricMatrix> {
 
 	/**
 	 * Return the probability density of the values parameter.

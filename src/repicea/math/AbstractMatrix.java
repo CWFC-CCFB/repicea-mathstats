@@ -31,6 +31,7 @@ import repicea.util.DeepCloneable;
  *
  * @param <P> an AbstractMatrix class
  */
+@SuppressWarnings("rawtypes")
 public abstract class AbstractMatrix<P extends AbstractMatrix> implements DeepCloneable {
 
 	public final int m_iRows;
@@ -179,5 +180,38 @@ public abstract class AbstractMatrix<P extends AbstractMatrix> implements DeepCl
 	@Override
 	public abstract P getDeepClone();
 
+
+	/**
+	 * Returns a representation of the matrix content.
+	 */
+	@Override
+	public final String toString() {
+		StringBuilder outputString = new StringBuilder();
+		outputString.append("{");
+		for (int i = 0; i < m_iRows; i ++) {
+			outputString.append(convertArrayToString(i));
+			if (i == m_iRows - 1) {
+				outputString.append("}");
+			} else {
+				if (isColumnVector()) {
+					outputString.append(", ");
+				} else {
+					outputString.append(", \n");
+				}
+			}
+			if (outputString.length() > 5000) {
+				outputString.append("...");
+				break;
+			}
+		}
+		return outputString.toString();
+	}
+
+	/**
+	 * Convert a particular row of the matrix into a string.
+	 * @param rowIndex the index of the row to be converted
+	 * @return a String instance
+	 */
+	protected abstract String convertArrayToString(int rowIndex);
 
 }

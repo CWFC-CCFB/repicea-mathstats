@@ -647,13 +647,15 @@ public class Matrix extends AbstractMatrix<Matrix> implements Serializable, Deep
 			Matrix mat = new Matrix(m_iRows, m.m_iCols);
 			for (int i_this = 0; i_this < m_iRows; i_this++) {
 				for (int j_m = 0; j_m < m.m_iCols; j_m++ ) {
+					double sum = 0d;
 					for (int j_this = 0; j_this < m_iCols; j_this++) {
 						int i_m = j_this;
-						if (getValueAt(i_this, j_this) != 0d && m.getValueAt(i_m, j_m) != 0d) {
-							double newValue = mat.getValueAt(i_this, j_m) + getValueAt(i_this, j_this) * m.getValueAt(i_m, j_m);
-							mat.setValueAt(i_this, j_m, newValue);
-						}
+//						if (getValueAt(i_this, j_this) != 0d && m.getValueAt(i_m, j_m) != 0d) {
+//							double newValue = mat.getValueAt(i_this, j_m) + getValueAt(i_this, j_this) * m.getValueAt(i_m, j_m);
+//						}
+						sum += getValueAt(i_this, j_this) * m.getValueAt(i_m, j_m);
 					}
+					mat.setValueAt(i_this, j_m, sum);
 				}
 			}
 			return mat;
@@ -1051,45 +1053,21 @@ public class Matrix extends AbstractMatrix<Matrix> implements Serializable, Deep
 		return oMat;
 	}
 	
-	/**
-	 * Returns a representation of the matrix content.
-	 */
 	@Override
-	public final String toString() {
-		String outputString = "{";
-		for (int i = 0; i < m_iRows; i ++) {
-			outputString += convertArrayToString(i);
-			if (i == m_iRows - 1) {
-				outputString += "}";
-			} else {
-				if (isColumnVector()) {
-					outputString += ", ";
-				} else {
-					outputString += ", \n";
-				}
-			}
-			if (outputString.length() > 5000) {
-				outputString += "...";
-				break;
-			}
-		}
-		return outputString;
-	}
-
-	private String convertArrayToString(int i) {
-		String outputString = "";
+	protected String convertArrayToString(int rowIndex) {
+		StringBuilder outputString = new StringBuilder();
 		for (int j = 0; j < m_iCols; j++) {
 			if (j > 0) {
-				outputString = outputString.concat(" ");
+				outputString.append(" ");
 			}
-			double absValue = Math.abs(getValueAt(i, j));
+			double absValue = Math.abs(getValueAt(rowIndex, j));
 			if (absValue > 0.1 && absValue < 1E3) {
-				outputString = outputString.concat("[" + SimpleDecimalFormatter.format(getValueAt(i, j)) + "]");
+				outputString.append("[" + SimpleDecimalFormatter.format(getValueAt(rowIndex, j)) + "]");
 			} else {
-				outputString = outputString.concat("[" + ScientificFormatter.format(getValueAt(i, j)) + "]");
+				outputString.append("[" + ScientificFormatter.format(getValueAt(rowIndex, j)) + "]");
 			}
 		}
-		return outputString;
+		return outputString.toString();
 	}
 	
 	/**

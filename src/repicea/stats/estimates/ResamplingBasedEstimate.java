@@ -4,9 +4,7 @@ import java.security.InvalidParameterException;
 import java.util.List;
 
 import repicea.math.AbstractMatrix;
-import repicea.math.Matrix;
 import repicea.stats.distributions.AbstractEmpiricalDistribution;
-import repicea.stats.distributions.EmpiricalDistribution;
 
 /*
  * This file is part of the repicea library.
@@ -26,13 +24,14 @@ import repicea.stats.distributions.EmpiricalDistribution;
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-@SuppressWarnings("serial")
-abstract class ResamplingBasedEstimate<P extends AbstractMatrix> extends Estimate<P, AbstractEmpiricalDistribution<P>> implements NumberOfRealizationsProvider {
+@SuppressWarnings({ "serial", "rawtypes" })
+abstract class ResamplingBasedEstimate<M extends AbstractMatrix, V extends AbstractMatrix> 
+					extends Estimate<M, V, AbstractEmpiricalDistribution<M,V>> implements NumberOfRealizationsProvider {
 	
 	/**
 	 * Constructor.
 	 */
-	protected ResamplingBasedEstimate(AbstractEmpiricalDistribution<P> dist) {
+	protected ResamplingBasedEstimate(AbstractEmpiricalDistribution<M, V> dist) {
 		super(dist);
 		estimatorType = EstimatorType.Resampling;
 	}
@@ -43,7 +42,7 @@ abstract class ResamplingBasedEstimate<P extends AbstractMatrix> extends Estimat
 	 * new realization is checked before adding it.
 	 * @param value a Matrix
 	 */
-	public void addRealization(P value) {
+	public void addRealization(M value) {
 		if (checkConformity(value)) {
 			getDistribution().addRealization(value);
 		} else {
@@ -51,15 +50,15 @@ abstract class ResamplingBasedEstimate<P extends AbstractMatrix> extends Estimat
 		}
 	}
 
-	private boolean checkConformity(P value) {
-		List<P> observations = getDistribution().getRealizations();
+	private boolean checkConformity(M value) {
+		List<M> observations = getDistribution().getRealizations();
 		if (observations.isEmpty()) {
 			return true; 
 		} else {
-			P firstObservation = observations.get(0);
-			if (value == null || firstObservation == null) {
-				int u = 0;
-			}
+			M firstObservation = observations.get(0);
+//			if (value == null || firstObservation == null) {
+//				int u = 0;
+//			}
 			return (firstObservation.m_iRows == value.m_iRows && firstObservation.m_iCols == value.m_iCols);
 		}
 	}
@@ -69,7 +68,7 @@ abstract class ResamplingBasedEstimate<P extends AbstractMatrix> extends Estimat
 	 * This method returns the list of realizations in the empirical distribution.
 	 * @return a List of Matrix instance
 	 */
-	public List<P> getRealizations() {return getDistribution().getRealizations();}
+	public List<M> getRealizations() {return getDistribution().getRealizations();}
 
 	@Override
 	public int getNumberOfRealizations() {return getDistribution().getNumberOfRealizations();}
