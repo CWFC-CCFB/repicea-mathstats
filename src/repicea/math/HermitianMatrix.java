@@ -36,7 +36,7 @@ public class HermitianMatrix extends ComplexMatrix {
 	 * 
 	 * @param mat a ComplexMatrix instance
 	 * 
-	 * @throw UnsupportedOperationException if the ComplexMatrix argument is not symmetric
+	 * @throws UnsupportedOperationException if the ComplexMatrix argument is not symmetric
 	 */
 	public HermitianMatrix(ComplexMatrix mat) {
 		this(mat.m_iRows);

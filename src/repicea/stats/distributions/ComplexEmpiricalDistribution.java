@@ -42,9 +42,10 @@ public class ComplexEmpiricalDistribution extends AbstractEmpiricalDistribution<
 	}
 
 	/**
-	 * {@inheritDoc AbstractEmpiricalDistribution#getVariance()} 
 	 * For complex random variable, the variance-covariance matrix is 
 	 * a Hermitian matrix.
+	 * 
+	 * @see AbstractEmpiricalDistribution#getVariance() 
 	 * @return a HermitianMatrix instance
 	 */
 	@Override
