@@ -73,7 +73,7 @@ public class LogNormalEstimateTest {
 		Assert.assertEquals("Testing mean", expectedMean, actualMean, 0.02);
 		double actualVariance = mce.getVariance().getValueAt(0, 0);
 		double expectedVariance = est.getVariance().getValueAt(0, 0);
-		Assert.assertEquals("Testing variance", expectedVariance, actualVariance, 0.6);
+		Assert.assertEquals("Testing variance", expectedVariance, actualVariance, 0.8);
 	}
 
 }

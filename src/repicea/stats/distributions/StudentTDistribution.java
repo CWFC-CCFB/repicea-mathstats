@@ -31,7 +31,7 @@ import repicea.stats.StatisticalUtility;
  * @author Mathieu Fortin - October 2019
  */
 @SuppressWarnings("serial")
-public class StudentTDistribution implements Distribution {
+public class StudentTDistribution implements Distribution<Matrix, SymmetricMatrix> {
 
 	
 	private Matrix mu;

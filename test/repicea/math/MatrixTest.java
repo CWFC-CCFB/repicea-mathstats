@@ -45,6 +45,18 @@ import repicea.util.ObjectUtility;
  */
 public class MatrixTest {
 
+	
+	@Test
+	public void multiplicationTest() {
+		Matrix m1 = new Matrix(2,2,1,1);
+		Matrix m2 = new Matrix(2,2,2,1);
+		Matrix product = m1.multiply(m2);
+		Assert.assertEquals("Testing element 1,1", 1*2 + 2*4, product.getValueAt(0, 0), 1E-8);
+		Assert.assertEquals("Testing element 1,2", 1*3 + 2*5, product.getValueAt(0, 1), 1E-8);
+		Assert.assertEquals("Testing element 2,1", 3*2 + 4*4, product.getValueAt(1, 0), 1E-8);
+		Assert.assertEquals("Testing element 2,2", 3*3 + 4*5, product.getValueAt(1, 1), 1E-8);
+	}
+	
 	/**
 	 * This test is performed on the calculation of the inverse of a blocked matrix.
 	 */

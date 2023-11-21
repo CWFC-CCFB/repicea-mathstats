@@ -20,8 +20,7 @@ package repicea.stats;
 
 import java.io.Serializable;
 
-import repicea.math.Matrix;
-import repicea.math.SymmetricMatrix;
+import repicea.math.AbstractMatrix;
 
 /**
  * The RandomVariable class ensures the instance can provide its two first central moments (i.e. mean and variance) as
@@ -30,7 +29,7 @@ import repicea.math.SymmetricMatrix;
  * @author Mathieu Fortin - May 2012
  * @param <D> a Distribution derived instance
  */
-public abstract class RandomVariable<D extends Distribution> implements CentralMomentsGettable, Serializable {
+public abstract class RandomVariable<M extends AbstractMatrix, V extends AbstractMatrix, D extends Distribution<M,V>> implements CentralMomentsGettable<M,V>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -49,20 +48,20 @@ public abstract class RandomVariable<D extends Distribution> implements CentralM
 	}
 	
 	@Override
-	public Matrix getMean() {
+	public M getMean() {
 		return getMeanFromDistribution();
 	}
 
-	protected Matrix getMeanFromDistribution() {
+	protected M getMeanFromDistribution() {
 		return getDistribution().getMean();
 	}
 	
 	@Override
-	public SymmetricMatrix getVariance() {
+	public V getVariance() {
 		return getVarianceFromDistribution();
 	}
 
-	protected SymmetricMatrix getVarianceFromDistribution() {
+	protected V getVarianceFromDistribution() {
 		return getDistribution().getVariance();
 	}
 }

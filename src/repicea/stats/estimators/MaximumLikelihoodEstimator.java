@@ -212,7 +212,7 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 	public boolean isConvergenceAchieved() {return nro.isConvergenceAchieved();}
 
 	@Override
-	public Estimate<?> getParameterEstimates() {
+	public Estimate<Matrix, SymmetricMatrix, ?> getParameterEstimates() {
 		return parameterEstimate;
 	}
 	

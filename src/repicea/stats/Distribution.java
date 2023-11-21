@@ -20,7 +20,7 @@ package repicea.stats;
 
 import java.io.Serializable;
 
-import repicea.math.Matrix;
+import repicea.math.AbstractMatrix;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
@@ -32,8 +32,11 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * returns a random deviate of the distribution. For the implementation of probability density (or mass) functions, see
  * the repicea.stat.distribution.utility package.
  * @author Mathieu Fortin - August 2012
+ * 
+ * @param <M> an AbstractMatrix-derived class that stands for the mean
+ * @param <V> an AbstractMatrix-derived class that stands for the variance
  */
-public interface Distribution extends CentralMomentsGettable, Serializable {
+public interface Distribution<M extends AbstractMatrix, V extends AbstractMatrix> extends CentralMomentsGettable<M,V>, Serializable {
 
 	public enum Type implements TextableEnum {
 		GAUSSIAN("Gaussian", "Gaussienne"), 
@@ -92,7 +95,7 @@ public interface Distribution extends CentralMomentsGettable, Serializable {
 	 * This method draws a random realization from the distribution.
 	 * @return the observation in a Matrix instance
 	 */
-	public Matrix getRandomRealization();
+	public M getRandomRealization();
 
 
 }

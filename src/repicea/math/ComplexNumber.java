@@ -20,6 +20,8 @@
 package repicea.math;
 
 import java.security.InvalidParameterException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
 
 /**
@@ -28,10 +30,15 @@ import java.util.List;
  * @author Mathieu Fortin - Sept 2023
  */
 @SuppressWarnings("serial")
-public final class ComplexNumber extends Number {
+public final class ComplexNumber extends Number implements Cloneable {
 
-	final double realPart;
-	final double imaginaryPart;
+	private static final NumberFormat ScientificFormatter = new DecimalFormat("0.##E0");
+	
+	private static final NumberFormat SimpleDecimalFormatter = NumberFormat.getNumberInstance();
+	static {SimpleDecimalFormatter.setMinimumFractionDigits(2);}
+
+	public final double realPart;
+	public final double imaginaryPart;
 	final double absoluteValue;
 	
 	/**
@@ -222,6 +229,22 @@ public final class ComplexNumber extends Number {
 		return "" + realPart + " + " + imaginaryPart + "i"; 
 	}
 	
+	/**
+	 * Provide a formatted expression of the complex number.
+	 * @return a String instance
+	 */
+	public String getFormattedString() {
+		double realPartAbs = Math.abs(realPart);
+		String realPartFormatted = realPartAbs > 0.1 && realPartAbs < 1E3 ? 
+				SimpleDecimalFormatter.format(realPart) :
+					ScientificFormatter.format(realPart);
+		double imagPartAbs = Math.abs(imaginaryPart);
+		String imagPartFormatted = imagPartAbs > 0.1 && imagPartAbs < 1E3 ? 
+				SimpleDecimalFormatter.format(imaginaryPart) :
+					ScientificFormatter.format(imaginaryPart);
+		return "" + realPartFormatted + " + " + imagPartFormatted + "i";
+	}
+	
 	@Override
 	public boolean equals(Object c) {
 		if (c instanceof ComplexNumber) {
@@ -271,6 +294,11 @@ public final class ComplexNumber extends Number {
 		}
 		double df = sample.size() - 1;
 		return diff2Real / df + diff2Imag / df;
+	}
+	
+	@Override
+	public ComplexNumber clone() {
+		return new ComplexNumber(realPart, imaginaryPart);
 	}
 	
 }

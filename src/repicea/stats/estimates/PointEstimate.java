@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.math.utility.GaussianUtility;
 import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.sampling.PopulationUnit;
@@ -37,7 +38,7 @@ import repicea.stats.sampling.PopulationUnit;
  * @param <O> a PopulationEstimate-derived class
  */
 @SuppressWarnings("serial")
-public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<GaussianDistribution> {
+public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<Matrix, SymmetricMatrix, GaussianDistribution> {
 
 	private final Map<String, O> observations;
 	protected int nRows;
@@ -142,7 +143,7 @@ public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<G
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	protected boolean isMergeableEstimate(Estimate<?> estimate) {
+	protected boolean isMergeableEstimate(Estimate<?,?,?> estimate) {
 		if (estimate.getClass().equals(getClass())) {
 			PointEstimate pe = (PointEstimate) estimate;
 			if (getSampleIds().equals(pe.getSampleIds())) {	// make sure we have the same sample ids

@@ -44,7 +44,7 @@ import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
  * inference in forest inventories. Forestry 91(3): 354-365. </a>
  */
 @SuppressWarnings("serial")
-public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution> implements NumberOfRealizationsProvider {
+public final class BootstrapHybridPointEstimate extends Estimate<Matrix, SymmetricMatrix, UnknownDistribution> implements NumberOfRealizationsProvider {
 
 	private static boolean IsVarianceCorrectionEnabled = true; 	// default value
 	
@@ -308,7 +308,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	
 	
 	@Override
-	protected boolean isMergeableEstimate(Estimate<?> estimate) {
+	protected boolean isMergeableEstimate(Estimate<?,?,?> estimate) {
 		if (estimate instanceof BootstrapHybridPointEstimate) {
 			if (((BootstrapHybridPointEstimate) estimate).getNumberOfRealizations() == getNumberOfRealizations()) {
 				if (estimates.get(0).isMergeableEstimate(((BootstrapHybridPointEstimate) estimate).estimates.get(0)));
@@ -534,7 +534,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	}
 
 	@Override
-	public Estimate<?> getDifferenceEstimate(Estimate<?> estimate2) {
+	public Estimate<Matrix, SymmetricMatrix, ?> getDifferenceEstimate(Estimate<Matrix, SymmetricMatrix, ?> estimate2) {
 		if (this.isMergeableEstimate(estimate2)) {
 			return subtract((BootstrapHybridPointEstimate) estimate2);
 		} else {
@@ -543,7 +543,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	}
 
 	@Override
-	public Estimate<?> getSumEstimate(Estimate<?> estimate2) {
+	public Estimate<Matrix, SymmetricMatrix, ?> getSumEstimate(Estimate<Matrix, SymmetricMatrix, ?> estimate2) {
 		if (this.isMergeableEstimate(estimate2)) {
 			return add((BootstrapHybridPointEstimate) estimate2);
 		} else {
@@ -552,7 +552,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	}
 
 	@Override
-	public Estimate<?> getProductEstimate(double scalar) {
+	public Estimate<Matrix, SymmetricMatrix, ?> getProductEstimate(double scalar) {
 		return multiply(scalar);
 	}
 
