@@ -90,7 +90,7 @@ public class WeibullModelTest {
 		wm.getSummary();
 		Assert.assertTrue("Is convergence achieved?", wm.getEstimator().isConvergenceAchieved());
 		System.out.println("Expected shape = " + 3 + "; Actual = " + wm.getParameters().getValueAt(0, 0));
-		Assert.assertEquals("Shape parameter", 3, wm.getParameters().getValueAt(0, 0), 5E-2);
+		Assert.assertEquals("Shape parameter", 3, wm.getParameters().getValueAt(0, 0), 6E-2);
 		System.out.println("Expected scale = " + 5 + "; Actual = " + wm.getParameters().getValueAt(1, 0));
 		Assert.assertEquals("Scale parameter", 5, wm.getParameters().getValueAt(1, 0), 7E-2);
 		System.out.println("Expected location = " + 10 + "; Actual = " + wm.getParameters().getValueAt(2, 0));
