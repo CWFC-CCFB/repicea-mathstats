@@ -122,6 +122,14 @@ public final class ComplexNumber extends Number implements Cloneable {
 		return new ComplexNumber(Math.log(r), phi);
 	}
 	
+	/**
+	 * Compute the power of this complex number.
+	 * @param power the exponent
+	 * @return a ComplexNumber
+	 */
+	public ComplexNumber pow(double power) {
+		return log().multiply(power).exp();
+	}
 	
 	/**
 	 * Return the absolute value of this complex number.<p>

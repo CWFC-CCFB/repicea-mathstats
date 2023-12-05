@@ -37,15 +37,14 @@ import repicea.stats.Distribution.Type;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.estimates.ComplexMonteCarloEstimate;
 import repicea.stats.estimates.MonteCarloEstimate;
-import repicea.stats.sampling.SamplingUtility;
 import repicea.util.ObjectUtility;
 
 /**
  * The ComplexNumberSimpleCaseStudy class implements a simulation study around 
- * the exponential, square and log transformation of Gaussian variables.
+ * the log transformation of uniformly distributed variables.
  * @author Mathieu Fortin - Oct 2023
  */
-public class ComplexNumberSimpleCaseStudy {
+public class ComplexNumberSimpleCaseStudy2 {
 
 	
 	static class PopulationUnit {
@@ -55,7 +54,9 @@ public class ComplexNumberSimpleCaseStudy {
 		PopulationUnit(Matrix trueBeta, double trueStd, int id) {
 			this.id = id;
 			x = StatisticalUtility.getRandom().nextDouble() * 7 + 3;
-			y = trueBeta.getValueAt(0, 0) + x * trueBeta.getValueAt(1, 0) + StatisticalUtility.getRandom().nextGaussian() * trueStd;
+			double bound = Math.sqrt(3d) * trueStd;
+//			y = trueBeta.getValueAt(0, 0) + x * trueBeta.getValueAt(1, 0) + StatisticalUtility.getRandom().nextGaussian() * trueStd;
+			y = trueBeta.getValueAt(0, 0) + x * trueBeta.getValueAt(1, 0) + StatisticalUtility.getRandom().nextDouble() * 2 * bound - bound;
 		}
 	}
 
@@ -132,27 +133,26 @@ public class ComplexNumberSimpleCaseStudy {
 			return invXtXChol;
 		}
 		
-		private Matrix sampleResiduals(int n) {
-			if (!sampleIndexMap.containsKey(n)) {
-				List<Integer> sampleIndex = new ArrayList<Integer>();
-				for (int i = 0; i < n; i++)
-					sampleIndex.add(i);
-				sampleIndexMap.put(n, sampleIndex);
-			}
-			
-			List<Integer> index = SamplingUtility.getSample(sampleIndexMap.get(n), n, true);
-			Matrix sampledResiduals = residuals.getSubMatrix(index, null, false); // we do not sort the indices
-			return sampledResiduals;
-		}
+//		private Matrix sampleResiduals(int n) {
+//			if (!sampleIndexMap.containsKey(n)) {
+//				List<Integer> sampleIndex = new ArrayList<Integer>();
+//				for (int i = 0; i < n; i++)
+//					sampleIndex.add(i);
+//				sampleIndexMap.put(n, sampleIndex);
+//			}
+//			
+//			List<Integer> index = SamplingUtility.getSample(sampleIndexMap.get(n), n, true);
+//			Matrix sampledResiduals = residuals.getSubMatrix(index, null, false); // we do not sort the indices
+//			return sampledResiduals;
+//		}
 		
-		Matrix getRandomDeviate(List<Double> xValues, Transformation t, boolean useNonParametricMethod) {
+		Matrix getRandomDeviate(List<Double> xValues, Transformation t) {
 			Matrix xMat = createMatrixX(xValues);
 			Matrix betaDeviates = getOmegaChol().multiply(StatisticalUtility.drawRandomVector(betaHat.m_iRows, Distribution.Type.GAUSSIAN)).scalarMultiply(sigmaHat);
 			Matrix betaHat_b = betaHat.add(betaDeviates);
-			
-			Matrix epsilon_b = useNonParametricMethod ? 
-					sampleResiduals(xMat.m_iRows) :
-						StatisticalUtility.drawRandomVector(xMat.m_iRows, Type.GAUSSIAN).scalarMultiply(sigmaHat);
+			double bound = Math.sqrt(3d) * sigmaHat;
+
+			Matrix epsilon_b = StatisticalUtility.drawRandomVector(xMat.m_iRows, Type.UNIFORM).scalarMultiply(2 * bound).scalarAdd(-bound);
 			
 			Matrix result = xMat.multiply(betaHat_b).add(epsilon_b);
 			return convertPredictionToOriginalScale(result, t);
@@ -251,7 +251,7 @@ public class ComplexNumberSimpleCaseStudy {
 //			return result.scalarMultiply(1d / res_hat.m_iRows);
 //		}
 		
-		ComplexMatrix getComplexRandomDeviate(List<Double> xValues, Transformation t, boolean useNonParametricMethod) {
+		ComplexMatrix getComplexRandomDeviate(List<Double> xValues, Transformation t) {
 			double chiSquareDeviate = StatisticalUtility.getRandom().nextChiSquare(upsilon);
 			ComplexNumber sigma2Hat_b = new ComplexNumber(sigma2Hat, sigma2Hat * (chiSquareDeviate - upsilon) / upsilon);
 			ComplexNumber sigmaHat_b = sigma2Hat_b.sqrt();
@@ -265,10 +265,8 @@ public class ComplexNumberSimpleCaseStudy {
 				Matrix xMat_ii = xMat.getSubMatrix(ii, ii, 0, xMat.m_iCols - 1);
 				ComplexNumber betaDeviates = new ComplexNumber(0, xMat_ii.multiply(betaDeviatesMat).getValueAt(0, 0));
 				betaDeviates = betaDeviates.multiply(sigmaHat_b);
-
-				Number epsilon_b = useNonParametricMethod ?
-						sampleResiduals(1).getValueAt(0, 0) :
-							sigmaHat_b.multiply(StatisticalUtility.getRandom().nextGaussian());
+				ComplexNumber bound = sigmaHat_b.multiply(Math.sqrt(3));
+				Number epsilon_b = 	bound.multiply(2d).multiply(StatisticalUtility.getRandom().nextDouble()).subtract(bound);
 				double xBetaHat = xMat_ii.multiply(betaHat).getValueAt(0, 0); 
 				ComplexNumber mean = betaDeviates.add(xBetaHat);
 				ComplexNumber result = mean.add(epsilon_b);
@@ -411,7 +409,7 @@ public class ComplexNumberSimpleCaseStudy {
 		ComplexMonteCarloEstimate cmcEstimator = new ComplexMonteCarloEstimate();
 
 		for (int innerReal = 0; innerReal < nbInnerReal; innerReal++) {
-			cmcEstimator.addRealization(m.getComplexRandomDeviate(xValues, t, false)); // false : regular parametric method
+			cmcEstimator.addRealization(m.getComplexRandomDeviate(xValues, t)); // false : regular parametric method
 		}
 
 		ComplexMatrix cmcMean = cmcEstimator.getMean();
@@ -433,6 +431,7 @@ public class ComplexNumberSimpleCaseStudy {
 	
 
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static List getParameters(Transformation t) {
 		List outputList = new ArrayList();
 		Matrix trueBeta = new Matrix(2,1);
@@ -462,7 +461,7 @@ public class ComplexNumberSimpleCaseStudy {
 	private static void doRun(Transformation t, int sampleSize, int nbRealizations) throws IOException {
 		System.out.println("Simulating " + t.name() + " with sample size n = " + sampleSize);
 		int nbInnerReal = 10000;
-		String filename = ObjectUtility.getPackagePath(ComplexNumberSimpleCaseStudy.class) + "caseStudyPseudo_" + t.name() + sampleSize +".csv";
+		String filename = ObjectUtility.getPackagePath(ComplexNumberSimpleCaseStudy2.class) + "caseStudy2_" + t.name() + sampleSize +".csv";
 		filename = filename.replace("bin/", "");
 		CSVWriter writer = new CSVWriter(new File(filename), false);
 		List<FormatField> fields = new ArrayList<FormatField>();
@@ -488,6 +487,7 @@ public class ComplexNumberSimpleCaseStudy {
 		writer.setFields(fields);
 		
 		
+		@SuppressWarnings("rawtypes")
 		List parms = getParameters(t);
 		
 		Matrix trueBeta = (Matrix) parms.get(0);
@@ -521,8 +521,8 @@ public class ComplexNumberSimpleCaseStudy {
 			ComplexMonteCarloEstimate cmcEstimator = new ComplexMonteCarloEstimate();
 
 			for (int innerReal = 0; innerReal < nbInnerReal; innerReal++) {
-				mcEstimator.addRealization(m.getRandomDeviate(xValues, t, false)); // false: regular parametric method
-				cmcEstimator.addRealization(m.getComplexRandomDeviate(xValues, t, false)); // false : regular parametric method
+				mcEstimator.addRealization(m.getRandomDeviate(xValues, t)); 
+				cmcEstimator.addRealization(m.getComplexRandomDeviate(xValues, t)); 
 			}
 			
 			Matrix mcMean = mcEstimator.getMean();
@@ -603,13 +603,13 @@ public class ComplexNumberSimpleCaseStudy {
 	}
 
 	public static void main(String[] arg) throws IOException {
-		testLimitEstimator(25, Transformation.Exp, 4000000);
+//		testLimitEstimator(25, Transformation.Exp, 4000000);
 //		runSimulationChiSquareToSeries(1000000);
 //		runSimulationChiSquare(1000000);
-//		doRun(Transformation.Exp, 25, 10000);
-//		doRun(Transformation.Exp, 50, 10000);
-//		doRun(Transformation.Exp, 100, 10000);
-//		doRun(Transformation.Exp, 200, 10000);
+		doRun(Transformation.Exp, 25, 10000);
+		doRun(Transformation.Exp, 50, 10000);
+		doRun(Transformation.Exp, 100, 10000);
+		doRun(Transformation.Exp, 200, 10000);
 //		doRun(Transformation.Exp, 100);
 //		doRun(Transformation.Exp, 200);
 //		doRun(Transformation.Sqr, 50);

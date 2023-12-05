@@ -20,6 +20,7 @@
 package repicea.stats.estimates;
 
 import repicea.math.ComplexMatrix;
+import repicea.math.ComplexSymmetricMatrix;
 import repicea.math.HermitianMatrix;
 import repicea.math.Matrix;
 import repicea.stats.distributions.ComplexEmpiricalDistribution;
@@ -67,4 +68,12 @@ public class ComplexMonteCarloEstimate extends ResamplingBasedEstimate<ComplexMa
 		return getDistribution().getVarianceImaginaryPart();
 	}
 
+	/**
+	 * Produce the pseudovariance of the vector of complex random variables.
+	 * @return a ComplexSymmetricMatrix instance
+	 */
+	public ComplexSymmetricMatrix getPseudoVariance() {
+		return getDistribution().getPseudoVariance();
+	}
+	
 }

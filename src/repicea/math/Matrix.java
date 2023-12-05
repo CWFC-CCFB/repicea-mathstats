@@ -313,11 +313,7 @@ public class Matrix extends AbstractMatrix<Matrix> implements Serializable, Deep
 		}
 	}
 	
-	/**
-	 * This method compute the elementwise product of this x m
-	 * @param m the matrix that contains the elements to be multiplied with.
-	 * @return a Matrix instance
-	 */
+	@Override
 	public Matrix elementWiseMultiply(Matrix m) {
 		if (isTheSameDimension(m)) {
 			Matrix oMat = new Matrix(this.m_iRows,this.m_iCols);
@@ -796,12 +792,8 @@ public class Matrix extends AbstractMatrix<Matrix> implements Serializable, Deep
 		}
 		return matrix;
 	}
-	
-	/**
-	 * Compute the elements of the matrix at a given power.
-	 * @param power a double
-	 * @return a Matrix instance
-	 */
+
+	@Override
 	public Matrix elementWisePower(double power) {
 		Matrix matrix = new Matrix(m_iRows, m_iCols);
 		for (int i = 0; i < matrix.m_iRows; i++) {

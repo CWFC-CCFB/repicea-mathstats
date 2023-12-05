@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import repicea.math.ComplexMatrix;
 import repicea.math.ComplexNumber;
+import repicea.math.ComplexSymmetricMatrix;
 import repicea.math.HermitianMatrix;
 import repicea.math.Matrix;
 import repicea.stats.StatisticalUtility;
@@ -57,6 +58,10 @@ public class ComplexEmpiricalDistributionTest {
 		Assert.assertEquals("Testing variance", 2d, variance.getValueAt(0, 0).realPart, 2.5E-2);
 		System.out.println("Expected variance (imaginary part) = 0; Actual variance = " + variance.getValueAt(0, 0).imaginaryPart);
 		Assert.assertEquals("Testing variance", 0d, variance.getValueAt(0, 0).imaginaryPart, 1E-15);
+		
+		ComplexSymmetricMatrix pseudoVariance = ced.getPseudoVariance();
+		int u = 0;
+		
 	}
 	
 	
@@ -122,7 +127,6 @@ public class ComplexEmpiricalDistributionTest {
 			double iPart = imagPart.getValueAt(i, 0);
 			Assert.assertEquals("Testing variance decomposition", totalVariance, rPart + iPart, 1E-8);
 		}
-		
 	}
 
 }

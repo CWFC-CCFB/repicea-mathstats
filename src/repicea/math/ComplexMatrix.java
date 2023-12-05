@@ -482,4 +482,53 @@ public class ComplexMatrix extends AbstractMatrix<ComplexMatrix> {
 		return outputString.toString();
 	}
 
+	/**
+	 * Produce a complex matrix from two matrices representing the real part and 
+	 * the imaginary part. <p>
+	 * The two Matrix arguments must have the same dimensions.
+	 * @param realPart a Matrix instance
+	 * @param imagPart a Matrix instance
+	 * @return a ComplexMatrix instance
+	 */
+	public static ComplexMatrix convertMatrixToComplexMatrix(Matrix realPart, Matrix imagPart) {
+		if (realPart == null || imagPart == null)
+			throw new InvalidParameterException("Matrices realPart and imagPart must be non null!");
+		if (!realPart.isTheSameDimension(imagPart))
+			throw new InvalidParameterException("Matrices realPart and imagPart must have the same dimensions!");
+		ComplexMatrix cm = new ComplexMatrix(realPart.m_iRows, realPart.m_iCols);
+		for (int i = 0; i < realPart.m_iRows; i++) {
+			for (int j = 0; j < realPart.m_iCols; j++) {
+				cm.setValueAt(i, j, new ComplexNumber(realPart.getValueAt(i, j), imagPart.getValueAt(i,j)));
+			}
+		}
+		return cm;
+	}
+
+	@Override
+	public ComplexMatrix elementWisePower(double power) {
+		ComplexMatrix matrix = new ComplexMatrix(m_iRows, m_iCols);
+		for (int i = 0; i < matrix.m_iRows; i++) {
+			for (int j = 0; j < matrix.m_iCols; j++) {
+				matrix.setValueAt(i, j, getValueAt(i, j).pow(power));
+			}
+		}
+		return matrix;
+	}
+	
+	@Override
+	public ComplexMatrix elementWiseMultiply(ComplexMatrix m) {
+		if (isTheSameDimension(m)) {
+			ComplexMatrix oMat = new ComplexMatrix(this.m_iRows,this.m_iCols);
+			for (int i = 0; i < this.m_iRows; i++) {
+				for (int j = 0; j < this.m_iCols; j++) {
+					oMat.setValueAt(i, j, getValueAt(i, j).multiply(m.getValueAt(i, j)));
+				}
+			}
+			return oMat;
+		} else {
+			throw new UnsupportedOperationException("The matrix m does not have the same dimensions than the current matrix!");
+		}
+	}
+
+	
 }

@@ -94,10 +94,25 @@ public abstract class AbstractMatrix<P extends AbstractMatrix> implements DeepCl
 	 * @see Matrix#getSubMatrix(List, List, boolean)
 	 * @param rowIndex a List of integers (if null all the rows are selected)
 	 * @param columnIndex a List of integers (if null all the columns are selected)
-	 * @return a ComplexMatrix instance
+	 * @return a Matrix instance
 	 */
 	public abstract P getSubMatrix(List<Integer> rowIndex, List<Integer> columnIndex);
 
+	/**
+	 * Compute the elements of the matrix at a given power.
+	 * @param power a double
+	 * @return a Matrix instance
+	 */
+	public abstract P elementWisePower(double power);
+		
+	
+	/**
+	 * This method compute the elementwise product of this x m
+	 * @param m the matrix that contains the elements to be multiplied with.
+	 * @return a Matrix instance
+	 */
+	public abstract P elementWiseMultiply(P m);
+	
 	/**
 	 * This method checks if this is a column vector
 	 * @return a boolean that is true if this is a column vector
@@ -214,4 +229,6 @@ public abstract class AbstractMatrix<P extends AbstractMatrix> implements DeepCl
 	 */
 	protected abstract String convertArrayToString(int rowIndex);
 
+	
+	
 }
