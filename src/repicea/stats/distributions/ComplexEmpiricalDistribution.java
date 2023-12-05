@@ -21,6 +21,7 @@ package repicea.stats.distributions;
 
 import repicea.math.ComplexMatrix;
 import repicea.math.ComplexNumber;
+import repicea.math.ComplexSymmetricMatrix;
 import repicea.math.HermitianMatrix;
 import repicea.math.Matrix;
 
@@ -106,5 +107,24 @@ public class ComplexEmpiricalDistribution extends AbstractEmpiricalDistribution<
 		return new Matrix(sumRes);
 	}
 
-	
+
+	/**
+	 * Provide the pseudovariance of the complex
+	 * random matrices.
+	 * 
+	 * @return a ComplexSymmetricMatrix instance
+	 */
+	public ComplexSymmetricMatrix getPseudoVariance() {
+		ComplexMatrix mean = getMean();
+		ComplexMatrix variance = null;
+		for (ComplexMatrix m : getRealizations()) {
+			ComplexMatrix res = m.subtract(mean);
+			ComplexMatrix product = res.multiply(res.transpose());
+			variance = variance == null ? product : variance.add(product);
+		}
+		variance = variance.scalarMultiply(1d/(getNumberOfRealizations() - 1));
+		ComplexSymmetricMatrix formattedMatrix = new ComplexSymmetricMatrix(variance);
+		return formattedMatrix;
+	}
+
 }

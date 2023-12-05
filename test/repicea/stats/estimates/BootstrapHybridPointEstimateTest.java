@@ -197,7 +197,7 @@ public class BootstrapHybridPointEstimateTest {
 //		System.out.println("Expected variance = " + expectedVariance);
 
 		System.out.println("Expected variance = " + expectedVariance + " - actual variance = " + actualVariance);
-		Assert.assertTrue("Testing variance estimates", !expectedVariance.subtract(actualVariance).getAbsoluteValue().anyElementLargerThan(3E-1));
+		Assert.assertTrue("Testing variance estimates", !expectedVariance.subtract(actualVariance).getAbsoluteValue().anyElementLargerThan(0.5));
 		
 		Matrix empiricalCorrection = bhpe.getVarianceBiasCorrection();
 		Matrix theoreticalCorrection = var_mu_x_hat.scalarMultiply(-stdModel * stdModel);

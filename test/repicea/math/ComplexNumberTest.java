@@ -49,6 +49,15 @@ public class ComplexNumberTest {
 	}
 	
 	@Test
+	public void comparePow2AndSquare() {
+		ComplexNumber c1 = new ComplexNumber(4,1.4);
+		ComplexNumber pow2 = c1.pow(2d);
+		ComplexNumber sqr = c1.square();
+		Assert.assertEquals("Test real part", pow2.realPart, sqr.realPart, 1E-10);
+		Assert.assertEquals("Test imag part", pow2.imaginaryPart, sqr.imaginaryPart, 1E-10);
+	}
+	
+	@Test
 	public void testNumberInterfaceMethods() {
 		ComplexNumber c1 = new ComplexNumber(2.5, 1);
 		Assert.assertEquals("Test double", c1.realPart, c1.doubleValue(), 1E-15);

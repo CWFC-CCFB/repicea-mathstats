@@ -23,55 +23,69 @@ package repicea.math;
  * A Hermitian matrix implementation.<p>
  * 
  * The implementation is based on a full array. It overrides the method
- * setValueAt to make sure the element j,i is the conjugate of element i,j.
+ * setValueAt to make sure the element j,i is equal to element i,j.
  * @author Mathieu Fortin - November 2023
  */
-public class HermitianMatrix extends ComplexMatrix {
+public class ComplexSymmetricMatrix extends ComplexMatrix {
 
 	/**
 	 * Constructor. <p>
 	 * 
-	 * The ComplexMatrix argument is checked for symmetry and conjugate. If the
-	 * check passes the HermitianMatrix object is constructed.
+	 * The ComplexMatrix argument is checked for symmetry. If the
+	 * check passes the ComplexSymmetricMatrix object is constructed.
 	 * 
 	 * @param mat a ComplexMatrix instance
 	 * 
 	 * @throws UnsupportedOperationException if the ComplexMatrix argument is not symmetric
 	 */
-	public HermitianMatrix(ComplexMatrix mat) {
+	public ComplexSymmetricMatrix(ComplexMatrix mat) {
 		this(mat.m_iRows);
-		if (!mat.isSquare()) {
-			throw new UnsupportedOperationException("The ComplexMatrix argument must be a square matrix!");
+		if (!mat.isSymmetric()) {
+			throw new UnsupportedOperationException("The ComplexMatrix argument must be a symmetric matrix!");
 		}
 		for (int i = 0; i < mat.m_iRows; i++) {
 			for (int j = i; j < mat.m_iCols; j++) {
-				ComplexNumber valueUp = mat.getValueAt(i,j);
-				ComplexNumber valueBelow = mat.getValueAt(j,i);
-				if (valueUp.equals(valueBelow.getComplexConjugate())) {
-					setValueAt(i,j, valueUp);
-				} else {
-					throw new UnsupportedOperationException("The ComplexMatrix argument is not a Hermitian matrix!");
-				}
+				setValueAt(i, j, mat.getValueAt(i,j));
 			}
 		}
 	}
 
-	private HermitianMatrix(int size) {
+	private ComplexSymmetricMatrix(int size) {
 		super(size, size);
 	}
 
 	@Override
 	protected ComplexNumber[][] contructInternalArray(int iRows, int iCols) {
-		ComplexNumber[][] mainArray = new ComplexNumber[iRows][iCols];
+		ComplexNumber[][] mainArray = new ComplexNumber[iRows][];
+		for (int i = 0; i < mainArray.length; i++) {
+			mainArray[i] = new ComplexNumber[iCols - i]; 
+		}
 		return mainArray;
 	}
 
 	@Override
 	public void setValueAt(int i, int j, ComplexNumber value) {
-		m_afData[i][j] = value;
-		if (i != j) {
-			m_afData[j][i] = value.getComplexConjugate();
+		if (j >= i) {
+			m_afData[i][j - i] = value;
+		} else {
+			m_afData[j][i - j] = value;
 		}
+	}
+
+	/**
+	 * Return the value at row i and column j.
+	 * @param i the row index
+	 * @param j the column index
+	 * @return the entry
+	 */
+	@Override
+	public ComplexNumber getValueAt(int i, int j) {
+		return j >= i ? m_afData[i][j - i] : m_afData[j][i - j];
+	}
+
+	@Override
+	public final boolean isSymmetric() {
+		return true;
 	}
 
 }
