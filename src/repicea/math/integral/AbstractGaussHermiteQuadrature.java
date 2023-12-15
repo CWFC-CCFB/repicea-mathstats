@@ -26,13 +26,13 @@ import java.util.Map;
 import java.util.Set;
 
 import repicea.math.integral.GaussHermiteQuadrature.GaussHermiteQuadratureCompatibleFunction;
-import repicea.serial.xml.XmlSerializerChangeMonitor;
+import repicea.serial.SerializerChangeMonitor;
 
 @SuppressWarnings("serial")
 public abstract class AbstractGaussHermiteQuadrature extends AbstractGaussQuadrature {
 
 	static {
-		XmlSerializerChangeMonitor.registerClassNameChange("repicea.stats.integral.GaussQuadrature$NumberOfPoints", "repicea.math.integral.AbstractGaussQuadrature$NumberOfPoints");
+		SerializerChangeMonitor.registerClassNameChange("repicea.stats.integral.GaussQuadrature$NumberOfPoints", "repicea.math.integral.AbstractGaussQuadrature$NumberOfPoints");
 	}
 
 	protected static Map<NumberOfPoints, Set<QuadratureNode>> NODE_MAP = new HashMap<NumberOfPoints, Set<QuadratureNode>>();

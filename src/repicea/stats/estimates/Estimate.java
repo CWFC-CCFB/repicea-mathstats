@@ -28,7 +28,7 @@ import repicea.math.AbstractMatrix;
 import repicea.math.ComplexMatrix;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
-import repicea.serial.xml.XmlSerializerChangeMonitor;
+import repicea.serial.SerializerChangeMonitor;
 import repicea.stats.Distribution;
 import repicea.stats.RandomVariable;
 
@@ -43,7 +43,7 @@ import repicea.stats.RandomVariable;
 public abstract class Estimate<M extends AbstractMatrix, V extends AbstractMatrix, D extends Distribution<M,V>> extends RandomVariable<M,V,D> {
 	
 	static {
-		XmlSerializerChangeMonitor.registerEnumNameChange("repicea.stats.estimates.Estimate$EstimatorType", "MonteCarlo", "Resampling");
+		SerializerChangeMonitor.registerEnumNameChange("repicea.stats.estimates.Estimate$EstimatorType", "MonteCarlo", "Resampling");
 	}
 	
 	

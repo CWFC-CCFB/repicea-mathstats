@@ -32,8 +32,9 @@ import repicea.io.FormatField;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
 import repicea.lang.REpiceaSystem;
+import repicea.serial.MarshallingException;
+import repicea.serial.UnmarshallingException;
 import repicea.serial.xml.XmlDeserializer;
-import repicea.serial.xml.XmlMarshallException;
 import repicea.serial.xml.XmlSerializer;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.StatisticalUtility.TypeMatrixR;
@@ -184,7 +185,7 @@ public class MatrixTest {
 	}
 	
 		@Test
-	public void deserializationOfAMatrix() throws FileNotFoundException, XmlMarshallException {
+	public void deserializationOfAMatrix() throws FileNotFoundException, UnmarshallingException {
 		String pathname = ObjectUtility.getPackagePath(getClass()) + "serializedMatrix.xml";
 //		Matrix myMatrix = new Matrix(2,4);
 //		XmlSerializer serializer = new XmlSerializer(pathname);
@@ -198,7 +199,7 @@ public class MatrixTest {
 	}
 	
 	@Test
-	public void serializationWithAndWithoutCompression() throws XmlMarshallException {
+	public void serializationWithAndWithoutCompression() throws MarshallingException {
 		Matrix mat = new Matrix(100,100);
 		String filename1 = ObjectUtility.getPackagePath(getClass()) + "serializedWithCompression.xml";
 		XmlSerializer ser1 = new XmlSerializer(filename1);
