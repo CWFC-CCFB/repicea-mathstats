@@ -1,7 +1,9 @@
 /*
- * This file is part of the repicea library.
+ * This file is part of the repicea-mathstats library.
  *
  * Copyright (C) 2009-2019 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2024 His Majesty the King in Right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -42,30 +44,13 @@ import repicea.io.Saveable;
 import repicea.math.Matrix;
 
 /**
- * The DataSet class contains many observations and implements the method to read a dataset with a FormatReader instance.
+ * The DataSet class contains Observation instances and implements the methods 
+ * to read a dataset with a FormatReader instance or to write data to file.
  * @author Mathieu Fortin - November 2012
+ * 
  */
 public class DataSet implements Table, Saveable, REpiceaUIObject {
 
-//	private static enum MessageID implements TextableEnum {
-//
-//		ReadingFileMessage("Reading file...", "Lecture du fichier...");
-//
-//		MessageID(String englishText, String frenchText) {
-//			setText(englishText, frenchText);
-//		}
-//		
-//		@Override
-//		public void setText(String englishText, String frenchText) {
-//			REpiceaTranslator.setString(this, englishText, frenchText);
-//		}
-//
-//		@Override
-//		public String toString() {return REpiceaTranslator.getString(this);}
-//	}
-	
-
-	
 	protected List<String> fieldNames;
 	protected List<Class<?>> fieldTypes;
 	protected List<Observation> observations;
@@ -84,7 +69,10 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 	}
 
 	/**
-	 * General constructor.
+	 * Constructor for reading. <p>
+	 * This constructor reads a file, typically in a csv format and populates a List of Observation instances. The
+	 * type of each field is automatically determined by scanning the values and using type coercion. 
+	 * 
 	 * @param filename the name of the file to be read
 	 * @param autoLoad true if the file is to be read now. Typically, this boolean is set to false when the swingworker is
 	 * launched from a window that retrieves some events.
@@ -98,7 +86,11 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 	}
 	
 	/**
-	 * An empty DataSet instance with known field names.
+	 * Constructor for writing.<p>
+	 * 
+	 * The constructor sets the field names. Observations can be added using the {@link DataSet#addObservation(Object[])}
+	 * method. When all the observations have been added, it is good practice to call the {@link DataSet#indexFieldType()} method
+	 * to set the field types. The DataSet instance can be saved to file using the {@link DataSet#save(String)} method.
 	 * @param fieldNames a List of String instances that represent the field names
 	 */
 	public DataSet(List<String> fieldNames) {
@@ -125,6 +117,12 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 		return observations.get(i).values.get(j);
 	}
 
+	/**
+	 * Provide the value at row i in a particular field.
+	 * @param i the row index.
+	 * @param fieldName the name of the field.
+	 * @return an Object instance
+	 */
 	public Object getValueAt(int i, String fieldName) {
 		int j = getIndexOfThisField(fieldName);
 		if (j != -1) {
@@ -142,8 +140,8 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 	}
 	
 	/**
-	 * Indexes the different field types. More specifically, it goes 
-	 * through the columns and find the appropriate class for a particular
+	 * Index the different field types.<p>
+	 * More specifically, it goes through the columns and find the appropriate class for a particular
 	 * field. This method should be called after adding all the observations.
 	 */
 	public void indexFieldType() {
@@ -304,6 +302,10 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 		return outputMatrix;
 	}
 	
+	/**
+	 * Add an observation to the list of observations.
+	 * @param observationFrame an array of Object instances.
+	 */
 	public void addObservation(Object[] observationFrame) {
 		parseDifferentFields(observationFrame);
 		observations.add(new Observation(observationFrame));
@@ -319,6 +321,12 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 		fieldNames.add(name);
 	}
 	
+	/**
+	 * Add a field and its value to the DataSet instance.<p>
+	 * The field argument must have the same size than the number of observations. 
+	 * @param name the name of the new field.
+	 * @param field an array of Object instances 
+	 */
 	public void addField(String name, Object[] field) {
 		if (observations.size() > 0 && field.length != observations.size()) {	// will only trigger if there are some observations already
 			throw new InvalidParameterException("The number of observations in the new field does not match the number of observations in the dataset!");
@@ -334,11 +342,6 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 		}
 		
 		setClassOfThisField(fieldNames.size() - 1);
-//		if (isDouble(fieldNames.size() - 1)) {
-//			fieldTypes.add(Double.class);
-//		} else {
-//			fieldTypes.add(String.class);
-//		}
 	}
 
 	@Override
@@ -381,17 +384,9 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 				fieldNames.add(field.getName());
 			}
 
-//			int nbRecords = reader.getRecordCount();
-//			int recordsRead = 0;
-			
-//			firePropertyChange(REpiceaProgressBarDialog.LABEL, 0d, MessageID.ReadingFileMessage.toString());
-			
 			Object[] lineRead = reader.nextRecord();
 			while (lineRead != null) {
 				addObservation(lineRead);
-//				recordsRead++;
-//				int progress = (int) ((recordsRead * 100d) / nbRecords);
-//				firePropertyChange(REpiceaProgressBarDialog.PROGRESS, recordsRead, progress);
 				lineRead = reader.nextRecord();
 			}
 			
@@ -450,7 +445,7 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 
 
 	/**
-	 * Returns the observations of the data set.
+	 * Return the observations of the DataSet instance.
 	 * @return a List of Observation instances
 	 */	
 	public List<Observation> getObservations() {
@@ -489,7 +484,8 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 	}
 	
 	/**
-	 * Set a NumberFormat instance for a particular field
+	 * Set a NumberFormat instance for a particular field.<p>
+	 * This method is used to have a better display of the DataSet instance when calling the {@link DataSet#toString()} method.
 	 * @param fieldId the id of the field
 	 * @param formatter a NumberFormat instance
 	 */
