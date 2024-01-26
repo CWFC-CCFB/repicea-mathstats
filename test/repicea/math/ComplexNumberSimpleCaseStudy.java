@@ -47,7 +47,12 @@ import repicea.util.ObjectUtility;
  */
 public class ComplexNumberSimpleCaseStudy {
 
-	
+
+	/**
+	 * A population unit.<p>
+	 * The variable x follows a uniform distribution (3,10).
+	 * @author Mathieu Fortin - December 2023
+	 */
 	static class PopulationUnit {
 		final double x;
 		final double y;
@@ -59,7 +64,10 @@ public class ComplexNumberSimpleCaseStudy {
 		}
 	}
 
-	
+	/**
+	 * A sample of population units.
+	 * @author Mathieu Fortin - December 2023
+	 */
 	@SuppressWarnings("serial")
 	static class Sample extends ArrayList<PopulationUnit> {
 		
@@ -103,6 +111,10 @@ public class ComplexNumberSimpleCaseStudy {
 		
 	}
 	
+	/**
+	 * A model fitted to a sample of population units.
+	 * @author Mathieu Fortin - December 2023
+	 */
 	static class Model {
 		final Matrix betaHat;
 		final SymmetricMatrix invXtX;
@@ -393,6 +405,12 @@ public class ComplexNumberSimpleCaseStudy {
 
 	}
 	
+	/**
+	 * Test the limit of the estimator.
+	 * @param sampleSize
+	 * @param t
+	 * @param nbInnerReal
+	 */
 	@SuppressWarnings("rawtypes")
 	static void testLimitEstimator(int sampleSize, Transformation t, int nbInnerReal) {
 		List parms = getParameters(t);
@@ -432,7 +450,11 @@ public class ComplexNumberSimpleCaseStudy {
 
 	
 
-	
+	/**
+	 * Provide the population parameters.
+	 * @param t a Transformation enum
+	 * @return a List of Matrix and double
+	 */
 	private static List getParameters(Transformation t) {
 		List outputList = new ArrayList();
 		Matrix trueBeta = new Matrix(2,1);
