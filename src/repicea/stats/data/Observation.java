@@ -20,6 +20,7 @@ package repicea.stats.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,7 +30,7 @@ import repicea.data.Record;
 @SuppressWarnings("rawtypes")
 public class Observation implements Record, Comparable {
 
-	static List<Integer> comparableFields = new ArrayList<Integer>();
+	static List<Integer> ComparableFields = new ArrayList<Integer>();
 	
 	List<Object> values;
 	
@@ -41,7 +42,7 @@ public class Observation implements Record, Comparable {
 	@SuppressWarnings("unchecked")
 	@Override
 	public int compareTo(Object o) {
-		for (Integer index : comparableFields) {
+		for (Integer index : ComparableFields) {
 			Comparable thisValue = (Comparable) values.get(index);
 			Comparable thatValue = (Comparable) ((Observation) o).values.get(index);
 			int comparisonResult = thisValue.compareTo(thatValue);
