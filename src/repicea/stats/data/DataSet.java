@@ -26,6 +26,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -228,7 +229,7 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 	 */
 	@SuppressWarnings("unchecked")
 	public void sortObservations(List<Integer> fieldIndices) {
-		Observation.comparableFields = fieldIndices;
+		Observation.ComparableFields = fieldIndices;
 		Collections.sort(observations);
 	}
 	
@@ -269,12 +270,9 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 		}
 		return output;
 	}
-	
-	
-	
-	
+
 	/**
-	 * This method returns all the possible values in this field.  
+	 * Return all possible values in this field.  
 	 * @param j the index of the field.
 	 * @return a SORTED list of all the possible value.
 	 */
@@ -503,6 +501,10 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 		getFormatters().clear();
 	}
 	
+	/**
+	 * Provide a String representation of the DataSet instance.
+	 * @return a String instance
+	 */
 	@Override
 	public String toString() {
 		boolean exceeds = false;
@@ -552,9 +554,9 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 	}
 
 	/**
-	* This method returns a list of the values in a particular field.
-	* @param i the field id
-	* @return a List of object instance
+	* Return a list of the values in a particular field.
+	* @param i the field id, that is an integer
+	* @return a List of Object instance
 	*/	
 	public List<Object> getFieldValues(int i) {
 		List<Object> objs = new ArrayList<Object>();
@@ -568,4 +570,28 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 	public List<? extends Record> getRecords() {
 		return getObservations();
 	}
+	
+
+	/**
+	 * Provide a series of LinkedHashMap instances for easier JSON conversion.<p>
+	 * 
+	 * The method produce an array whose values are the LinkedHashMap instances. A
+	 * single LinkedHashMap instance contains the field names as keys and their associated
+	 * objects as values.
+	 * 
+	 * @return An array of LinkedHashMap instances
+	 */
+	@SuppressWarnings("unchecked")
+	public LinkedHashMap<String, Object>[] getProtoMapArrayForJSONConversion() {
+		LinkedHashMap<String, Object>[] oMapArray = new LinkedHashMap[getNumberOfObservations()];
+		for (int i = 0; i < getNumberOfObservations(); i++) {
+			LinkedHashMap<String, Object> oMap = new LinkedHashMap<String, Object>();
+			for (int j = 0; j < this.getFieldNames().size(); j++) {
+				oMap.put(getFieldNames().get(j), this.getObservations().get(i).getValueAt(j));
+			}
+			oMapArray[i] = oMap;
+		} 
+		return oMapArray;
+	}
+	
 }

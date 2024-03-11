@@ -1,7 +1,9 @@
 /*
  * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2022 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2022 Mathieu Fortin for Rouge-Epicea.
+ * Copyright (C) 2024 His Majesty the King in Right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,9 +20,14 @@
  */
 package repicea.stats.data;
 
+import java.lang.reflect.Array;
+import java.util.LinkedHashMap;
+
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DataSetTest {
 
@@ -33,4 +40,22 @@ public class DataSetTest {
 		Object observed = myDataSet.getObservations().get(1).values.get(1);
 		Assert.assertEquals("Comparing values", observed, expected);
 	}
+	
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void testJSONConversion() throws JsonProcessingException {
+		DataSet myDataSet = new DataSet();
+		myDataSet.addField("Field1", new Object[] {"true", "allo", "patate"});
+		myDataSet.addField("Field2", new Object[] {"false", "hello", "carotte"});
+		LinkedHashMap<String, Object>[] protoMap = myDataSet.getProtoMapArrayForJSONConversion();
+		ObjectMapper mapper = new ObjectMapper();
+		String jsonStr = mapper.writeValueAsString(protoMap);
+		Object o = mapper.readValue(jsonStr, protoMap.getClass());
+		Assert.assertTrue("Testing the instance type", o.getClass().isArray());
+		Object entry1 = Array.get(o, 0);
+		Assert.assertTrue("Testing first entry in the array", entry1 instanceof LinkedHashMap);
+		String value1 = ((LinkedHashMap) entry1).get("Field1").toString();
+		Assert.assertEquals("Testing value in Field1", "true", value1);
+	}
+
 }
