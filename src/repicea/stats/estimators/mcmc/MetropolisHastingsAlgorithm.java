@@ -1,7 +1,8 @@
 /*
- * This file is part of the repicea library.
+ * This file is part of the repicea-mathstats library.
  *
- * Copyright (C) 2009-2023 Mathieu Fortin for Rouge Epicea.
+ * Copyright (C) 2021-24 His Majesty the King in Right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -42,7 +43,7 @@ import repicea.util.REpiceaLogManager;
  * An implementation of the MCMC Metropolis-Hastings algorithm.
  * @author Mathieu Fortin - September 2021
  */
-public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHastingsCompatibleModel> {
+public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHastingsCompatibleModel> {
 		
 	private String loggerName;
 	private String loggerPrefix;
@@ -58,18 +59,29 @@ public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHa
 	protected int indexCorrelationParameter;
 	private MonteCarloEstimate mcmcEstimate;
 
+	/**
+	 * Constructor.<p>
+	 * Includes logging features.
+	 * @param model a MetropolisHastingsCompatibleModel instance
+	 * @param loggerName a String that stands for the logger name
+	 * @param loggerPrefix a prefix for the logger
+	 */
 	public MetropolisHastingsAlgorithm(MetropolisHastingsCompatibleModel model, String loggerName, String loggerPrefix) {
-		this(model);
-		this.loggerName = loggerName;
-		this.loggerPrefix = loggerPrefix;
-	}
-	
-	public MetropolisHastingsAlgorithm(MetropolisHastingsCompatibleModel model) {
 		super(model);
 		simParms = new MetropolisHastingsParameters();
 		priors = new MetropolisHastingsPriorHandler();
+		this.loggerName = loggerName;
+		this.loggerPrefix = loggerPrefix;
 	}
 
+	/**
+	 * Export the final selection of parameter samples.<p>
+	 * The final selection excludes the burn in period. It consists of a subsample of 
+	 * the Markov Chain. One sample is selected every x sample. The x parameter is set through
+	 * the {@link MetropolisHastingsParameters#oneEach} member.
+	 * @param filename the name of the file containing the export
+	 * @throws IOException if an I/O error occurs
+	 */
 	public void exportMetropolisHastingsSample(String filename) throws IOException {
 		if (isConvergenceAchieved() && finalMetropolisHastingsSampleSelection != null) {
 			CSVWriter writer = null;
@@ -94,6 +106,12 @@ public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHa
 		}
 	}
 	
+	/**
+	 * Set the Markov Chain simulation parameters.<p>
+	 * This class already contains a MetropolisHastingsParameters member, which is instantiated with the
+	 * default value. This method is used to replace these default parameters 
+	 * @param simParms a MetropolisHastingsParameters instance
+	 */
 	public void setSimulationParameters(MetropolisHastingsParameters simParms) {
 		if (simParms != null) {
 			this.simParms = simParms;
@@ -136,20 +154,11 @@ public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHa
 		return simParms;
 	}
 
-//	public double getMarginalLogLikelihood() {
-//		return lnProbY;
-//	}
-//
-//	public double getMarginalLogLikelihood2() {
-//		return lnProbY2;
-//	}
-
 	/**
-	 * Return the final parameter estimates. <br>
-	 * <br>
+	 * Return the final parameter estimates. <p>
 	 * Convergence must be achieved. If the parameters member has not been set, it is then
 	 * set on the fly to avoid recalculating the mean from the MonteCarloEstimate every time.
-	 * @return a Matrix
+	 * @return a Matrix instance containing the mean parameter estimates.
 	 */
 	public Matrix getFinalParameterEstimates() {
 		if (isConvergenceAchieved()) {
@@ -162,11 +171,10 @@ public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHa
 	}
 	
 	/**
-	 * Return the estimated variance-covariance of the final parameter estimates. <br>
-	 * <br>
+	 * Return the estimated variance-covariance of the final parameter estimates. <p>
 	 * Convergence must be achieved. If the variance-covariance member has not been set, it is then
 	 * set on the fly to avoid recalculating it from the MonteCarloEstimate every time.
-	 * @return a Matrix
+	 * @return a Matrix containing the estimated variances-covariances of the parameter estimates
 	 */
 	public Matrix getParameterCovarianceMatrix() {
 		if (isConvergenceAchieved()) {
@@ -183,18 +191,23 @@ public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHa
 		return converged;
 	}
 	
+	/**
+	 * Accessor to the prior handler.<p>
+	 * The prior handler is used to specify the prior distributions of the parameter estimates.
+	 * @return a MetropolisHastingsPriorHandler instance
+	 */
 	public MetropolisHastingsPriorHandler getPriorHandler() {
 		return priors;
 	}
 	
 	/**
-	 * Implement the Metropolis-Hastings algorithm.
-	 * @param nbRealizations number of samples in the chain before removing burn in and selected one sample every x samples
-	 * @param nbBurnIn number of samples to discard at the beginning of the chain
-	 * @param nbInternalIter maximum number of realizations to find the next acceptable sample of the chain
-	 * @param metropolisHastingsSample A list of MetaModelMetropolisHastingsSample instance that represents the chain
-	 * @param gaussDist the sampling distribution
-	 * @return a boolean
+	 * Implement the Metropolis-Hastings algorithm.<p>
+	 * The variance of the sampler is adjusted during the burn-in period in order to obtain an acceptance ratio around 0.3-0.4. Then,
+	 * the Markov Chain continues until it contains a given number of realizations (set through the {@link MetropolisHastingsParameters#nbAcceptedRealizations} parameter).
+	 * 
+	 * @param metropolisHastingsSample A list of MetaModelMetropolisHastingsSample instance that represents the Markov Chain
+	 * @param gaussDist the sampler
+	 * @return a boolean true if the algorithm succeeded or false otherwise
 	 */
 	private boolean generateMetropolisSample(List<MetropolisHastingsSample> metropolisHastingsSample, GaussianDistribution gaussDist) {
 		long startTime = System.currentTimeMillis();
@@ -204,7 +217,7 @@ public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHa
 		int trials = 0;
 		int successes = 0;
 		double acceptanceRatio; 
-		for (int i = 0; i < simParms.nbRealizations - 1; i++) { // Metropolis-Hasting  -1 : the starting parameters are considered as the first realization
+		for (int i = 0; i < simParms.nbAcceptedRealizations - 1; i++) { // Metropolis-Hasting  -1 : the starting parameters are considered as the first realization
 			gaussDist.setMean(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).parms);
 			if (i > 0 && i < simParms.nbBurnIn && i%1000 == 0) {
 				acceptanceRatio = ((double) successes) / trials;
@@ -219,7 +232,7 @@ public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHa
 			}
 			if (i%10000 == 0 && i > simParms.nbBurnIn) {
 				acceptanceRatio = ((double) successes) / trials;
-				REpiceaLogManager.logMessage(getLoggerName(), Level.FINE, getLogMessagePrefix(), "Processing realization " + i + " / " + simParms.nbRealizations + "; " + acceptanceRatio);
+				REpiceaLogManager.logMessage(getLoggerName(), Level.FINE, getLogMessagePrefix(), "Processing realization " + i + " / " + simParms.nbAcceptedRealizations + "; " + acceptanceRatio);
 			}
 			boolean accepted = false;
 			int innerIter = 0;
@@ -281,10 +294,12 @@ public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHa
 	}
 	
 	/**
-	 * Implement Gibbs sampling in a preliminary stage to balance the variance of the sampler.
+	 * Implement Gibbs sampling in a preliminary stage to balance the variance of the sampler.<p>
+	 * Each parameter is sampled individually. The acceptance rate is then calculated for each parameter. Depending on whether this rate is
+	 * too low or too high, the variance of the sample is re-adjusted so as to obtain balanced acceptance rates across the parameters.
 	 * @param firstSample the MetaModelMetropolisHastingsSample instance that was found through random sampling
 	 * @param sampler the sampling distribution
-	 * @return a boolean
+	 * @return a boolean true if the balancing has succeeded.
 	 */
 	private boolean balanceVariance(MetropolisHastingsSample firstSample, GaussianDistribution sampler) {
 		long startTime = System.currentTimeMillis();
@@ -387,17 +402,30 @@ public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHa
 		parameters = null;
 		parmsVarCov = null;
 		mcmcEstimate = null;
-//		lnProbY = 0;
 		finalMetropolisHastingsSampleSelection = null;
 		converged = false;
 	}
 	
+	/**
+	 * Estimate the posterior distributions of the parameters.<p>
+	 * The estimation follows these steps:<p>
+	 * <ul>
+	 * <li> The acceptance rates are balanced across the parameters.
+	 * <li> The global acceptance rate is re-adjusted during the burn-in period.
+	 * <li> The Markov Chain continues until it has the desired number of realizations.
+	 * <li> A final sample is selected from the Markov Chain.
+	 * </ul>
+	 * @return a boolean true if the estimation was successful.
+	 */
 	@Override
 	public boolean doEstimation() {
 		reset();
 		double coefVar = 0.01;
 		try {
 			GaussianDistribution samplingDist = model.getStartingParmEst(coefVar);
+			if (getPriorHandler().isEmpty()) {
+				model.setPriorDistributions(getPriorHandler());
+			}
 			List<MetropolisHastingsSample> mhSample = new ArrayList<MetropolisHastingsSample>();
 			MetropolisHastingsSample firstSet = findFirstSetOfParameters(simParms.nbInitialGrid, false);	// false: not for integration
 			mhSample.add(firstSet); // first valid sample
@@ -444,6 +472,10 @@ public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHa
 		return lpml;
 	}
 	
+	/**
+	 * Provide the log pseudomarginal likelihood for model comparison.
+	 * @return a double
+	 */
 	public double getLogPseudomarginalLikelihood() {
 		if (isConvergenceAchieved()) 
 			return lpml;

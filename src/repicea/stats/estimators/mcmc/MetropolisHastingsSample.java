@@ -1,7 +1,8 @@
 /*
- * This file is part of the repicea library.
+ * This file is part of the repicea-mathstats library.
  *
- * Copyright (C) 2009-2021 Mathieu Fortin for Rouge Epicea.
+ * Copyright (C) 2021-24 His Majesty the King in Right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,6 +21,10 @@ package repicea.stats.estimators.mcmc;
 
 import repicea.math.Matrix;
 
+/**
+ * A package class to handle the realizations of the Markov Chain.
+ * @author Mathieu Fortin - November 2021
+ */
 class MetropolisHastingsSample implements Comparable<MetropolisHastingsSample> {
 
 	final Matrix parms;

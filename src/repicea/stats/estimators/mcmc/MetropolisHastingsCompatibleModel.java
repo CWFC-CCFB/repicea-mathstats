@@ -1,7 +1,8 @@
 /*
- * This file is part of the repicea library.
+ * This file is part of the repicea-mathstats library.
  *
- * Copyright (C) 2009-2021 Mathieu Fortin for Rouge Epicea.
+ * Copyright (C) 2021-24 His Majesty the King in Right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,8 +30,7 @@ import repicea.stats.estimators.AbstractEstimator.EstimatorCompatibleModel;
 public interface MetropolisHastingsCompatibleModel extends EstimatorCompatibleModel {
 
 	/**
-	 * Return the log-likelihood of the parameters. <br>
-	 * <br>
+	 * Return the log-likelihood of the parameters. <p>
 	 * The model implementation is handled by the class implementing this interface. In the
 	 * context of mixed-effects model, the vector of parameters (the argument parms) must 
 	 * also include the random effects.
@@ -41,8 +41,7 @@ public interface MetropolisHastingsCompatibleModel extends EstimatorCompatibleMo
 	public double getLogLikelihood(Matrix parms);
 
 	/**
-	 * Return the number of subjects. <br>
-	 * <br>
+	 * Return the number of subjects. <p>
 	 * If the model is a mixed-effects model, the number of subjects must match the number of random effects.
 	 * Otherwise, it should be the number of observations. 
 	 * 
@@ -50,8 +49,32 @@ public interface MetropolisHastingsCompatibleModel extends EstimatorCompatibleMo
 	 */
 	public int getNbSubjects();
 	
+	/**
+	 * Provide the likelihood of a particular subject.<p>
+	 * In the mixed model implementation, the subject is the highest hierarchical level (e.g. the plot).
+	 * @param parms the parameter estimates
+	 * @param subjectId an integer that stands for the id of the subject
+	 * @return the likelihood (a double)
+	 */
 	public double getLikelihoodOfThisSubject(Matrix parms, int subjectId);
 	
+	/**
+	 * Return the sampler.<p>
+	 * The sampler contains the starting values of the parameter estimates plus
+	 * their variances. The variances are often assumed to be the square of the product 
+	 * of the parameter estimate by the coefVar argument. 
+	 * @param coefVar a multiplicative factor for the variance. 
+	 * @return a GaussianDistribution instance that will act as the sampler in the Metropolis-Hastings algorithm
+	 */
 	public GaussianDistribution getStartingParmEst(double coefVar);
+	
+	
+	/**
+	 * Set the prior distributions of the different fixed and random parameters.<p>
+	 * These distributions are set using the {@link MetropolisHastingsPriorHandler#addFixedEffectDistribution(repicea.stats.distributions.ContinuousDistribution, Integer...)} 
+	 * and the {@link MetropolisHastingsPriorHandler#addRandomEffectVariance(GaussianDistribution, repicea.stats.distributions.ContinuousDistribution, Integer...)} public methods.
+	 * @param handler a MetropolisHastingsPriorHandler instance
+	 */
+	public void setPriorDistributions(MetropolisHastingsPriorHandler handler);
 	
 }

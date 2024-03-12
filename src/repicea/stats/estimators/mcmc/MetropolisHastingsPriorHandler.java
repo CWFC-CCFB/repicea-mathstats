@@ -1,7 +1,8 @@
 /*
- * This file is part of the repicea library.
+ * This file is part of the repicea-mathstats library.
  *
- * Copyright (C) 2009-2021 Mathieu Fortin for Rouge Epicea.
+ * Copyright (C) 2021-24 His Majesty the King in Right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,13 +37,16 @@ import repicea.stats.distributions.GaussianDistribution;
  */
 public class MetropolisHastingsPriorHandler {
 	
-	private final Map<ContinuousDistribution, List<Integer>> distributions;
+	private final Map<ContinuousDistribution, Integer> distributions;
 	private final Map<GaussianDistribution, ContinuousDistribution> randomEffectDistributions;
 	private final List<GaussianDistribution> randomEffectList;
 	private int nbElements;
 
+	/**
+	 * Package constructor.
+	 */
 	MetropolisHastingsPriorHandler() {
-		distributions = new LinkedHashMap<ContinuousDistribution, List<Integer>>();
+		distributions = new LinkedHashMap<ContinuousDistribution, Integer>();
 		randomEffectDistributions = new HashMap<GaussianDistribution, ContinuousDistribution>();
 		randomEffectList = new ArrayList<GaussianDistribution>();
 	}
@@ -56,21 +60,21 @@ public class MetropolisHastingsPriorHandler {
 		for (ContinuousDistribution d : distributions.keySet()) {
 			updateRandomEffectVariance(d, realizedParameters);
 			Matrix thisR = d.getRandomRealization();
-			List<Integer> indices = distributions.get(d);
-			realizedParameters.setElements(indices, thisR);
+			int index = distributions.get(d);
+			realizedParameters.setElements(turnIntIntoArray(index), thisR);
 		}
 		return realizedParameters;
 	}
 
 	/**
 	 * Update the variance of the random effects on the fly.
-	 * @param d the distribution
-	 * @param realizedParameters the realized parameters
+	 * @param d a ContinuousDistribution instance that stands for the distribution of a particular random effect
+	 * @param realizedParameters the realized parameters generated from one realization of the Metropolis-Hastings algorithm.
 	 */
 	private void updateRandomEffectVariance(ContinuousDistribution d, Matrix realizedParameters) {
 		if (randomEffectDistributions.containsKey(d)) {	// it is a random effect. So we must update its variance
 			ContinuousDistribution varianceDist = randomEffectDistributions.get(d);
-			int index = distributions.get(varianceDist).get(0);	// TODO FP MF2021-11-01 here we assume that there is only one index 
+			int index = distributions.get(varianceDist);	
 			Matrix realizedRandomEffectVariance = realizedParameters.getSubMatrix(index, index, 0, 0);
 			((GaussianDistribution) d).setVariance(SymmetricMatrix.convertToSymmetricIfPossible(realizedRandomEffectVariance));
 		}
@@ -83,22 +87,16 @@ public class MetropolisHastingsPriorHandler {
 	 */
 	double getLogProbabilityDensity(Matrix realizedParameters) {
 		double logProb = 0;
+		
 		for (ContinuousDistribution d : distributions.keySet()) {
 			if (!randomEffectDistributions.containsKey(d)) {	// we do not consider the random effects in the probability density of the prior
-				List<Integer> indices = distributions.get(d);
-				double thisProb = d.getProbabilityDensity(realizedParameters.getSubMatrix(indices, null));
+				int index = distributions.get(d);
+				double thisProb = d.getProbabilityDensity(realizedParameters.getSubMatrix(turnIntIntoArray(index), null));
 				if (thisProb == 0d) {
 					return Double.NEGATIVE_INFINITY;
 				}
 				logProb += Math.log(thisProb);
 			}
-//			updateRandomEffectVarianceIfNeedsBe(d, m);
-//			List<Integer> indices = distributions.get(d);
-//			double thisProb = d.getProbabilityDensity(m.getSubMatrix(indices, null));
-//			if (thisProb == 0d) {
-//				return 0d;
-//			}
-//			logProb += Math.log(thisProb);
 		}
 		return logProb;
 	}
@@ -113,15 +111,6 @@ public class MetropolisHastingsPriorHandler {
 				logProb += Math.log(thisProb);
 			}
 		}
-//		for (GaussianDistribution d : randomEffectList) {
-//			updateRandomEffectVariance(d, realizedParameters);
-//			List<Integer> indices = distributions.get(d);
-//			double thisProb = d.getProbabilityDensity(realizedParameters.getSubMatrix(indices, null));
-//			if (thisProb == 0d) {
-//				return Double.NEGATIVE_INFINITY;
-//			}
-//			logProb += Math.log(thisProb);
-//		}
 		return logProb;
 	}
 	
@@ -131,24 +120,56 @@ public class MetropolisHastingsPriorHandler {
 		} else {
 			GaussianDistribution d = randomEffectList.get(i);
 			updateRandomEffectVariance(d, realizedParameters);
-			List<Integer> indices = distributions.get(d);
-			return d.getProbabilityDensity(realizedParameters.getSubMatrix(indices, null));
+			int index = distributions.get(d);
+			return d.getProbabilityDensity(realizedParameters.getSubMatrix(turnIntIntoArray(index), null));
 		}
-		
-	}
-	
-	
-
-	public void addFixedEffectDistribution(ContinuousDistribution dist, Integer... indices) {
-		List<Integer> ind = Arrays.asList(indices);
-		distributions.put(dist, ind);
-		nbElements += ind.size();
 	}
 
-	public void addRandomEffectVariance(GaussianDistribution dist, ContinuousDistribution variancePrior, Integer... indices) {
-		addFixedEffectDistribution(dist, indices);
+	
+	private List<Integer> turnIntIntoArray(int i) {
+		return Arrays.asList(new Integer[] {i});
+	}
+	
+	/**
+	 * Add a prior distribution for a fixed effect parameter.
+	 * @param dist a ContinuousDistribution instance
+	 * @param indices the indices of the parameters associated with this distribution
+	 */
+	public void addFixedEffectDistribution(ContinuousDistribution dist, int index) {
+//		List<Integer> ind = Arrays.asList(indices);
+		distributions.put(dist, index);
+//		nbElements += ind.size();
+		nbElements++;
+	}
+
+	/**
+	 * Add a prior distribution for a random effect variance effect parameter.<p>
+	 * @param dist a GaussianDistribution instance that stands for the distribution of a particular random effect.
+	 * @param variancePrior a ContinuousDistribution instance that stands for the prior distribution of the random effect variance.
+	 * @param indices some integers standing for the indices of the subjects on which the random effect applies
+	 */
+	public void addRandomEffectVariance(GaussianDistribution dist, ContinuousDistribution variancePrior, int index) {
+		addFixedEffectDistribution(dist, index);
 		randomEffectDistributions.put(dist, variancePrior);
 		randomEffectList.add(dist);
+	}
+
+	/**
+	 * Check if any prior distribution has been set.
+	 * @return true if there is NO prior distribution in the handler yet.
+	 */
+	public boolean isEmpty() {
+		return distributions.isEmpty();
+	}
+	
+	/**
+	 * Clear the prior distributions.
+	 */
+	public void clear() {
+		nbElements = 0;
+		distributions.clear();
+		randomEffectDistributions.clear();
+		randomEffectList.clear();
 	}
 
 }
