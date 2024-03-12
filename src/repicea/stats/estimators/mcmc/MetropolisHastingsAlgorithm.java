@@ -408,7 +408,7 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 	
 	/**
 	 * Estimate the posterior distributions of the parameters.<p>
-	 * The estimation follows these steps:<p>
+	 * The estimation follows these steps:
 	 * <ul>
 	 * <li> The acceptance rates are balanced across the parameters.
 	 * <li> The global acceptance rate is re-adjusted during the burn-in period.

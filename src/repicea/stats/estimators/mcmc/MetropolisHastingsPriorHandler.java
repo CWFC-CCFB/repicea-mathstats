@@ -133,7 +133,7 @@ public class MetropolisHastingsPriorHandler {
 	/**
 	 * Add a prior distribution for a fixed effect parameter.
 	 * @param dist a ContinuousDistribution instance
-	 * @param indices the indices of the parameters associated with this distribution
+	 * @param index the index of the parameter associated with this distribution
 	 */
 	public void addFixedEffectDistribution(ContinuousDistribution dist, int index) {
 //		List<Integer> ind = Arrays.asList(indices);
@@ -146,7 +146,7 @@ public class MetropolisHastingsPriorHandler {
 	 * Add a prior distribution for a random effect variance effect parameter.<p>
 	 * @param dist a GaussianDistribution instance that stands for the distribution of a particular random effect.
 	 * @param variancePrior a ContinuousDistribution instance that stands for the prior distribution of the random effect variance.
-	 * @param indices some integers standing for the indices of the subjects on which the random effect applies
+	 * @param index the index of the parameter associated with this random effect
 	 */
 	public void addRandomEffectVariance(GaussianDistribution dist, ContinuousDistribution variancePrior, int index) {
 		addFixedEffectDistribution(dist, index);

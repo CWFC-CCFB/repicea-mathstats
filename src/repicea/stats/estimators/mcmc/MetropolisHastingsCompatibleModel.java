@@ -71,8 +71,8 @@ public interface MetropolisHastingsCompatibleModel extends EstimatorCompatibleMo
 	
 	/**
 	 * Set the prior distributions of the different fixed and random parameters.<p>
-	 * These distributions are set using the {@link MetropolisHastingsPriorHandler#addFixedEffectDistribution(repicea.stats.distributions.ContinuousDistribution, Integer...)} 
-	 * and the {@link MetropolisHastingsPriorHandler#addRandomEffectVariance(GaussianDistribution, repicea.stats.distributions.ContinuousDistribution, Integer...)} public methods.
+	 * These distributions are set using the {@link MetropolisHastingsPriorHandler#addFixedEffectDistribution(repicea.stats.distributions.ContinuousDistribution, int)} 
+	 * and the {@link MetropolisHastingsPriorHandler#addRandomEffectVariance(GaussianDistribution, repicea.stats.distributions.ContinuousDistribution, int)} public methods.
 	 * @param handler a MetropolisHastingsPriorHandler instance
 	 */
 	public void setPriorDistributions(MetropolisHastingsPriorHandler handler);
