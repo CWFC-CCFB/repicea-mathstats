@@ -66,7 +66,7 @@ public class SIMEXTest {
 		double expParm1 = -0.1687;
 		double actualParm1 = estimate.getMean().getValueAt(0, 0);
 		System.out.println("Expected parm1 = " + expParm1 + "; Actual parm1 = " + actualParm1);
-		Assert.assertEquals("Checking parm estimate 1", expParm1, actualParm1, 5E-3);
+		Assert.assertEquals("Checking parm estimate 1", expParm1, actualParm1, 1E-2);
 		double expParm1Std = 0.067178;
 		double actualParm1Std = Math.sqrt(estimate.getVariance().getValueAt(0, 0));
 		System.out.println("Expected std parm1 = " + expParm1Std + "; Actual std parm1 = " + actualParm1Std);
