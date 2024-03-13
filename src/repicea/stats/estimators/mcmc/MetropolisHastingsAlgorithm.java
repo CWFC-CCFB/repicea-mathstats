@@ -19,7 +19,6 @@
  */
 package repicea.stats.estimators.mcmc;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,9 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-import repicea.io.FormatField;
-import repicea.io.javacsv.CSVField;
-import repicea.io.javacsv.CSVWriter;
 import repicea.math.Matrix;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataSet;
@@ -75,7 +71,7 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 	}
 
 	/**
-	 * Export the final selection of parameter samples.<p>
+	 * Export the final selection of parameter samples to file.<p>
 	 * The final selection excludes the burn in period. It consists of a subsample of 
 	 * the Markov Chain. One sample is selected every x sample. The x parameter is set through
 	 * the {@link MetropolisHastingsParameters#oneEach} member.
@@ -83,26 +79,61 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 	 * @throws IOException if an I/O error occurs
 	 */
 	public void exportMetropolisHastingsSample(String filename) throws IOException {
+		DataSet dataSet = this.convertMetropolisHastingsSampleToDataSet();
+		dataSet.save(filename);
+		
+//		if (isConvergenceAchieved() && finalMetropolisHastingsSampleSelection != null) {
+//			CSVWriter writer = null;
+//			for (MetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
+//				if (writer == null) {
+//					writer = new CSVWriter(new File(filename), false);
+//					List<FormatField> fieldNames = new ArrayList<FormatField>();
+//					fieldNames.add(new CSVField("LLK"));
+//					for (int j = 1; j <= sample.parms.m_iRows; j++) {
+//						fieldNames.add(new CSVField("p" + j));
+//					}
+//					writer.setFields(fieldNames);
+//				}
+//				Object[] record = new Object[sample.parms.m_iRows + 1];
+//				record[0] = sample.llk;
+//				for (int j = 1; j <= sample.parms.m_iRows; j++) {
+//					record[j] = sample.parms.getValueAt(j - 1, 0);
+//				}
+//				writer.addRecord(record);
+//			}
+//			writer.close();
+//		}
+	}
+	
+	/**
+	 * Convert the final selection of parameter samples into a DataSet object.<p>
+	 * The final selection excludes the burn in period. It consists of a subsample of 
+	 * the Markov Chain. One sample is selected every x sample. The x parameter is set through
+	 * the {@link MetropolisHastingsParameters#oneEach} member.
+	 * @return a DataSet instance
+	 */
+	public DataSet convertMetropolisHastingsSampleToDataSet() {
 		if (isConvergenceAchieved() && finalMetropolisHastingsSampleSelection != null) {
-			CSVWriter writer = null;
+			DataSet dataSet = null;
 			for (MetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
-				if (writer == null) {
-					writer = new CSVWriter(new File(filename), false);
-					List<FormatField> fieldNames = new ArrayList<FormatField>();
-					fieldNames.add(new CSVField("LLK"));
+				if (dataSet == null) {
+					List<String> fieldNames = new ArrayList<String>();
+					fieldNames.add("LLK");
 					for (int j = 1; j <= sample.parms.m_iRows; j++) {
-						fieldNames.add(new CSVField("p" + j));
+						fieldNames.add("p" + j);
 					}
-					writer.setFields(fieldNames);
+					dataSet = new DataSet(fieldNames);
 				}
 				Object[] record = new Object[sample.parms.m_iRows + 1];
 				record[0] = sample.llk;
 				for (int j = 1; j <= sample.parms.m_iRows; j++) {
 					record[j] = sample.parms.getValueAt(j - 1, 0);
 				}
-				writer.addRecord(record);
+				dataSet.addObservation(record);;
 			}
-			writer.close();
+			return dataSet;
+		} else {
+			throw new UnsupportedOperationException("The meta model has not converged yet or the final sample is empty!");
 		}
 	}
 	
