@@ -71,7 +71,7 @@ public class MetropolisHastingsTest {
 
 		@Override
 		public List<String> getOtherParameterNames() {
-			return null;
+			return new ArrayList<String>();
 		}
 
 		@Override
@@ -146,6 +146,9 @@ public class MetropolisHastingsTest {
 		Assert.assertEquals("Testing variance", 15.5, parameterEstimates.getValueAt(1, 0), 0.1);
 		
 		DataSet ds = mha.convertMetropolisHastingsSampleToDataSet();
+		Assert.assertEquals("Testing field name 0", "LLK", ds.getFieldNames().get(0));
+		Assert.assertEquals("Testing field name 1", "Mean", ds.getFieldNames().get(1));
+		Assert.assertEquals("Testing field name 2", "Variance", ds.getFieldNames().get(2));
 		Assert.assertEquals("Testing posterior parameter sample size", 10000, ds.getNumberOfObservations());
 	}
 	

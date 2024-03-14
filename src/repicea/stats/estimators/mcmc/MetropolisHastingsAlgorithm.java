@@ -81,46 +81,33 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 	public void exportMetropolisHastingsSample(String filename) throws IOException {
 		DataSet dataSet = this.convertMetropolisHastingsSampleToDataSet();
 		dataSet.save(filename);
-		
-//		if (isConvergenceAchieved() && finalMetropolisHastingsSampleSelection != null) {
-//			CSVWriter writer = null;
-//			for (MetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
-//				if (writer == null) {
-//					writer = new CSVWriter(new File(filename), false);
-//					List<FormatField> fieldNames = new ArrayList<FormatField>();
-//					fieldNames.add(new CSVField("LLK"));
-//					for (int j = 1; j <= sample.parms.m_iRows; j++) {
-//						fieldNames.add(new CSVField("p" + j));
-//					}
-//					writer.setFields(fieldNames);
-//				}
-//				Object[] record = new Object[sample.parms.m_iRows + 1];
-//				record[0] = sample.llk;
-//				for (int j = 1; j <= sample.parms.m_iRows; j++) {
-//					record[j] = sample.parms.getValueAt(j - 1, 0);
-//				}
-//				writer.addRecord(record);
-//			}
-//			writer.close();
-//		}
 	}
 	
 	/**
 	 * Convert the final selection of parameter samples into a DataSet object.<p>
-	 * The final selection excludes the burn in period. It consists of a subsample of 
-	 * the Markov Chain. One sample is selected every x sample. The x parameter is set through
-	 * the {@link MetropolisHastingsParameters#oneEach} member.
+	 * In case of convergence, the final selection excludes the burn in period. 
+	 * It consists of a subsample of the Markov Chain. One sample is selected every x sample. 
+	 * The x parameter is set through the {@link MetropolisHastingsParameters#oneEach} member. <p>
+	 * In case of non-convergence, the final selection is the complete sample until it stopped. In 
+	 * this particular case, the log issues a warning.
+	 * 
 	 * @return a DataSet instance
 	 */
 	public DataSet convertMetropolisHastingsSampleToDataSet() {
-		if (isConvergenceAchieved() && finalMetropolisHastingsSampleSelection != null) {
+		if (finalMetropolisHastingsSampleSelection != null) {
+			if (!isConvergenceAchieved()) {
+				REpiceaLogManager.logMessage(getLoggerName(), Level.WARNING, getLogMessagePrefix(), "The Markov Chain has not converged. This is the complete sample of parameters until the chain was stopped without subsamble selection!");
+			}
 			DataSet dataSet = null;
 			for (MetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
 				if (dataSet == null) {
 					List<String> fieldNames = new ArrayList<String>();
 					fieldNames.add("LLK");
+					List<String> parmNames = new ArrayList<String>();
+					parmNames.addAll(model.getEffectList());
+					parmNames.addAll(model.getOtherParameterNames());
 					for (int j = 1; j <= sample.parms.m_iRows; j++) {
-						fieldNames.add("p" + j);
+						fieldNames.add(parmNames.get(j - 1));
 					}
 					dataSet = new DataSet(fieldNames);
 				}
@@ -131,9 +118,14 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 				}
 				dataSet.addObservation(record);;
 			}
+			dataSet.indexFieldType();
 			return dataSet;
 		} else {
-			throw new UnsupportedOperationException("The meta model has not converged yet or the final sample is empty!");
+			if (isConvergenceAchieved()) {
+				throw new UnsupportedOperationException("The Markov Chain has converged but the final sample is empty! You might have deserialized a light version of a meta-model.");
+			} else {
+				throw new UnsupportedOperationException("The Markov Chain has not converged yet!");
+			}
 		}
 	}
 	
@@ -476,6 +468,9 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 					this.lpml = calculateLogPseudomarginalLikelihood();
 					REpiceaLogManager.logMessage(getLoggerName(), Level.FINE, getLogMessagePrefix(), "Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
 					converged = true;
+				} else {	// 
+					finalMetropolisHastingsSampleSelection = mhSample;
+					converged = false;
 				}
 			}
 		} catch (Exception e1) {
