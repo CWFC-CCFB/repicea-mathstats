@@ -122,4 +122,27 @@ public class LinearModelTest {
 		Assert.assertEquals("Testing intercept estimate std", expectedInterceptStd, actualInterceptStd, 1E-8);
 	}
 
+	@Test
+	public void truncatedLinearModelTest2() throws Exception {
+		String filename = ObjectUtility.getPackagePath(getClass()) + "diameterIncrementData.csv";
+		DataSet ds = new DataSet(filename, true);
+		LinearModel lm = new LinearModel(ds, "yTrans ~ lnDt_corr + BAL*dbhCm.x + G_othersMinusBAL + meanFrostDay + meanCMI");
+		lm.doEstimation();
+		System.out.println(lm.getSummary());
+
+		Matrix sigma2Res = new Matrix(1,1,lm.getResidualVariance(),0d);
+		Matrix startingValues = lm.getParameters().matrixStack(sigma2Res, true);
+		LinearModelWithTruncatedGaussianErrorTerm lmt = new LinearModelWithTruncatedGaussianErrorTerm(ds, 
+				"yTrans ~ lnDt_corr + BAL*dbhCm.x + G_othersMinusBAL + meanFrostDay + meanCMI", 
+				startingValues, 0);
+		lmt.doEstimation();
+		System.out.println(lmt.getSummary());
+
+		double expectedIntercept = 0.4631388180861423;
+		Assert.assertEquals("Testing intercept estimate", expectedIntercept, lm.getParameters().getValueAt(0, 0), 1E-8);
+		double expectedInterceptStd = 0.04381822451441379 ;
+		double actualInterceptStd = Math.sqrt(lm.getEstimator().getParameterEstimates().getVariance().getValueAt(0, 0));
+		Assert.assertEquals("Testing intercept estimate std", expectedInterceptStd, actualInterceptStd, 1E-8);
+	}
+
 }

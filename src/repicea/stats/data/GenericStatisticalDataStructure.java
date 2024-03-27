@@ -44,8 +44,6 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 
 	protected final DataSet dataSet;
 	protected boolean isInterceptModel;
-//	protected Matrix vectorY;
-//	protected Matrix matrixX;
 	protected final LinkedHashMap<String, MathFormula> effects;
 	protected String yName;
 	
@@ -68,6 +66,7 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 	}
 
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public List getPossibleValueForDummyVariable(String fieldName, String refClass) {
 		int fieldIndex = getDataSet().getIndexOfThisField(fieldName);
@@ -112,76 +111,63 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 		Vector<String> effectsInThisInteraction = new Vector<String>();
 
 		for (String effectName : effects.keySet()) {
-			Matrix subMatrixX = null;
-			MathFormula formula;
-			if ((formula = effects.get(effectName)) != null) {	// there is a Math Formula behind this effect
-				String fName = formula.getVariables().get(0);
-				Matrix originalValues = getVectorOfThisField(fName);
-				subMatrixX = new Matrix(originalValues.m_iRows, 1);
-				for (int i = 0; i < originalValues.m_iRows; i++) {
-					formula.setVariable(fName, originalValues.getValueAt(i, 0));
-					subMatrixX.setValueAt(i, 0, formula.calculate());
-				}
-			} else {
-				StringTokenizer tkzInclusiveInteraction = new StringTokenizer(effectName, "*");
-				StringTokenizer tkzExclusiveInteraction = new StringTokenizer(effectName, ":");
-				effectsInThisInteraction.clear();
-
-				int numberOfInclusiveInteraction = tkzInclusiveInteraction.countTokens();
-				int numberOfExclusiveInteraction = tkzExclusiveInteraction.countTokens();
-
-				if (numberOfInclusiveInteraction > 1 && numberOfExclusiveInteraction > 1) {
-					throw new StatisticalDataException("Error : symbols * and : are being used at the same time in the model specification!");
-				}
-
-				boolean isAnInclusiveInteraction = numberOfInclusiveInteraction > 1;
-				StringTokenizer selectedTokenizer;
-				if (isAnInclusiveInteraction) {
-					selectedTokenizer = tkzInclusiveInteraction;
+			StringTokenizer tkzExclusiveInteraction = new StringTokenizer(effectName, ":");
+			effectsInThisInteraction.clear();
+			while (tkzExclusiveInteraction.hasMoreTokens()) {
+				effectsInThisInteraction.add(tkzExclusiveInteraction.nextToken());
+			}
+			Matrix matXForThisEffect = null;
+			for (String singleEffect : effectsInThisInteraction) {
+				Matrix matXtmp;
+				MathFormula formula;
+				if ((formula = effects.get(singleEffect)) != null) {	// there is a Math Formula behind this effect
+					String fName = formula.getVariables().get(0);
+					Matrix originalValues = getVectorOfThisField(fName);
+					matXtmp = new Matrix(originalValues.m_iRows, 1);
+					for (int i = 0; i < originalValues.m_iRows; i++) {
+						formula.setVariable(fName, originalValues.getValueAt(i, 0));
+						matXtmp.setValueAt(i, 0, formula.calculate());
+					}
 				} else {
-					selectedTokenizer = tkzExclusiveInteraction;
-				}
-
-				while (selectedTokenizer.hasMoreTokens()) {
-					effectsInThisInteraction.add(selectedTokenizer.nextToken());
-				}
-
-				Matrix matrixTmp;
-				for (String effect : effectsInThisInteraction) {
-
-					int indexOfReferenceClass = effect.indexOf("#");
+					int indexOfReferenceClass = singleEffect.indexOf("#");
 					String refClass = null;
 					if (indexOfReferenceClass != -1) {
-						refClass = effect.substring(indexOfReferenceClass + 1);
-						effect = effect.substring(0, indexOfReferenceClass);
+						refClass = singleEffect.substring(indexOfReferenceClass + 1);
+						singleEffect = singleEffect.substring(0, indexOfReferenceClass);
 					}
 
-					Class<?> fieldType = dataSet.getFieldTypeOfThisField(effect);
+					Class<?> fieldType = dataSet.getFieldTypeOfThisField(singleEffect);
 					if (Number.class.isAssignableFrom(fieldType)) {		// it is either a double or an integer
-						matrixTmp = getVectorOfThisField(effect);
+						matXtmp = getVectorOfThisField(singleEffect);
 					} else {
-						matrixTmp = computeDummyVariables(effect, refClass);
-					}
-
-					if (subMatrixX == null) {
-						subMatrixX = matrixTmp;
-					} else {
-						subMatrixX = MatrixUtility.combineMatrices(subMatrixX, matrixTmp);
+						matXtmp = computeDummyVariables(singleEffect, refClass);
 					}
 				}
+				matXForThisEffect = matXForThisEffect == null ?
+						matXtmp :
+							MatrixUtility.combineMatrices(matXForThisEffect, matXtmp);
 			}
-
-			if (matrixX == null) {
-				matrixX = subMatrixX;
-			} else {
-				matrixX = matrixX.matrixStack(subMatrixX, false);
-			}
+			matrixX = matrixX == null ? 
+					matXForThisEffect :
+						matrixX.matrixStack(matXForThisEffect, false);
 		}
 		return matrixX;
 	}
 
 	@Override
 	public Matrix constructVectorY() {return dataSet.getVectorOfThisField(yName);}
+	
+	private List<String> getLongNamedEffects(String modelEffects) {
+		List<String> longNamedEffects = new ArrayList<String>();
+		for (String longNamedOperator : MathOperator.NamedOperators.keySet()) {
+			List<String> longNamedEffectsForThisOperator = ObjectUtility.extractSequences(modelEffects, longNamedOperator + "(", ")");
+			if (longNamedEffectsForThisOperator.size() > 1) {
+				for (int i = 1; i < longNamedEffectsForThisOperator.size(); i++)
+					longNamedEffects.add(longNamedEffectsForThisOperator.get(i));
+			}
+		}
+		return longNamedEffects;
+	}
 	
 	@Override
 	public void setModelDefinition(String modelDefinition) {
@@ -194,14 +180,15 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 		yName = responseAndFixedEffects.get(0);
 		String modelEffects = responseAndFixedEffects.get(1);
 
-		List<String> longNamedEffects = new ArrayList<String>();
-		for (String longNamedOperator : MathOperator.NamedOperators.keySet()) {
-			List<String> longNamedEffectsForThisOperator = ObjectUtility.extractSequences(modelEffects, longNamedOperator + "(", ")");
-			if (longNamedEffectsForThisOperator.size() > 1) {
-				for (int i = 1; i < longNamedEffectsForThisOperator.size(); i++)
-					longNamedEffects.add(longNamedEffectsForThisOperator.get(i));
-			}
-		}
+//		List<String> longNamedEffects = new ArrayList<String>();
+//		for (String longNamedOperator : MathOperator.NamedOperators.keySet()) {
+//			List<String> longNamedEffectsForThisOperator = ObjectUtility.extractSequences(modelEffects, longNamedOperator + "(", ")");
+//			if (longNamedEffectsForThisOperator.size() > 1) {
+//				for (int i = 1; i < longNamedEffectsForThisOperator.size(); i++)
+//					longNamedEffects.add(longNamedEffectsForThisOperator.get(i));
+//			}
+//		}
+		List<String> longNamedEffects = getLongNamedEffects(modelEffects);
 
 		Map<String, String> longNamedEffectsMap = new HashMap<String, String>();
 		int id = 0;
@@ -213,18 +200,78 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 			id++;
 		}
 		
-		List<String> effectList = ObjectUtility.decomposeUsingToken(modelEffects, "+");
 		effects.clear();
+		List<String> effectsInThisInteraction = new ArrayList<String>();
+		List<String> effectAndInteractionList = ObjectUtility.decomposeUsingToken(modelEffects, "+");
 
-		for (String effectName : effectList) {
-			MathFormula formula = null;
-			if (longNamedEffectsMap.containsKey(effectName)) {
-				String originalEffectName = longNamedEffectsMap.get(effectName);
-				formula = extractFormulaIfAny(originalEffectName);
+		for (String effectOrInteraction : effectAndInteractionList) {
+			StringTokenizer tkzInclusiveInteraction = new StringTokenizer(effectOrInteraction, "*");
+			StringTokenizer tkzExclusiveInteraction = new StringTokenizer(effectOrInteraction, ":");
+			effectsInThisInteraction.clear();
+
+			int numberOfInclusiveInteraction = tkzInclusiveInteraction.countTokens();
+			int numberOfExclusiveInteraction = tkzExclusiveInteraction.countTokens();
+
+			if (numberOfInclusiveInteraction > 1 && numberOfExclusiveInteraction > 1) {
+				throw new StatisticalDataException("Error : symbols * and : are being used at the same time in the model specification!");
 			}
-			effects.put(effectName, formula);
+
+			boolean isAnInclusiveInteraction = numberOfInclusiveInteraction > 1;
+			if (isAnInclusiveInteraction) {
+				while (tkzInclusiveInteraction.hasMoreTokens()) {
+					effectsInThisInteraction.add(tkzInclusiveInteraction.nextToken());
+				}
+				Collections.sort(effectsInThisInteraction);
+				effectsInThisInteraction.addAll(getAllCombinations(effectsInThisInteraction));
+			} else {
+				List<String> tempColl = new ArrayList<String>();
+				while (tkzExclusiveInteraction.hasMoreTokens()) {
+					tempColl.add(tkzExclusiveInteraction.nextToken());
+				}
+				Collections.sort(tempColl);
+				String interaction = "";
+				for (int i = 0; i < tempColl.size(); i++)
+					interaction = i == tempColl.size() - 1 ? 
+							interaction + tempColl.get(i) :
+								interaction + tempColl.get(i) + ":";
+				effectsInThisInteraction.add(interaction);
+			}
+			for (String effectName : effectsInThisInteraction) {
+				if (!effects.containsKey(effectName)) {
+					MathFormula formula = null;
+					if (longNamedEffectsMap.containsKey(effectName)) {
+						String originalEffectName = longNamedEffectsMap.get(effectName);
+						formula = extractFormulaIfAny(originalEffectName);
+					}
+					effects.put(effectName, formula);
+				}
+			}
 		}
 	}
+	
+	protected static final List<String> getAllCombinations(List<String> simpleEffects) {
+		List<String> outputList = new ArrayList<String>();
+		List<String> uniqueValues = new ArrayList<String>();
+		for (String str : simpleEffects) {
+			if (!uniqueValues.contains(str)) {
+				uniqueValues.add(str);
+			}
+		}
+		if (uniqueValues.size() == 2) {
+			outputList.add(uniqueValues.get(0) + ":" + uniqueValues.get(1)); 
+		} else if (uniqueValues.size() == 3) {
+			for (int i = 0; i < uniqueValues.size() - 1; i++) {
+				for (int j = i+1; j < uniqueValues.size(); j++) {
+					outputList.add(uniqueValues.get(i) + ":" + uniqueValues.get(j));
+				}
+			}
+			outputList.add(uniqueValues.get(0) + ":" + uniqueValues.get(1) + ":" + uniqueValues.get(2));
+		} else {
+			throw new InvalidParameterException("Interactions with more than 3 effects are not allowed!");
+		}
+		return outputList;
+	}
+	
 	
 	private MathFormula extractFormulaIfAny(String effectName) {
 		boolean isLongNamedOperator = false;
