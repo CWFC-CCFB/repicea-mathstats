@@ -141,7 +141,6 @@ public class MetropolisHastingsTest {
 		mha.doEstimation();
 		System.out.println(mha.getReport());
 		Matrix parameterEstimates = mha.getFinalParameterEstimates();
-		
 		Assert.assertEquals("Testing mean", 2.49, parameterEstimates.getValueAt(0, 0), 0.1);
 		Assert.assertEquals("Testing variance", 15.5, parameterEstimates.getValueAt(1, 0), 0.1);
 		
@@ -151,7 +150,39 @@ public class MetropolisHastingsTest {
 		Assert.assertEquals("Testing field name 2", "Variance", ds.getFieldNames().get(2));
 		Assert.assertEquals("Testing posterior parameter sample size", 10000, ds.getNumberOfObservations());
 	}
-	
-	
-	
+
+	@Test
+	public void noGridTest() {
+		MetropolisHastingsCompatibleModel model = new MetropolisHastingsCompatibleModelImpl(100);
+		MetropolisHastingsAlgorithm mha = new MetropolisHastingsAlgorithm(model, "mh", "MH");
+		model.setPriorDistributions(mha.getPriorHandler());
+		mha.simParms.nbInitialGrid = 0;
+		double coefVar = 0.01;
+		GaussianDistribution samplingDist = model.getStartingParmEst(coefVar);
+		MetropolisHastingsSample firstSet = mha.getFirstSetOfParameters(samplingDist);
+		GaussianDistribution refSamplingDist = model.getStartingParmEst(coefVar);
+		Assert.assertEquals("Testing first parameter", 
+				refSamplingDist.getMean().getValueAt(0,0),
+				firstSet.parms.getValueAt(0, 0), 1E-8);
+		Assert.assertEquals("Testing second parameter", 
+				refSamplingDist.getMean().getValueAt(1,0),
+				firstSet.parms.getValueAt(1, 0), 1E-8);
+	}
+
+	@Test
+	public void withGridTest() {
+		MetropolisHastingsCompatibleModel model = new MetropolisHastingsCompatibleModelImpl(100);
+		MetropolisHastingsAlgorithm mha = new MetropolisHastingsAlgorithm(model, "mh", "MH");
+		model.setPriorDistributions(mha.getPriorHandler());
+		mha.simParms.nbInitialGrid = 1000;
+		double coefVar = 0.01;
+		GaussianDistribution samplingDist = model.getStartingParmEst(coefVar);
+		MetropolisHastingsSample firstSet = mha.getFirstSetOfParameters(samplingDist);
+		GaussianDistribution refSamplingDist = model.getStartingParmEst(coefVar);
+		Assert.assertTrue("Testing first parameter", Math.abs(
+				refSamplingDist.getMean().getValueAt(0,0) - firstSet.parms.getValueAt(0, 0)) > 1E-8);
+		Assert.assertTrue("Testing secondirst parameter", Math.abs(
+				refSamplingDist.getMean().getValueAt(0,0) - firstSet.parms.getValueAt(0, 0)) > 1E-8);
+	}
+
 }
