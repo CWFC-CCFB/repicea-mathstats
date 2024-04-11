@@ -148,13 +148,13 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 		return loggerName;
 	}
 	
-	private MetropolisHastingsSample findFirstSetOfParameters(int desiredSize, boolean isForIntegral) {
+	private MetropolisHastingsSample findFirstSetOfParameters(int desiredSize) {
 		long startTime = System.currentTimeMillis();
 		double llk = Double.NEGATIVE_INFINITY;
 		List<MetropolisHastingsSample> myFirstList = new ArrayList<MetropolisHastingsSample>();
 		while (myFirstList.size() < desiredSize) {
 			Matrix parms = priors.getRandomRealization();
-			llk = isForIntegral ? model.getLogLikelihood(parms) : model.getLogLikelihood(parms) + priors.getLogProbabilityDensityOfRandomEffects(parms) + priors.getLogProbabilityDensity(parms); // if isForIntegral then there is no need for the density of the parameters since the random realizations account for the distribution of the prior 
+			llk = model.getLogLikelihood(parms) + priors.getLogProbabilityDensityOfRandomEffects(parms) + priors.getLogProbabilityDensity(parms); 
 			if (llk > Double.NEGATIVE_INFINITY) {
 				myFirstList.add(new MetropolisHastingsSample(parms, llk));
 				if (myFirstList.size()%1000 == 0) {
@@ -428,6 +428,16 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 		finalMetropolisHastingsSampleSelection = null;
 		converged = false;
 	}
+
+	MetropolisHastingsSample getFirstSetOfParameters(GaussianDistribution samplingDist) {
+		return simParms.isGridEnabled() ?
+				findFirstSetOfParameters(simParms.nbInitialGrid) :
+					new MetropolisHastingsSample(samplingDist.getMean(), // those are the initial parameters
+							model.getLogLikelihood(samplingDist.getMean()) + 
+							priors.getLogProbabilityDensityOfRandomEffects(samplingDist.getMean()) + 
+							priors.getLogProbabilityDensity(samplingDist.getMean()));
+	}
+	
 	
 	/**
 	 * Estimate the posterior distributions of the parameters.<p>
@@ -450,7 +460,7 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 				model.setPriorDistributions(getPriorHandler());
 			}
 			List<MetropolisHastingsSample> mhSample = new ArrayList<MetropolisHastingsSample>();
-			MetropolisHastingsSample firstSet = findFirstSetOfParameters(simParms.nbInitialGrid, false);	// false: not for integration
+			MetropolisHastingsSample firstSet = getFirstSetOfParameters(samplingDist);
 			mhSample.add(firstSet); // first valid sample
 			boolean completed = balanceVariance(firstSet, samplingDist);
 			if (completed) {
