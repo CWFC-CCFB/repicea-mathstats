@@ -81,5 +81,15 @@ public class MetropolisHastingsParameters {
 	 * @return a boolean
 	 */
 	public boolean isGridEnabled() {return nbInitialGrid > 0;}
+	
+	@Override
+	public String toString() {
+		return 	"MCMC Metropolis-Hastings simulation parameters" + System.lineSeparator() +
+				"Nb initial grid = " + this.nbInitialGrid + System.lineSeparator() +
+				"Nb burn in = " + this.nbBurnIn + System.lineSeparator() +
+				"Nb accepted realizations = " + this.nbAcceptedRealizations + System.lineSeparator() +
+				"One each = " + this.oneEach + System.lineSeparator() +
+				"Nb internal iterations = " + this.nbInternalIter;
+	}
 
 }

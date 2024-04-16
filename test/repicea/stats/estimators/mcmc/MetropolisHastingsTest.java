@@ -132,6 +132,7 @@ public class MetropolisHastingsTest {
 		mhcm =(MetropolisHastingsCompatibleModel) deserializer.readObject();
 		
 		MetropolisHastingsAlgorithm mha = new MetropolisHastingsAlgorithm(mhcm, "mh", "MH");
+		System.out.println(mha.getSimulationParameters().toString());
 //		Level l = Level.FINE;
 //		ConsoleHandler ch = new ConsoleHandler();
 //		ch.setLevel(l);
