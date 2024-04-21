@@ -73,9 +73,9 @@ public class MetropolisHastingsPriorHandler {
 	 */
 	private void updateRandomEffectVariance(ContinuousDistribution d, Matrix realizedParameters) {
 		if (randomEffectDistributions.containsKey(d)) {	// it is a random effect. So we must update its variance
-			ContinuousDistribution varianceDist = randomEffectDistributions.get(d);
-			int index = distributions.get(varianceDist);	
-			Matrix realizedRandomEffectVariance = realizedParameters.getSubMatrix(index, index, 0, 0);
+			ContinuousDistribution stdPrior = randomEffectDistributions.get(d);
+			int index = distributions.get(stdPrior);	
+			Matrix realizedRandomEffectVariance = realizedParameters.getSubMatrix(index, index, 0, 0).elementWisePower(2d); // power 2 because we are dealing with the standard deviation
 			((GaussianDistribution) d).setVariance(SymmetricMatrix.convertToSymmetricIfPossible(realizedRandomEffectVariance));
 		}
 	}
@@ -143,14 +143,18 @@ public class MetropolisHastingsPriorHandler {
 	}
 
 	/**
-	 * Add a prior distribution for a random effect variance effect parameter.<p>
+	 * Add a prior distribution for a random effect standard deviation.<p>
+	 * 
+	 * When assuming the existence of a random effect, it is good practice to assume
+	 * the standard deviation is uniformly distributed and not the variance (Gelman 2006). 
 	 * @param dist a GaussianDistribution instance that stands for the distribution of a particular random effect.
-	 * @param variancePrior a ContinuousDistribution instance that stands for the prior distribution of the random effect variance.
+	 * @param stdPrior a ContinuousDistribution instance that stands for the prior distribution of the random effect standard deviation.
 	 * @param index the index of the parameter associated with this random effect
+	 * @see <a href=https://doi.org/10.1214/06-BA117A> Gelman 2006 </a>
 	 */
-	public void addRandomEffectVariance(GaussianDistribution dist, ContinuousDistribution variancePrior, int index) {
+	public void addRandomEffectStandardDeviation(GaussianDistribution dist, ContinuousDistribution stdPrior, int index) {
 		addFixedEffectDistribution(dist, index);
-		randomEffectDistributions.put(dist, variancePrior);
+		randomEffectDistributions.put(dist, stdPrior);
 		randomEffectList.add(dist);
 	}
 

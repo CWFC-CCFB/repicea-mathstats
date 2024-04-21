@@ -36,8 +36,12 @@ import repicea.stats.estimators.AbstractEstimator;
 import repicea.util.REpiceaLogManager;
 
 /**
- * An implementation of the MCMC Metropolis-Hastings algorithm.
+ * An implementation of the MCMC Metropolis-Hastings algorithm.<p>
+ * If the model implementation assumes the existence of random effects, it is 
+ * their standard deviation that should be modeled and not their variance (Gelman 2006).
+ * 
  * @author Mathieu Fortin - September 2021
+ * @see <a href=https://doi.org/10.1214/06-BA117A> Gelman 2006 </a>
  */
 public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHastingsCompatibleModel> {
 		
