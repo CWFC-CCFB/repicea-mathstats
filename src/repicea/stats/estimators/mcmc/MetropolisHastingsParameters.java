@@ -56,9 +56,10 @@ public class MetropolisHastingsParameters {
 	 * Set the size of the initial grid.<p>
 	 * The realizations are generated at random and that with the greatest likelihood is selected as
 	 * starting value for the Markov Chain. If this member is set to a value equal to or smaller than 0,
-	 * then the grid is disabled.
+	 * then the grid is disabled.<p>
+	 * The grid is disabled by default.
 	 */
-	public int nbInitialGrid = 10000;	
+	public int nbInitialGrid = 0;	
 
 	/**
 	 * An empty constructor with default values.
