@@ -501,14 +501,14 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 		for (int i = 0; i < nbSubjects; i++) {
 			double sum = 0;
 			for (MetropolisHastingsSample s : finalMetropolisHastingsSampleSelection) {
-				double lk_i = model.getLikelihoodOfThisSubject(s.parms, i);
+				double lk_i = model.getLikelihoodOfThisSubject(s.parms, i) * 
+						getPriorHandler().getProbabilityDensityOfThisRandomEffect(s.parms, i);
 				sum += 1d / lk_i;
 			}
 			sum /= finalMetropolisHastingsSampleSelection.size();
 			double cpo_i = 1d / sum;
 			lpml += Math.log(cpo_i);
 		}
-//		lpml /= nbSubjects;			// This division is a typo in de la Cruz et al. (2016). Validated with Hoque (2017) and Ibrahim et al. (2001 p.228).
 		return lpml;
 	}
 	

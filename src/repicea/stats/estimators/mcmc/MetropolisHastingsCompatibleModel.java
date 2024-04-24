@@ -33,13 +33,26 @@ public interface MetropolisHastingsCompatibleModel extends EstimatorCompatibleMo
 	 * Return the log-likelihood of the parameters. <p>
 	 * The model implementation is handled by the class implementing this interface. In the
 	 * context of mixed-effects model, the vector of parameters (the argument parms) must 
-	 * also include the random effects.
-	 * 
+	 * also include the random effects.<p>
+	 * By default, this method 
+	 * <ol>
+	 * <li> iterates on the subjects, 
+	 * <li> computes their likelihood, 
+	 * <li> converts it to log-likelihood and
+	 * <li> returns the sum of the subject log-likelihoods
+	 * </ol>
 	 * @param parms the model parameters (a Matrix instance)
 	 * @return the log-likelihood of the parameters.
 	 */
-	public double getLogLikelihood(Matrix parms);
+	public default double getLogLikelihood(Matrix parms) {
+		double llk = 0;
+		for (int i = 0; i < getNbSubjects(); i++) {
+			llk += Math.log(getLikelihoodOfThisSubject(parms, i));
+		}
+		return llk;
+	}
 
+	
 	/**
 	 * Return the number of subjects. <p>
 	 * If the model is a mixed-effects model, the number of subjects must match the number of random effects.
