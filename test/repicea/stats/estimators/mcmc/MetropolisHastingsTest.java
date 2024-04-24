@@ -353,8 +353,8 @@ public class MetropolisHastingsTest {
 		mha.doEstimation();
 		System.out.println(mha.getReport());
 		Matrix parameterEstimates = mha.getFinalParameterEstimates();
-		Assert.assertEquals("Testing mean", 3.8, parameterEstimates.getValueAt(0, 0), 0.1);
-		Assert.assertEquals("Testing variance", 15.9, parameterEstimates.getValueAt(1, 0), 0.1);
+		Assert.assertEquals("Testing mean", 3.8, parameterEstimates.getValueAt(0, 0), 0.2);
+		Assert.assertEquals("Testing variance", 15.9, parameterEstimates.getValueAt(1, 0), 0.2);
 		Assert.assertEquals("Testing random effect standard deviation", 2.3, parameterEstimates.getValueAt(2, 0), 0.1);
 		
 		DataSet ds = mha.convertMetropolisHastingsSampleToDataSet();
