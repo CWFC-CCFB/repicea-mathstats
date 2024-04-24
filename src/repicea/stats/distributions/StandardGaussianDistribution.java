@@ -49,7 +49,7 @@ public class StandardGaussianDistribution implements ContinuousDistribution, Pos
 	
 	/**
 	 * This method returns the single instance of the StandardGaussianDistribution class.
-	 * @return a StandardGaussianDistribution instance
+	 * @return a StandardGaussianDistribution instance
 	 */
 	public static StandardGaussianDistribution getInstance() {
 		if (Singleton == null) {
