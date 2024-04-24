@@ -40,7 +40,7 @@ public interface MetropolisHastingsCompatibleModel extends EstimatorCompatibleMo
 	 * <li> computes their likelihood, 
 	 * <li> converts it to log-likelihood and
 	 * <li> returns the sum of the subject log-likelihoods
-	 * <ol>
+	 * </ol>
 	 * @param parms the model parameters (a Matrix instance)
 	 * @return the log-likelihood of the parameters.
 	 */
