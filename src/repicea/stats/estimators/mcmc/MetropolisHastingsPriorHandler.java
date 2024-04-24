@@ -41,6 +41,7 @@ public class MetropolisHastingsPriorHandler {
 	private final Map<GaussianDistribution, ContinuousDistribution> randomEffectDistributions;
 	private final List<GaussianDistribution> randomEffectList;
 	private int nbElements;
+	private List<Integer> commodityArray; // a commodity array for random effect density calculation
 
 	/**
 	 * Package constructor.
@@ -51,6 +52,13 @@ public class MetropolisHastingsPriorHandler {
 		randomEffectList = new ArrayList<GaussianDistribution>();
 	}
 
+	private List<Integer> getCommodityArray() {
+		if (commodityArray == null) {
+			commodityArray = new ArrayList<Integer>();
+		}
+		return commodityArray;
+	}
+	
 	/**
 	 * Provide a realization of the parameters (fixed and random).
 	 * @return a Matrix instance
@@ -114,7 +122,7 @@ public class MetropolisHastingsPriorHandler {
 		return logProb;
 	}
 	
-	private double getProbabilityDensityOfThisRandomEffect(Matrix realizedParameters, int i) {
+	double getProbabilityDensityOfThisRandomEffect(Matrix realizedParameters, int i) {
 		if (randomEffectList.isEmpty()) {
 			return 1d;		// no random effect then prob = 1
 		} else {
@@ -127,7 +135,10 @@ public class MetropolisHastingsPriorHandler {
 
 	
 	private List<Integer> turnIntIntoArray(int i) {
-		return Arrays.asList(new Integer[] {i});
+		List<Integer> array = getCommodityArray();
+		array.clear();
+		array.add(i);
+		return array;
 	}
 	
 	/**
