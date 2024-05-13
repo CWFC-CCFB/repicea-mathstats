@@ -150,4 +150,30 @@ public class REpiceaRandomTest {
 	}
 
 
+	@Test
+	public void testChiSquareMeanAndVariance() {
+		int upsilon = 100;
+		double expectedMean = upsilon;
+		double expectedVariance = 2 * upsilon;
+		REpiceaRandom randomGenerator = new REpiceaRandom();
+		int maxIter = 500000;
+		MonteCarloEstimate estimate = new MonteCarloEstimate();
+		Matrix realization;
+		long initial = System.currentTimeMillis();
+		for (int i = 0; i < maxIter; i++) {
+			realization = new Matrix(1,1);
+			realization.setValueAt(0, 0, randomGenerator.nextChiSquare(upsilon));
+			estimate.addRealization(realization);
+		}
+		long finalTime = System.currentTimeMillis() - initial;
+		System.out.println("Time to compute deviates = " + finalTime);
+
+		double actualMean = estimate.getMean().getValueAt(0, 0);
+		double actualVariance = estimate.getVariance().getValueAt(0, 0);
+		System.out.println ("Simulated mean = " + actualMean + "; Expected variance = " + expectedMean);
+		Assert.assertEquals("Testing mean for chi-squared random values", expectedMean, actualMean, 5E-2);
+		System.out.println ("Simulated variance = " + actualVariance + "; Expected variance = " + expectedVariance);
+		Assert.assertEquals("Testing mean for chi-squared random values", expectedVariance, actualVariance, .4);
+	}
+
 }

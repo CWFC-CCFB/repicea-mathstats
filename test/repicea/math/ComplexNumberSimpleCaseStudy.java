@@ -21,7 +21,6 @@ package repicea.math;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,14 +29,11 @@ import java.util.Map;
 import repicea.io.FormatField;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
-import repicea.math.utility.GammaUtility;
-import repicea.math.utility.MathUtility;
 import repicea.stats.Distribution;
 import repicea.stats.Distribution.Type;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.estimates.ComplexMonteCarloEstimate;
 import repicea.stats.estimates.MonteCarloEstimate;
-import repicea.stats.sampling.SamplingUtility;
 import repicea.util.ObjectUtility;
 
 /**
@@ -144,47 +140,15 @@ public class ComplexNumberSimpleCaseStudy {
 			return invXtXChol;
 		}
 		
-		private Matrix sampleResiduals(int n) {
-			if (!sampleIndexMap.containsKey(n)) {
-				List<Integer> sampleIndex = new ArrayList<Integer>();
-				for (int i = 0; i < n; i++)
-					sampleIndex.add(i);
-				sampleIndexMap.put(n, sampleIndex);
-			}
-			
-			List<Integer> index = SamplingUtility.getSample(sampleIndexMap.get(n), n, true);
-			Matrix sampledResiduals = residuals.getSubMatrix(index, null, false); // we do not sort the indices
-			return sampledResiduals;
-		}
-		
-		Matrix getRandomDeviate(List<Double> xValues, Transformation t, boolean useNonParametricMethod) {
+		Matrix getRandomDeviate(List<Double> xValues) {
 			Matrix xMat = createMatrixX(xValues);
 			Matrix betaDeviates = getOmegaChol().multiply(StatisticalUtility.drawRandomVector(betaHat.m_iRows, Distribution.Type.GAUSSIAN)).scalarMultiply(sigmaHat);
 			Matrix betaHat_b = betaHat.add(betaDeviates);
-			
-			Matrix epsilon_b = useNonParametricMethod ? 
-					sampleResiduals(xMat.m_iRows) :
-						StatisticalUtility.drawRandomVector(xMat.m_iRows, Type.GAUSSIAN).scalarMultiply(sigmaHat);
-			
+			Matrix epsilon_b = StatisticalUtility.drawRandomVector(xMat.m_iRows, Type.GAUSSIAN).scalarMultiply(sigmaHat);
 			Matrix result = xMat.multiply(betaHat_b).add(epsilon_b);
-			return convertPredictionToOriginalScale(result, t);
+			return result.expMatrix();
 		}
 		
-		private Matrix convertPredictionToOriginalScale(Matrix transScalePred, Transformation t) {
-			switch(t) {
-			case Sqr:
-				return transScalePred.elementWisePower(2d);
-			case Exp:
-				return transScalePred.expMatrix();
-			case Log:
-				return transScalePred.logMatrix();
-			case Sqrt:
-				return transScalePred.elementWisePower(.5);
-			default:
-				throw new InvalidParameterException("This transformation " + t.name() + " is not supported!");
-			}
-		}
-
 		Matrix createMatrixX(List<Double> xValues) {
 			Matrix xMat = new Matrix(xValues.size(),2);
 			for (int i = 0; i < xValues.size(); i++) {
@@ -251,19 +215,7 @@ public class ComplexNumberSimpleCaseStudy {
 			return xBeta.scalarMultiply(Math.exp(sigma2Hat) - 1);
 		}
 
-//		private Matrix getSmearingEstimate(List<Double> xValues, Transformation t) {
-//			Matrix xBeta = getXBeta(xValues);
-//			Matrix res_hat = sample.getVectorY().subtract(sample.getMatrixX().multiply(betaHat));
-//			Matrix result = null;
-//			for (int i = 0; i < res_hat.m_iRows; i++) {
-//				result = result == null ?
-//						convertPredictionToOriginalScale(xBeta.scalarAdd(res_hat.getValueAt(i, 0)), t) :
-//							result.add(convertPredictionToOriginalScale(xBeta.scalarAdd(res_hat.getValueAt(i, 0)), t));	
-//			}
-//			return result.scalarMultiply(1d / res_hat.m_iRows);
-//		}
-		
-		ComplexMatrix getComplexRandomDeviate(List<Double> xValues, Transformation t, boolean useNonParametricMethod) {
+		ComplexMatrix getComplexRandomDeviate(List<Double> xValues) {
 			double chiSquareDeviate = StatisticalUtility.getRandom().nextChiSquare(upsilon);
 			ComplexNumber sigma2Hat_b = new ComplexNumber(sigma2Hat, sigma2Hat * (chiSquareDeviate - upsilon) / upsilon);
 			ComplexNumber sigmaHat_b = sigma2Hat_b.sqrt();
@@ -277,214 +229,21 @@ public class ComplexNumberSimpleCaseStudy {
 				Matrix xMat_ii = xMat.getSubMatrix(ii, ii, 0, xMat.m_iCols - 1);
 				ComplexNumber betaDeviates = new ComplexNumber(0, xMat_ii.multiply(betaDeviatesMat).getValueAt(0, 0));
 				betaDeviates = betaDeviates.multiply(sigmaHat_b);
-
-				Number epsilon_b = useNonParametricMethod ?
-						sampleResiduals(1).getValueAt(0, 0) :
-							sigmaHat_b.multiply(StatisticalUtility.getRandom().nextGaussian());
+				Number epsilon_b = sigmaHat_b.multiply(StatisticalUtility.getRandom().nextGaussian());
 				double xBetaHat = xMat_ii.multiply(betaHat).getValueAt(0, 0); 
 				ComplexNumber mean = betaDeviates.add(xBetaHat);
 				ComplexNumber result = mean.add(epsilon_b);
-				switch(t) {
-				case Sqr:
-					cnArray[ii] = result.square();
-					break;
-				case Exp:
-					cnArray[ii] = result.exp();
-					break;
-				case Log:
-					cnArray[ii] = result.log();
-					break;
-				case Sqrt:
-					cnArray[ii] = result.sqrt();
-					break;
-				default:
-					throw new InvalidParameterException("The transformation " + t.name() + " is not supported!");
-				}
+				cnArray[ii] = result.exp();
 			}
 			return new ComplexMatrix(cnArray);
 		}
 
-		private Matrix getGregoireEstimator(List<Double> xValues) {
-			Matrix xMat = createMatrixX(xValues);
-			Matrix varXBeta = xMat.multiply(invXtX).multiply(xMat.transpose()).scalarMultiply(sigma2Hat).diagonalVector();
-			Matrix pred = getXBeta(xValues);
-			
-			return pred.elementWisePower(2d).subtract(varXBeta).scalarAdd(sigma2Hat);
-		}
-		
-		private ComplexMatrix getLimitApproximation(List<Double> xValues) {
-			Matrix xMat = createMatrixX(xValues);
-			Matrix omega = xMat.multiply(invXtX).multiply(xMat.transpose());
-			Matrix A = omega.diagonalVector().scalarMultiply(-1).scalarAdd(1); 
-			Matrix xBetaHat = xMat.multiply(betaHat);
-			Matrix ASigma2Hat = A.scalarMultiply(sigma2Hat);
-			Matrix expPart = xBetaHat.add(ASigma2Hat.scalarMultiply(.5)).expMatrix();
-			
-			// correction part
-			Matrix term2 = ASigma2Hat.elementWisePower(2d).scalarMultiply(-1d/(4 * upsilon));
-			Matrix term3 = ASigma2Hat.elementWisePower(3d).scalarMultiply(-1d/(6 * upsilon * upsilon));
-			Matrix term4 = ASigma2Hat.elementWisePower(4d).scalarMultiply((upsilon + 4d)/(32 * upsilon * upsilon * upsilon));
-			Matrix term5 = ASigma2Hat.elementWisePower(5d).scalarMultiply((5 * upsilon + 12d)/(120 * upsilon * upsilon * upsilon * upsilon));
-			Matrix realTerm = term2.add(term4).scalarAdd(1).elementWiseMultiply(expPart);
-			Matrix imagTerm = term3.add(term5).elementWiseMultiply(expPart);
-			return ComplexMatrix.convertMatrixToComplexMatrix(realTerm, imagTerm);
-		}
-		
-		private ComplexMatrix getLimitApproximation2(List<Double> xValues, int maxK) {
-			Matrix xMat = createMatrixX(xValues);
-			Matrix omega = xMat.multiply(invXtX).multiply(xMat.transpose());
-			Matrix A = omega.diagonalVector().scalarMultiply(-1).scalarAdd(1); 
-			Matrix xBetaHat = xMat.multiply(betaHat);
-			Matrix ASigma2Hat = A.scalarMultiply(sigma2Hat);
-			Matrix ASigma2HatDividedByUpsilon = ASigma2Hat.scalarMultiply(1d / upsilon);
-			
-			Matrix expRealPart = xBetaHat.add(ASigma2Hat.scalarMultiply(.5));
-			Matrix expImagPart = ASigma2Hat.scalarMultiply(-.5);
-			ComplexMatrix expTerm = ComplexMatrix.convertMatrixToComplexMatrix(expRealPart, expImagPart).expMatrix();
-
-			Matrix onlyZeros = new Matrix(expTerm.m_iRows, expTerm.m_iCols);
-			ComplexMatrix correction = null;
-			for (int k = 0; k < maxK; k++) {
-				ComplexMatrix cmTemp = ComplexMatrix.convertMatrixToComplexMatrix(onlyZeros, ASigma2HatDividedByUpsilon).elementWisePower(k);
-				cmTemp.scalarMultiply(GammaUtility.gamma(k + 0.5 * upsilon) / GammaUtility.gamma(0.5 * upsilon) / MathUtility.Factorial(k));
-				correction = correction == null ? cmTemp : correction.add(cmTemp);
-			}
-			
-			return expTerm.elementWiseMultiply(correction);
-		}
-
-		private ComplexMatrix getLimitApproximation3(List<Double> xValues) {
-			Matrix xMat = createMatrixX(xValues);
-			Matrix omega = xMat.multiply(invXtX).multiply(xMat.transpose());
-			Matrix A = omega.diagonalVector().scalarMultiply(-1).scalarAdd(1); 
-			Matrix xBetaHat = xMat.multiply(betaHat);
-			Matrix ASigma2Hat = A.scalarMultiply(sigma2Hat);
-			Matrix expPart = xBetaHat.add(ASigma2Hat.scalarMultiply(.5)).expMatrix();
-
-			Matrix zeros = new Matrix(expPart.m_iRows, 1);
-			Matrix ones = new Matrix(expPart.m_iRows, 1, 1, 0);
-			ComplexMatrix numerator = ComplexMatrix.convertMatrixToComplexMatrix(zeros, ASigma2Hat.scalarMultiply(-0.5)).expMatrix();
-			ComplexMatrix invDenominator = ComplexMatrix.convertMatrixToComplexMatrix(ones, ASigma2Hat.scalarMultiply(-1d / upsilon)).elementWisePower(-upsilon * .5);
-			ComplexMatrix ratio = numerator.elementWiseMultiply(invDenominator);
-			ComplexMatrix expPartComp = ComplexMatrix.convertMatrixToComplexMatrix(expPart, zeros);
-			return expPartComp.elementWiseMultiply(ratio);
-		}
-		
-
-		private ComplexMatrix getLimitApproximation4(List<Double> xValues) {
-			Matrix xMat = createMatrixX(xValues);
-			Matrix omega = xMat.multiply(invXtX).multiply(xMat.transpose());
-			Matrix A = omega.diagonalVector().scalarMultiply(-1).scalarAdd(1); 
-			Matrix xBetaHat = xMat.multiply(betaHat);
-			Matrix ASigma2Hat = A.scalarMultiply(sigma2Hat);
-			Matrix realExponent = xBetaHat.add(ASigma2Hat.scalarMultiply(.5));
-			Matrix imagExponent = ASigma2Hat.scalarMultiply(-.5);
-			ComplexMatrix numerator = ComplexMatrix.convertMatrixToComplexMatrix(realExponent, imagExponent).expMatrix();
-
-			Matrix ones = new Matrix(numerator.m_iRows, 1, 1, 0);
-			ComplexMatrix invDenominator = ComplexMatrix.convertMatrixToComplexMatrix(ones, ASigma2Hat.scalarMultiply(-1d / upsilon)).elementWisePower(-upsilon * .5);
-			ComplexMatrix ratio = numerator.elementWiseMultiply(invDenominator);
-			return ratio;
-		}
-
-		private ComplexMatrix getLimitApproximation5(List<Double> xValues) {
-			Matrix xMat = createMatrixX(xValues);
-			Matrix omega = xMat.multiply(invXtX).multiply(xMat.transpose());
-			Matrix A = omega.diagonalVector().scalarMultiply(-1).scalarAdd(1); 
-			Matrix xBetaHat = xMat.multiply(betaHat);
-			Matrix ASigma2Hat = A.scalarMultiply(sigma2Hat);
-			Matrix realExponent = xBetaHat.add(ASigma2Hat.scalarMultiply(.5));
-			Matrix imagExponent = ASigma2Hat.scalarMultiply(-.5);
-
-			Matrix ones = new Matrix(imagExponent.m_iRows, 1, 1, 0);
-			ComplexMatrix logExpression = ComplexMatrix.convertMatrixToComplexMatrix(ones, ASigma2Hat.scalarMultiply(-1d / upsilon)).logMatrix().scalarMultiply(-upsilon * .5);
-			
-			ComplexMatrix numerator = ComplexMatrix.convertMatrixToComplexMatrix(realExponent, imagExponent).add(logExpression).expMatrix();
-			return numerator;
-		}
-
 	}
 	
-	/**
-	 * Test the limit of the estimator.
-	 * @param sampleSize
-	 * @param t
-	 * @param nbInnerReal
-	 */
-	@SuppressWarnings("rawtypes")
-	static void testLimitEstimator(int sampleSize, Transformation t, int nbInnerReal) {
-		List parms = getParameters(t);
-		
-		Matrix trueBeta = (Matrix) parms.get(0);
-		double trueVariance = (Double) parms.get(1);
-		
-		List<Double> xValues = new ArrayList<Double>();
-		for (double i = 3; i <= 10; i++) {
-			xValues.add(i);
-		}
-
-		Sample s = Sample.createSample(trueBeta, trueVariance, sampleSize);
-		Model m = s.getModel(null); // null means we are relying on the estimated variance
-
-		ComplexMonteCarloEstimate cmcEstimator = new ComplexMonteCarloEstimate();
-
-		for (int innerReal = 0; innerReal < nbInnerReal; innerReal++) {
-			cmcEstimator.addRealization(m.getComplexRandomDeviate(xValues, t, false)); // false : regular parametric method
-		}
-
-		ComplexMatrix cmcMean = cmcEstimator.getMean();
-		
-		ComplexMatrix cmcMeanLimit = m.getLimitApproximation(xValues);
-
-		ComplexMatrix cmcMeanLimitAlt = m.getLimitApproximation5(xValues);
-
-		System.out.println("Beta hat = " + m.betaHat.toString());
-		System.out.println("Sigma2 hat = " + m.sigma2Hat);
-		
-		for (int i = 0; i < cmcMean.m_iRows; i++) {
-			System.out.println("Mean = " + cmcMean.getValueAt(i, 0).toString() + 
-					" - Limit1 = " + cmcMeanLimit.getValueAt(i, 0).toString() + 
-					" - Limit2 = " + cmcMeanLimitAlt.getValueAt(i, 0).toString());
-		}
-	}
-
-	
-
-	/**
-	 * Provide the population parameters.
-	 * @param t a Transformation enum
-	 * @return a List of Matrix and double
-	 */
-	private static List getParameters(Transformation t) {
-		List outputList = new ArrayList();
-		Matrix trueBeta = new Matrix(2,1);
-		double trueVariance;
-		if (t == Transformation.Exp) {
-			trueBeta.setValueAt(0, 0, 2);
-			trueBeta.setValueAt(1, 0, 0.25);
-			trueVariance = 1d;
-		} else if (t == Transformation.Sqr) {  
-			trueBeta.setValueAt(0, 0, 2);
-			trueBeta.setValueAt(1, 0, 0.25);
-			trueVariance = 2d;
-		} else {
-			trueBeta.setValueAt(0, 0, 2.5);
-			trueBeta.setValueAt(1, 0, 4);
-			trueVariance = 12d;
-		}
-		outputList.add(trueBeta);
-		outputList.add(trueVariance);
-		return outputList;
-	}
-	
-	static enum Transformation {Sqr, Exp, Log, Sqrt}
-	
-	
-
-	private static void doRun(Transformation t, int sampleSize, int nbRealizations) throws IOException {
-		System.out.println("Simulating " + t.name() + " with sample size n = " + sampleSize);
+	private static void doRun(int sampleSize, int nbRealizations, double b0, double b1, double s2) throws IOException {
+		System.out.println("Simulating [" + b0 + "; " + b1 + "; " + s2 +"] with sample size n = " + sampleSize);
 		int nbInnerReal = 10000;
-		String filename = ObjectUtility.getPackagePath(ComplexNumberSimpleCaseStudy.class) + "caseStudyPseudo_" + t.name() + sampleSize +".csv";
+		String filename = ObjectUtility.getPackagePath(ComplexNumberSimpleCaseStudy.class) + "caseStudy_" + s2 + "_" + sampleSize +".csv";
 		filename = filename.replace("bin/", "");
 		CSVWriter writer = new CSVWriter(new File(filename), false);
 		List<FormatField> fields = new ArrayList<FormatField>();
@@ -499,21 +258,16 @@ public class ComplexNumberSimpleCaseStudy {
 		fields.add(new CSVField("MC_NEW_imag"));
 		fields.add(new CSVField("MC_NEWVar_real"));
 		fields.add(new CSVField("MC_NEWVar_imag"));
-		if (t == Transformation.Exp) {
-			fields.add(new CSVField("Beauchamp"));
-			fields.add(new CSVField("BeauchampVar"));
-			fields.add(new CSVField("Baskerville"));
-			fields.add(new CSVField("BaskervilleVar"));
-		} else if (t == Transformation.Sqr) {
-			fields.add(new CSVField("Gregoire"));
-		}
+		fields.add(new CSVField("Beauchamp"));
+		fields.add(new CSVField("BeauchampVar"));
+		fields.add(new CSVField("Baskerville"));
+		fields.add(new CSVField("BaskervilleVar"));
 		writer.setFields(fields);
 		
-		
-		List parms = getParameters(t);
-		
-		Matrix trueBeta = (Matrix) parms.get(0);
-		double trueVariance = (Double) parms.get(1);
+		Matrix trueBeta = new Matrix(2,1);
+		trueBeta.setValueAt(0, 0, b0);
+		trueBeta.setValueAt(1, 0, b1);
+		double trueVariance = s2;
 		
 		List<Double> xValues = new ArrayList<Double>();
 		for (double i = 3; i <= 10; i++) {
@@ -525,26 +279,17 @@ public class ComplexNumberSimpleCaseStudy {
 			}
 			Sample s = Sample.createSample(trueBeta, trueVariance, sampleSize);
 			Model m = s.getModel(null); // null means we are relying on the estimated variance
-			Matrix beauchampAndOlsonEstimator = null;
-			Matrix beauchampAndOlsonEstimatorVar = null;
-			Matrix baskervilleEstimator = null;
-			Matrix baskervilleEstimatorVar = null;
-			Matrix gregoireEstimator = null;
-			if (t == Transformation.Exp) {
-				beauchampAndOlsonEstimator = m.getBeauchampAndOlsonEstimator(xValues);
-				beauchampAndOlsonEstimatorVar = m.getBeauchampAndOlsonEstimatorVariance(xValues);
-				baskervilleEstimator = m.getBaskervilleEstimator(xValues);
-				baskervilleEstimatorVar = m.getBaskervilleEstimatorVariance(xValues);
-			} else if (t == Transformation.Sqr) {
-				gregoireEstimator = m.getGregoireEstimator(xValues);
-			}
+			Matrix beauchampAndOlsonEstimator = m.getBeauchampAndOlsonEstimator(xValues);
+			Matrix beauchampAndOlsonEstimatorVar = m.getBeauchampAndOlsonEstimatorVariance(xValues);
+			Matrix baskervilleEstimator = m.getBaskervilleEstimator(xValues);
+			Matrix baskervilleEstimatorVar = m.getBaskervilleEstimatorVariance(xValues);
 						
 			MonteCarloEstimate mcEstimator = new MonteCarloEstimate();
 			ComplexMonteCarloEstimate cmcEstimator = new ComplexMonteCarloEstimate();
 
 			for (int innerReal = 0; innerReal < nbInnerReal; innerReal++) {
-				mcEstimator.addRealization(m.getRandomDeviate(xValues, t, false)); // false: regular parametric method
-				cmcEstimator.addRealization(m.getComplexRandomDeviate(xValues, t, false)); // false : regular parametric method
+				mcEstimator.addRealization(m.getRandomDeviate(xValues)); 
+				cmcEstimator.addRealization(m.getComplexRandomDeviate(xValues)); 
 			}
 			
 			Matrix mcMean = mcEstimator.getMean();
@@ -572,63 +317,19 @@ public class ComplexNumberSimpleCaseStudy {
 //				record[10] = cmcImagPart.getValueAt(ii, 0);
 				record[9] = cmPseudoVariance.getValueAt(ii, ii).realPart;
 				record[10] = cmPseudoVariance.getValueAt(ii, ii).imaginaryPart;
-				if (t == Transformation.Exp) {
-					record[11] = beauchampAndOlsonEstimator.getValueAt(ii, 0);
-					record[12] = beauchampAndOlsonEstimatorVar.getValueAt(ii, 0);
-					record[13] = baskervilleEstimator.getValueAt(ii, 0);
-					record[14] = baskervilleEstimatorVar.getValueAt(ii, 0);
-				} else  if (t == Transformation.Sqr) {
-					record[9] = gregoireEstimator.getValueAt(ii, 0);
-				}
+				record[11] = beauchampAndOlsonEstimator.getValueAt(ii, 0);
+				record[12] = beauchampAndOlsonEstimatorVar.getValueAt(ii, 0);
+				record[13] = baskervilleEstimator.getValueAt(ii, 0);
+				record[14] = baskervilleEstimatorVar.getValueAt(ii, 0);
 				writer.addRecord(record);
 			}
 		}
 		writer.close();
-
 	}
 	
-//	private static void runSimulationChiSquare(int nReal) {
-//		int upsilon = 50;
-//		double A_j = 0.8;
-//		double sigma2_hat = 1;
-//		double realPart = 0;
-//		double imagPart = 0;
-//		for (int i = 0; i < nReal; i++) {
-//			ComplexNumber exponent = new ComplexNumber(0, A_j * sigma2_hat / upsilon * (StatisticalUtility.getRandom().nextChiSquare(upsilon) - upsilon));
-//			ComplexNumber result = exponent.exp();
-//			realPart += result.realPart;
-//			imagPart += result.imaginaryPart;
-//		}
-//		System.out.println("Real part = " + (realPart/nReal));
-//		System.out.println("Imaginary part = " + (imagPart/nReal));
-//		double approx = Math.exp(- A_j * A_j * sigma2_hat * sigma2_hat / upsilon); 
-//		System.out.println("Approximation = " + approx);
-//	}
-
-	
-	private static void runSimulationChiSquareToSeries(int nReal) {
-		int upsilon = 100;
-		double sigma2 = 2d;
-		double mean = 0d;
-		for (int i = 0; i < nReal; i++) {
-			double sigma2_hat = sigma2 * StatisticalUtility.getRandom().nextChiSquare(upsilon) / upsilon;
-			mean += Math.exp(sigma2_hat/2);
-		}
-		System.out.println("Monte Carlo = " + (mean/nReal));
-
-		double series = 0d;
-		for (int k = 0; k < 20; k++) {
-			series += Math.pow(sigma2/2, k) / MathUtility.Factorial(k) * Math.pow(2,k) * GammaUtility.gamma(k + 0.5 * upsilon) / (Math.pow(upsilon, k) * GammaUtility.gamma(0.5 * upsilon));
-			System.out.println("Series (k = " + k + ") = " + series);
-		}
-		System.out.println("With sigma2 = " + (Math.exp(sigma2/2)));
-	}
 
 	public static void main(String[] arg) throws IOException {
-		testLimitEstimator(25, Transformation.Exp, 4000000);
-//		runSimulationChiSquareToSeries(1000000);
-//		runSimulationChiSquare(1000000);
-//		doRun(Transformation.Exp, 25, 10000);
+		doRun(25, 1000, 2, 0.25, 2);
 //		doRun(Transformation.Exp, 50, 10000);
 //		doRun(Transformation.Exp, 100, 10000);
 //		doRun(Transformation.Exp, 200, 10000);
