@@ -155,12 +155,7 @@ public class REpiceaRandom extends Random {
 		if (df <= 0) {
 			throw new InvalidParameterException("The number of degrees of freedom should be larger than 0");
 		}
-		double sumSquared = 0;
-		for (int i = 0; i < df; i++) {
-			double gaussian = nextGaussian();
-			sumSquared += gaussian * gaussian;
-		}
-		return sumSquared;
+		return nextGamma(df * .5, 2d);
 	}
 
 	/**

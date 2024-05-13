@@ -20,8 +20,6 @@ package repicea.math.utility;
 
 import java.security.InvalidParameterException;
 
-import repicea.stats.StatisticalUtility;
-
 public class WeibullUtility {
 
 	
