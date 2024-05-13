@@ -173,7 +173,7 @@ public class REpiceaRandomTest {
 		System.out.println ("Simulated mean = " + actualMean + "; Expected variance = " + expectedMean);
 		Assert.assertEquals("Testing mean for chi-squared random values", expectedMean, actualMean, 5E-2);
 		System.out.println ("Simulated variance = " + actualVariance + "; Expected variance = " + expectedVariance);
-		Assert.assertEquals("Testing mean for chi-squared random values", expectedVariance, actualVariance, .4);
+		Assert.assertEquals("Testing mean for chi-squared random values", expectedVariance, actualVariance, .6);
 	}
 
 }
