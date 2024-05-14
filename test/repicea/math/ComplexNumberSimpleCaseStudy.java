@@ -22,6 +22,7 @@ package repicea.math;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import java.util.Map;
 import repicea.io.FormatField;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
+import repicea.lang.REpiceaSystem;
 import repicea.stats.Distribution;
 import repicea.stats.Distribution.Type;
 import repicea.stats.StatisticalUtility;
@@ -240,12 +242,15 @@ public class ComplexNumberSimpleCaseStudy {
 
 	}
 	
-	private static void doRun(int sampleSize, int nbRealizations, double b0, double b1, double s2) throws IOException {
+	private static void doRun(int sampleSize, 
+			int nbRealizations, 
+			double b0, 
+			double b1, 
+			double s2,
+			String filename) throws IOException {
 		System.out.println("Simulating [" + b0 + "; " + b1 + "; " + s2 +"] with sample size n = " + sampleSize);
 		int nbInnerReal = 10000;
-		String filename = ObjectUtility.getPackagePath(ComplexNumberSimpleCaseStudy.class) + "caseStudy_" + s2 + "_" + sampleSize +".csv";
-		filename = filename.replace("bin/", "");
-		CSVWriter writer = new CSVWriter(new File(filename), false);
+		CSVWriter writer = new CSVWriter(new File(filename.concat("" + sampleSize + ".csv")), false);
 		List<FormatField> fields = new ArrayList<FormatField>();
 		fields.add(new CSVField("RealID"));
 		fields.add(new CSVField("b0"));
@@ -328,15 +333,22 @@ public class ComplexNumberSimpleCaseStudy {
 	}
 	
 
-	public static void main(String[] arg) throws IOException {
-		doRun(25, 1000, 2, 0.25, 2);
-//		doRun(Transformation.Exp, 50, 10000);
-//		doRun(Transformation.Exp, 100, 10000);
-//		doRun(Transformation.Exp, 200, 10000);
-//		doRun(Transformation.Exp, 100);
-//		doRun(Transformation.Exp, 200);
-//		doRun(Transformation.Sqr, 50);
-//		doRun(Transformation.Sqr, 100);
-//		doRun(Transformation.Sqr, 200);
+	public static void main(String[] args) throws IOException {
+		String filename = REpiceaSystem.retrieveArgument("-outdir", Arrays.asList(args));
+		List<Double> variances = new ArrayList<Double>();
+		variances.add(1.0);
+		variances.add(2.0);
+		for (double variance : variances) {
+			String rootFilename = filename.concat("caseStudy_" + variance + "_");
+			List<Integer> sampleSizes = new ArrayList<Integer>();
+			sampleSizes.add(25);
+			sampleSizes.add(50);
+			sampleSizes.add(100);
+			sampleSizes.add(200);
+			
+			for (int sampleSize : sampleSizes) {
+				doRun(sampleSize, 10000, 2, 0.25, variance, rootFilename);
+			}
+		}
 	}	
 }
