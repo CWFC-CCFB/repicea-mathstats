@@ -118,7 +118,7 @@ public final class ComplexNumber extends Number implements Cloneable {
 	 */
 	public ComplexNumber log() {
 		double r = absoluteValue;
-		double phi = Math.atan(imaginaryPart / realPart);
+		double phi = Math.atan2(imaginaryPart, realPart);
 		return new ComplexNumber(Math.log(r), phi);
 	}
 	
