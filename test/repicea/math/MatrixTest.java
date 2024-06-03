@@ -249,6 +249,19 @@ public class MatrixTest {
 		System.out.println("Elapsed time = " + ((System.currentTimeMillis() - startingTime) * .001));
 	}
 	
+	@Test
+	public void columnVectorEqualToItselfTest() {
+		Matrix m1 = new Matrix(10,1,1,10);
+		Assert.assertTrue("Should be equal", m1.equals(m1));
+	}
+
+	@Test
+	public void twoColumnVectorsEqualTest() {
+		Matrix m1 = new Matrix(10,1,1,10);
+		Matrix m2 = new Matrix(10,1,1,10);
+		Assert.assertTrue("Should be equal", m1.equals(m2));
+	}
+
 //	public static void main(String[] args) throws IOException {
 //		MatrixTests test = new MatrixTests();
 ////		test.speedTestInversionMatrix(100);

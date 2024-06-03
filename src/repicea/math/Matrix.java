@@ -1404,17 +1404,15 @@ public class Matrix extends AbstractMatrix<Matrix> implements Serializable, Deep
 	
 	@Override
 	public final boolean equals(Object obj) {
-		if (obj instanceof Matrix) {
+		if (super.equals(obj)) {
+			return true;
+		} else if (obj instanceof Matrix) {
 			Matrix mat = (Matrix) obj;
 			if (mat.m_iCols != m_iCols || mat.m_iRows != m_iRows) {
 				return false;
 			} else {
-				double jLength = -1;
-				for (int i = 0; i < m_afData.length; i++) {
-					if (jLength == -1) {
-						jLength = m_afData[i].length;
-					}
-					for (int j = 0; j < jLength; j++) {
+				for (int i = 0; i < m_iRows; i++) {
+					for (int j = 0; j < m_iCols; j++) {
 						if (getValueAt(i, j) != mat.getValueAt(i, j)) {
 							return false;
 						}
