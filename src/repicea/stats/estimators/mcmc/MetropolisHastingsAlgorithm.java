@@ -325,10 +325,13 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 	 * Each parameter is sampled individually. The acceptance rate is then calculated for each parameter. Depending on whether this rate is
 	 * too low or too high, the variance of the sample is re-adjusted so as to obtain balanced acceptance rates across the parameters.
 	 * @param firstSample the MetaModelMetropolisHastingsSample instance that was found through random sampling
+	 * @param mhSample the List of MetropolisHastingsSample instance
 	 * @param sampler the sampling distribution
 	 * @return a boolean true if the balancing has succeeded.
 	 */
-	private boolean balanceVariance(MetropolisHastingsSample firstSample, GaussianDistribution sampler) {
+	private boolean balanceVariance(MetropolisHastingsSample firstSample, 
+			List<MetropolisHastingsSample> mhSample,
+			GaussianDistribution sampler) {
 		long startTime = System.currentTimeMillis();
 		List<MetropolisHastingsSample> initSample = new ArrayList<MetropolisHastingsSample>();
 		initSample.add(firstSample);
@@ -404,6 +407,7 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 			acceptanceRatios = computeSuccessRates(trialMap, successMap);
 			REpiceaLogManager.logMessage(getLoggerName(), Level.FINE, getLogMessagePrefix(), "Time to balance the variance of the sample: " + (System.currentTimeMillis() - startTime) + " ms");
 			REpiceaLogManager.logMessage(getLoggerName(), Level.FINE, getLogMessagePrefix(), "Acceptance ratio = " + acceptanceRatios);
+			mhSample.add(initSample.get(initSample.size() - 1));
 		} 
 		return completed;
 	}
@@ -465,8 +469,8 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 			}
 			List<MetropolisHastingsSample> mhSample = new ArrayList<MetropolisHastingsSample>();
 			MetropolisHastingsSample firstSet = getFirstSetOfParameters(samplingDist);
-			mhSample.add(firstSet); // first valid sample
-			boolean completed = balanceVariance(firstSet, samplingDist);
+//			mhSample.add(firstSet); // first valid sample
+			boolean completed = balanceVariance(firstSet, mhSample, samplingDist);
 			if (completed) {
 				completed = generateMetropolisSample(mhSample, samplingDist);
 				if (completed) {
