@@ -217,7 +217,7 @@ public class ComplexNumberSimpleCaseStudy {
 			return xBeta.scalarMultiply(Math.exp(sigma2Hat) - 1);
 		}
 
-		ComplexMatrix getComplexRandomDeviate(List<Double> xValues) {
+		ComplexMatrix[] getComplexRandomDeviate(List<Double> xValues) {
 			double chiSquareDeviate = StatisticalUtility.getRandom().nextChiSquare(upsilon);
 			ComplexNumber sigma2Hat_b = new ComplexNumber(sigma2Hat, sigma2Hat * (chiSquareDeviate - upsilon) / upsilon);
 			ComplexNumber sigmaHat_b = sigma2Hat_b.sqrt();
@@ -226,7 +226,8 @@ public class ComplexNumberSimpleCaseStudy {
 
 			Matrix betaDeviatesMat = getOmegaChol().multiply(StatisticalUtility.drawRandomVector(betaHat.m_iRows, Distribution.Type.GAUSSIAN));
 			
-			ComplexNumber[] cnArray = new ComplexNumber[xValues.size()];
+			ComplexNumber[] cnArrayRes = new ComplexNumber[xValues.size()];
+			ComplexNumber[] cnArrayMean = new ComplexNumber[xValues.size()];
 			for (int ii = 0; ii < xValues.size(); ii++) {
 				Matrix xMat_ii = xMat.getSubMatrix(ii, ii, 0, xMat.m_iCols - 1);
 				ComplexNumber betaDeviates = new ComplexNumber(0, xMat_ii.multiply(betaDeviatesMat).getValueAt(0, 0));
@@ -234,10 +235,15 @@ public class ComplexNumberSimpleCaseStudy {
 				Number epsilon_b = sigmaHat_b.multiply(StatisticalUtility.getRandom().nextGaussian());
 				double xBetaHat = xMat_ii.multiply(betaHat).getValueAt(0, 0); 
 				ComplexNumber mean = betaDeviates.add(xBetaHat);
-				ComplexNumber result = mean.add(epsilon_b);
-				cnArray[ii] = result.exp();
+				ComplexNumber meanPlusError = mean.add(epsilon_b);
+				ComplexNumber meanPlusCorrectionFactor = mean.add(sigma2Hat_b.divide(2d));				
+				cnArrayRes[ii] = meanPlusError.exp();
+				cnArrayMean[ii] = meanPlusCorrectionFactor.exp();
 			}
-			return new ComplexMatrix(cnArray);
+			ComplexMatrix[] output = new ComplexMatrix[2];
+			output[0] = new ComplexMatrix(cnArrayRes); 
+			output[1] = new ComplexMatrix(cnArrayMean); 
+			return output;
 		}
 
 	}
@@ -267,6 +273,10 @@ public class ComplexNumberSimpleCaseStudy {
 		fields.add(new CSVField("BeauchampVar"));
 		fields.add(new CSVField("Baskerville"));
 		fields.add(new CSVField("BaskervilleVar"));
+		fields.add(new CSVField("MC_NEW_mean"));
+		fields.add(new CSVField("MC_NEW_mean_imag"));
+		fields.add(new CSVField("MC_NEW_mean_Var_real"));
+		fields.add(new CSVField("MC_NEW_mean_Var_imag"));
 		writer.setFields(fields);
 		
 		Matrix trueBeta = new Matrix(2,1);
@@ -291,21 +301,26 @@ public class ComplexNumberSimpleCaseStudy {
 						
 			MonteCarloEstimate mcEstimator = new MonteCarloEstimate();
 			ComplexMonteCarloEstimate cmcEstimator = new ComplexMonteCarloEstimate();
+			ComplexMonteCarloEstimate cmcEstimatorJustMean = new ComplexMonteCarloEstimate();
 
 			for (int innerReal = 0; innerReal < nbInnerReal; innerReal++) {
 				mcEstimator.addRealization(m.getRandomDeviate(xValues)); 
-				cmcEstimator.addRealization(m.getComplexRandomDeviate(xValues)); 
+				ComplexMatrix[] complexRealizations = m.getComplexRandomDeviate(xValues);
+				cmcEstimator.addRealization(complexRealizations[0]); 
+				cmcEstimatorJustMean.addRealization(complexRealizations[1]); 
 			}
 			
 			Matrix mcMean = mcEstimator.getMean();
 			Matrix mcVar = mcEstimator.getVariance();
 			
 			ComplexMatrix cmcMean = cmcEstimator.getMean();
-//			Matrix cmcRealPart = cmcEstimator.getVarianceRealPart();
-//			Matrix cmcImagPart = cmcEstimator.getVarianceImaginaryPart();
+			Matrix cmcRealPart = cmcEstimator.getVarianceRealPart();
+			Matrix cmcImagPart = cmcEstimator.getVarianceImaginaryPart();
 
-			ComplexSymmetricMatrix cmPseudoVariance = cmcEstimator.getPseudoVariance();
-			
+			ComplexMatrix cmcMeanJustMean = cmcEstimatorJustMean.getMean();
+			Matrix cmcMeanJustMeanRealPart = cmcEstimatorJustMean.getVarianceRealPart();
+			Matrix cmcMeanJustMeanImagPart = cmcEstimatorJustMean.getVarianceImaginaryPart();
+
 			
 			for (int ii = 0; ii < xValues.size(); ii++) {
 				Object[] record = new Object[fields.size()];
@@ -318,14 +333,16 @@ public class ComplexNumberSimpleCaseStudy {
 				record[6] = mcVar.getValueAt(ii, ii);
 				record[7] = cmcMean.getValueAt(ii, 0).realPart;
 				record[8] = cmcMean.getValueAt(ii, 0).imaginaryPart;
-//				record[9] = cmcRealPart.getValueAt(ii, 0);
-//				record[10] = cmcImagPart.getValueAt(ii, 0);
-				record[9] = cmPseudoVariance.getValueAt(ii, ii).realPart;
-				record[10] = cmPseudoVariance.getValueAt(ii, ii).imaginaryPart;
+				record[9] = cmcRealPart.getValueAt(ii, 0);
+				record[10] = cmcImagPart.getValueAt(ii, 0);
 				record[11] = beauchampAndOlsonEstimator.getValueAt(ii, 0);
 				record[12] = beauchampAndOlsonEstimatorVar.getValueAt(ii, 0);
 				record[13] = baskervilleEstimator.getValueAt(ii, 0);
 				record[14] = baskervilleEstimatorVar.getValueAt(ii, 0);
+				record[15] = cmcMeanJustMean.getValueAt(ii, 0).realPart;
+				record[16] = cmcMeanJustMean.getValueAt(ii, 0).imaginaryPart;
+				record[17] = cmcMeanJustMeanRealPart.getValueAt(ii, 0);
+				record[18] = cmcMeanJustMeanImagPart.getValueAt(ii, 0);
 				writer.addRecord(record);
 			}
 		}
@@ -342,9 +359,9 @@ public class ComplexNumberSimpleCaseStudy {
 			String rootFilename = filename.concat("caseStudy_" + variance + "_");
 			List<Integer> sampleSizes = new ArrayList<Integer>();
 			sampleSizes.add(25);
-			sampleSizes.add(50);
-			sampleSizes.add(100);
-			sampleSizes.add(200);
+//			sampleSizes.add(50);
+//			sampleSizes.add(100);
+//			sampleSizes.add(200);
 			
 			for (int sampleSize : sampleSizes) {
 				doRun(sampleSize, 10000, 2, 0.25, variance, rootFilename);
