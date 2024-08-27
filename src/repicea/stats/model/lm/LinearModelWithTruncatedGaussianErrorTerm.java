@@ -22,13 +22,17 @@ package repicea.stats.model.lm;
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
-import repicea.math.integral.TrapezoidalRule;
 import repicea.math.utility.ErrorFunctionUtility;
 import repicea.math.utility.GaussianUtility;
 import repicea.stats.data.DataSet;
 import repicea.stats.model.CompositeLogLikelihood;
 import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 
+/**
+ * A class that implements the truncated TOBIT model.
+ * @see <a href=http://doi.org/https://doi.org/10.1093/forestry/cpae017> 
+ * Fortin, M. 2024. The impact of natural constraints in linear regression of log transformed response variables. Forestry, cpae017</a>
+ */
 @SuppressWarnings("serial")
 public class LinearModelWithTruncatedGaussianErrorTerm extends LinearModel {
 
@@ -127,35 +131,8 @@ public class LinearModelWithTruncatedGaussianErrorTerm extends LinearModel {
 		
 	}
 
-	class TrapezoidalRuleFunction extends AbstractMathematicalFunction {
-
-		@Override
-		public Double getValue() {
-			double mu = getParameterValue(0);
-			double F_t = getParameterValue(1);
-			double sigma2 = getParameterValue(2);
-			double w = getParameterValue(3);
-			return Math.exp(w) * GaussianUtility.getProbabilityDensity(w, mu, sigma2) / (1 - F_t);
-		}
-
-		/*
-		 * Useless for this class.
-		 */
-		@Override
-		public Matrix getGradient() {return null;}
-
-		/*
-		 * Useless for this class.
-		 */
-		@Override
-		public SymmetricMatrix getHessian() {return null;}
-		
-	}
-
 	private static double VERY_SMALL = 1E-8;
 	private final double truncation;
-	private final TrapezoidalRuleFunction trf; 
-	private final TrapezoidalRule tr;
 	
 	/**
 	 * Constructor for maximum likelihood estimation.
@@ -167,8 +144,6 @@ public class LinearModelWithTruncatedGaussianErrorTerm extends LinearModel {
 	public LinearModelWithTruncatedGaussianErrorTerm(DataSet dataSet, String modelDefinition, Matrix startingValues, double truncation) {
 		super(dataSet, modelDefinition, startingValues);
 		this.truncation = truncation;
-		this.tr = new TrapezoidalRule(.1);
-		this.trf = new TrapezoidalRuleFunction();
 	}
 	
 	@Override
@@ -197,37 +172,33 @@ public class LinearModelWithTruncatedGaussianErrorTerm extends LinearModel {
 	}
 	
 	@Override 
-	public Matrix getPredictedOriginalScale(Matrix xMatrix) {
-		Matrix parms = getParameters();
-		double sigma2 = parms.getValueAt(parms.m_iRows - 1, 0);
+	public Matrix getPredOnLogBackTransformedScale(Matrix xMatrix, double transformationOffset, boolean varianceRequired) {
+		double sigma2 = getResidualVariance();
 		double sigma = Math.sqrt(sigma2);
 		Matrix xBeta = getXBeta(xMatrix);
-		Matrix meanValues = new Matrix(xBeta.m_iRows, 1);
+		Matrix meanValues = new Matrix(xBeta.m_iRows, varianceRequired ? 2 : 1);
 		for (int i = 0; i < xBeta.m_iRows; i++) {
 			double xBeta_i = xBeta.getValueAt(i, 0);
 			double F_t = GaussianUtility.getCumulativeProbability((truncation - xBeta_i)/sigma);
-			double meanValue;
-			if (F_t < VERY_SMALL) {
-				meanValue = Math.exp(xBeta_i + 0.5 * sigma2);
-			} else {
-				trf.setParameterValue(0, xBeta_i);
-				trf.setParameterValue(1, F_t);
-				if (i==0) {
-					trf.setParameterValue(2, sigma2);
-				}
-				trf.setParameterValue(3, truncation);
-				tr.setLowerBound(truncation);
-				tr.setUpperBound(xBeta_i + 5 * sigma);
-				meanValue = tr.getIntegralApproximation(trf, 3, true);
+			double meanValue =  (F_t < VERY_SMALL) ?
+					Math.exp(xBeta_i + 0.5 * sigma2) :
+						Math.exp(xBeta_i + 0.5 * sigma2) * ((1 + ErrorFunctionUtility.erf((xBeta_i + sigma2 - truncation)/Math.sqrt(2*sigma2)))/(2*(1-F_t))); 
+			meanValues.setValueAt(i, 0, meanValue - transformationOffset);
+			if (varianceRequired) {
+				double sqrt2Sigma2 = Math.sqrt(2 * sigma2);
+				double part1 = Math.exp(2*xBeta_i + 2* sigma2) * (1 + ErrorFunctionUtility.erf((xBeta_i + 2*sigma2 - truncation)/sqrt2Sigma2));
+				double part2 = -2 * meanValue * Math.exp(xBeta_i + .5*sigma2) * (1 + ErrorFunctionUtility.erf((xBeta_i + sigma2 - truncation)/sqrt2Sigma2));
+				double part3 = meanValue * meanValue * (1 - ErrorFunctionUtility.erf((truncation - xBeta_i)/sqrt2Sigma2));
+				double var = 1d / (2 - 2*F_t) * (part1 + part2 + part3);
+				meanValues.setValueAt(i, 1, var);
 			}
-			meanValues.setValueAt(i, 0, meanValue);
 		}
 		return meanValues;
 	}
 	
 	@Override
 	public String toString() {
-		return "Linear model with residual errors following a truncated Gaussian distribution (fitted with maximum likelihood estimator)";
+		return "Linear model with residual errors following a truncated Gaussian distribution (Truncated Tobit model)" + System.lineSeparator() +"fitted with maximum likelihood estimator";
 	}
 
 	

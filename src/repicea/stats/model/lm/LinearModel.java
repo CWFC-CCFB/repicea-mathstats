@@ -115,15 +115,18 @@ public class LinearModel extends AbstractStatisticalModel implements Predictable
 
 
 	/**
-	 * This method returns the residual variance only if the optimizer is an instance
-	 * of OLSOptimizer.
-	 * @return a Matrix with a single element
+	 * Provide the estimator of sigma2. <p>
+	 * Note that sigma2 might not be exactly the residual variances stricto sensu, depending on the model.
+	 * @return a double 
 	 */
 	public double getResidualVariance() {
 		if (getEstimator() instanceof OLSEstimator) {
 			return ((OLSEstimator) getEstimator()).getResidualVariance().getMean().getValueAt(0, 0);
+		} else if (getEstimator() instanceof MaximumLikelihoodEstimator) {
+			Matrix parms = getParameters(); 
+			return parms.getValueAt(parms.m_iRows - 1, 0);
 		} else {
-			return -1d;
+			throw new UnsupportedOperationException("The residual variance cannot be obtained from an estimator of this class: " + getEstimator().getClass().getSimpleName());
 		}
 	}
 
@@ -136,21 +139,44 @@ public class LinearModel extends AbstractStatisticalModel implements Predictable
 	}
 
 	/**
-	 * Calculate the mean predicted value on the original scale. <p>
-	 * It is assumed the transformation was a log transformation, i.e. w = log(y)
+	 * Calculate the mean predicted value on the original scale under the 
+	 * assumption the transformation was a log transformation, i.e. w = log(y).
 	 * @param xMatrix a design matrix if null the original design matrix is used
-	 * @return the mean predicted value on the original scale
+	 * @param transformationOffset a constant. If the transformation was log(y+1), then transformationOffset=1
+	 * @param varianceRequired a boolean to request the variance calculation
+	 * @return the mean predicted value and eventually its variance on the original scale
 	 */
-	public Matrix getPredictedOriginalScale(Matrix xMatrix) {
-		return getPredicted(xMatrix).scalarAdd(0.5 * getResidualVariance()).expMatrix();
+	public Matrix getPredOnLogBackTransformedScale(Matrix xMatrix, double transformationOffset, boolean varianceRequired) {
+		Matrix pred = getPredicted(xMatrix).scalarAdd(0.5 * getResidualVariance()).expMatrix().scalarAdd(-transformationOffset);
+		if (varianceRequired) {
+			Matrix var = getPredicted(xMatrix).scalarMultiply(2d).scalarAdd(getResidualVariance()).expMatrix().scalarMultiply(Math.exp(getResidualVariance()) - 1);
+			pred = pred.matrixStack(var, false);
+		}
+		return pred;
 	}
+	
+	/**
+	 * Calculate the mean predicted value on the original scale under the 
+	 * assumption the transformation was a log transformation, i.e. w = log(y).
+	 * @param transformationOffset a constant. If the transformation was log(y+1), then transformationOffset=1
+	 * @param varianceRequired a boolean to request the variance calculation
+	 * @return the mean predicted value and eventually its variance on the original scale
+	 */
+	public Matrix getPredOnLogBackTransformedScale(double transformationOffset, boolean varianceRequired) {
+		return getPredOnLogBackTransformedScale(null, transformationOffset, varianceRequired);
+	}
+	
 
 	@Override
 	public Matrix getPredicted(Matrix xMatrix) throws UnsupportedOperationException {
 		if (getEstimator().isConvergenceAchieved()) {
+			Matrix parms = getParameters();
+			parms = getEstimator() instanceof MaximumLikelihoodEstimator ? 
+					parms.getSubMatrix(0, parms.m_iRows - 2, 0, 0) :  // if is a MML estimator, we drop the last parameter as it is the residual variance by convention
+						parms;
 			return xMatrix != null ? 
-					xMatrix.multiply(getParameters()) : 
-						getMatrixX().multiply(getParameters());
+					xMatrix.multiply(parms) : 
+						getMatrixX().multiply(parms);
 		} else {
 			throw new UnsupportedOperationException("The estimator has not converged!");
 		}
