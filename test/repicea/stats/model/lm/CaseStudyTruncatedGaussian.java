@@ -44,7 +44,7 @@ class CaseStudyTruncatedGaussian {
 		LinearModel lm = new LinearModel(ds, formula);
 		lm.doEstimation();
 		ds.addField("meanPredOLS", convertMatrixToObjectArray(lm.getPredicted()));
-		ds.addField("meanPredOLSOrigScale", convertMatrixToObjectArray(lm.getPredictedOriginalScale(null).scalarAdd(-1d)));
+		ds.addField("meanPredOLSOrigScale", convertMatrixToObjectArray(lm.getPredOnLogBackTransformedScale(1d, false)));
 		System.out.println(lm.getSummary());
 		Matrix p = lm.getParameters();
 		Matrix parmsTrad = new Matrix(p.m_iRows + 1, 1);
@@ -53,7 +53,7 @@ class CaseStudyTruncatedGaussian {
 		LinearModelWithTruncatedGaussianErrorTerm truncatedModel = new LinearModelWithTruncatedGaussianErrorTerm(ds, formula, parmsTrad, 0);
 		truncatedModel.doEstimation();
 		ds.addField("meanPredMML", convertMatrixToObjectArray(truncatedModel.getPredicted()));
-		ds.addField("meanPredMMLOrigScale", convertMatrixToObjectArray(truncatedModel.getPredictedOriginalScale(null).scalarAdd(-1d)));
+		ds.addField("meanPredMMLOrigScale", convertMatrixToObjectArray(truncatedModel.getPredOnLogBackTransformedScale(1d, false))); // offset = 1 and no variance
 		System.out.println(truncatedModel.getSummary());
 		
 		String outputDatasetFilename = ObjectUtility.getPackagePath(CaseStudyTruncatedGaussian.class) + "datasetSingleObsOutput.csv";

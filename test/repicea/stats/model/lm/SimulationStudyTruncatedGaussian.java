@@ -161,7 +161,7 @@ class SimulationStudyTruncatedGaussian {
 			parmsTrad.setSubMatrix(p, 0, 0);
 			parmsTrad.setValueAt(parmsTrad.m_iRows - 1, 0, lm.getResidualVariance());
 			Matrix olsLogPred = lm.getPredicted(newData);
-			Matrix olsOrigPred = lm.getPredictedOriginalScale(newData);
+			Matrix olsOrigPred = lm.getPredOnLogBackTransformedScale(newData, 0d, false); // no offset and no variance 
 			
 			LinearModelWithTruncatedGaussianErrorTerm truncatedModel = new LinearModelWithTruncatedGaussianErrorTerm(ds, "w ~ x", parmsTrad, 0);
 			truncatedModel.doEstimation();
@@ -169,7 +169,7 @@ class SimulationStudyTruncatedGaussian {
 				Matrix truncatedParms = truncatedModel.getParameters();
 				Matrix truncatedVar = truncatedModel.getEstimator().getParameterEstimates().getVariance().diagonalVector();
 				Matrix mmlLogPred = truncatedModel.getPredicted(newData);
-				Matrix mmlOrigPred = truncatedModel.getPredictedOriginalScale(newData);
+				Matrix mmlOrigPred = truncatedModel.getPredOnLogBackTransformedScale(newData, 0d, false); // no offset and no variance
 								
 				Matrix output = parmsTrad.matrixStack(vTrad, true).matrixStack(olsLogPred, true).matrixStack(olsOrigPred,true).
 						matrixStack(truncatedParms, true).matrixStack(truncatedVar, true).matrixStack(mmlLogPred, true).matrixStack(mmlOrigPred,true);

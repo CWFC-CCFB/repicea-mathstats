@@ -22,11 +22,13 @@ package repicea.stats.model.lm;
 import java.security.InvalidParameterException;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import repicea.math.Matrix;
 import repicea.stats.data.DataSet;
+import repicea.stats.estimates.GaussianEstimate;
+import repicea.stats.estimates.MonteCarloEstimate;
+import repicea.stats.estimates.TruncatedGaussianEstimate;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.util.ObjectUtility;
 
@@ -71,11 +73,27 @@ public class LinearModelTest {
 		Assert.assertTrue("Testing the estimator is maximum likelihood", lm.getEstimator() instanceof MaximumLikelihoodEstimator);
 		lm.doEstimation();
 		System.out.println(lm.getSummary());
+		
+		double sigma2 = lm.getResidualVariance();
+		Assert.assertEquals("Testing residual variance", 0.22291524, sigma2, 1E-8);
+		
 		double expectedIntercept = -0.72290709;
 		Assert.assertEquals("Testing intercept estimate", expectedIntercept, lm.getParameters().getValueAt(0, 0), 1E-8);
 		double expectedInterceptStd = 0.05539291;
 		double actualInterceptStd = Math.sqrt(lm.getEstimator().getParameterEstimates().getVariance().getValueAt(0, 0));
 		Assert.assertEquals("Testing intercept estimate std", expectedInterceptStd, actualInterceptStd, 1E-8);
+		
+		Matrix pred = lm.getPredicted();
+		GaussianEstimate estimate = new GaussianEstimate(pred.getValueAt(0, 0), lm.getResidualVariance());
+		MonteCarloEstimate mcEstimate = new MonteCarloEstimate();
+		for (int i = 0; i < 1000000; i++) {
+			mcEstimate.addRealization(estimate.getRandomDeviate().expMatrix().scalarAdd(-1d));
+		}
+		Matrix actualPredOrig = lm.getPredOnLogBackTransformedScale(1d, true);
+		double expectedMean = mcEstimate.getMean().getValueAt(0, 0);
+		Assert.assertEquals("Testing mean on original scale", expectedMean, actualPredOrig.getValueAt(0, 0), 1E-2);
+		double expectedVariance = mcEstimate.getVariance().getValueAt(0, 0);
+		Assert.assertEquals("Testing variance on original scale", expectedVariance, actualPredOrig.getValueAt(0, 1), 1E-2);
 	}
 
 	@Test
@@ -110,11 +128,37 @@ public class LinearModelTest {
 
 		LinearModelWithTruncatedGaussianErrorTerm lm = new LinearModelWithTruncatedGaussianErrorTerm(ds, "yTrans ~ lnDt_corr + BAL + dbhCm", startingValues, 0);
 		lm.doEstimation();
+		System.out.println(lm.getSummary());
+		
 		Matrix pred = lm.getPredicted();
 		System.out.println("Predicted log scale = " + pred.getValueAt(0, 0));
-		Matrix predOriginalScale = lm.getPredictedOriginalScale(null);
-		System.out.println("Predicted original scale = " + predOriginalScale.getValueAt(0, 0));
-		System.out.println(lm.getSummary());
+		System.out.println("Variance log scale = " + lm.getResidualVariance());
+		Assert.assertEquals("Testing residual variances", 0.32382955, lm.getResidualVariance(), 1E-8);
+		
+		
+		Matrix parms = lm.getParameters();
+		parms = parms.getSubMatrix(0, parms.m_iRows - 2, 0, 0);
+		double xBeta = lm.getMatrixX().multiply(parms).getValueAt(0, 0);
+		TruncatedGaussianEstimate estimate = new TruncatedGaussianEstimate(xBeta, lm.getResidualVariance());
+		estimate.setLowerBoundValue(new Matrix(1,1));
+		
+		MonteCarloEstimate mcEstimate = new MonteCarloEstimate();
+		MonteCarloEstimate mcEstimateOrig = new MonteCarloEstimate();
+		for (int i = 0; i < 1000000; i++) {
+			Matrix randomDeviate = estimate.getRandomDeviate();
+			mcEstimate.addRealization(randomDeviate);
+			mcEstimateOrig.addRealization(randomDeviate.expMatrix().scalarAdd(-1d));
+		}
+		
+		double expectedPred = mcEstimate.getMean().getValueAt(0, 0);
+		Assert.assertEquals("Testing pred on tranformed scale", expectedPred, pred.getValueAt(0, 0), 1E-2);
+		
+		Matrix predOriginalScale = lm.getPredOnLogBackTransformedScale(1d, true); // offset = 1 no variance 
+		double expectedPredOrig = mcEstimateOrig.getMean().getValueAt(0, 0);
+		Assert.assertEquals("Testing pred on original scale", expectedPredOrig, predOriginalScale.getValueAt(0, 0), 1E-2);
+		double expectedVarianceOrig = mcEstimateOrig.getVariance().getValueAt(0, 0);
+		Assert.assertEquals("Testing variance on original scale", expectedVarianceOrig, predOriginalScale.getValueAt(0, 1), 1E-2);
+		
 		double expectedIntercept = -1.82587351;
 		Assert.assertEquals("Testing intercept estimate", expectedIntercept, lm.getParameters().getValueAt(0, 0), 1E-8);
 		double expectedInterceptStd = 0.09970163;
