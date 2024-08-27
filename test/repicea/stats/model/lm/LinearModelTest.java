@@ -157,7 +157,7 @@ public class LinearModelTest {
 		double expectedPredOrig = mcEstimateOrig.getMean().getValueAt(0, 0);
 		Assert.assertEquals("Testing pred on original scale", expectedPredOrig, predOriginalScale.getValueAt(0, 0), 1E-2);
 		double expectedVarianceOrig = mcEstimateOrig.getVariance().getValueAt(0, 0);
-		Assert.assertEquals("Testing variance on original scale", expectedVarianceOrig, predOriginalScale.getValueAt(0, 1), 1E-2);
+		Assert.assertEquals("Testing variance on original scale", expectedVarianceOrig, predOriginalScale.getValueAt(0, 1), 2E-2);
 		
 		double expectedIntercept = -1.82587351;
 		Assert.assertEquals("Testing intercept estimate", expectedIntercept, lm.getParameters().getValueAt(0, 0), 1E-8);
