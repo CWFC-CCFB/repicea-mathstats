@@ -23,20 +23,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import repicea.io.FormatField;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
 import repicea.lang.REpiceaSystem;
 import repicea.stats.Distribution;
-import repicea.stats.Distribution.Type;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.estimates.ComplexMonteCarloEstimate;
 import repicea.stats.estimates.MonteCarloEstimate;
-import repicea.util.ObjectUtility;
 
 /**
  * The ComplexNumberSimpleCaseStudy class implements a simulation study around 
@@ -51,11 +47,12 @@ public class ComplexNumberSimpleCaseStudy {
 	 * The variable x follows a uniform distribution (3,10).
 	 * @author Mathieu Fortin - December 2023
 	 */
-	static class PopulationUnit {
-		final double x;
-		final double y;
-		final int id;
-		PopulationUnit(Matrix trueBeta, double trueStd, int id) {
+	private static class PopulationUnit {
+		private final double x;
+		private final double y;
+		@SuppressWarnings("unused")
+		private final int id;
+		private PopulationUnit(Matrix trueBeta, double trueStd, int id) {
 			this.id = id;
 			x = StatisticalUtility.getRandom().nextDouble() * 7 + 3;
 			y = trueBeta.getValueAt(0, 0) + x * trueBeta.getValueAt(1, 0) + StatisticalUtility.getRandom().nextGaussian() * trueStd;
@@ -67,17 +64,18 @@ public class ComplexNumberSimpleCaseStudy {
 	 * @author Mathieu Fortin - December 2023
 	 */
 	@SuppressWarnings("serial")
-	static class Sample extends ArrayList<PopulationUnit> {
+	private static class Sample extends ArrayList<PopulationUnit> {
 		
-		static Sample createSample(Matrix trueBeta, double trueVariance, int sampleSize) {
+		private static Sample createSample(Matrix trueBeta, double trueVariance, int sampleSize) {
 			Sample s = new Sample();
 			double trueStd = Math.sqrt(trueVariance);
-			for (int i = 0; i < sampleSize; i++) 
+			for (int i = 0; i < sampleSize; i++) {
 				s.add(new PopulationUnit(trueBeta, trueStd, i));
+			}
 			return s;
 		}
 		
-		Matrix getMatrixX() {
+		private Matrix getMatrixX() {
 			Matrix xMat = new Matrix(size(), 2);
 			for (int i = 0; i < size(); i++) {
 				xMat.setValueAt(i, 0, 1d);
@@ -86,7 +84,7 @@ public class ComplexNumberSimpleCaseStudy {
 			return xMat;
 		}
 
-		Matrix getVectorY() {
+		private Matrix getVectorY() {
 			Matrix yVec = new Matrix(size(), 1);
 			for (int i = 0; i < size(); i++) {
 				yVec.setValueAt(i, 0, get(i).y);
@@ -94,16 +92,14 @@ public class ComplexNumberSimpleCaseStudy {
 			return yVec;
 		}
 		
-		Model getModel(Double sigma2) {
+		private Model getModel() {
 			Matrix xMat = getMatrixX();
 			Matrix yVec = getVectorY();
 			SymmetricMatrix invXtX = SymmetricMatrix.convertToSymmetricIfPossible(xMat.transpose().multiply(xMat).getInverseMatrix());
 			Matrix betaHat = invXtX.multiply(xMat.transpose()).multiply(yVec);
 			Matrix res = yVec.subtract(xMat.multiply(betaHat));
 			int upsilon = yVec.m_iRows - xMat.m_iCols;
-			double sigma2Hat = sigma2 != null ?
-					sigma2 :
-						res.transpose().multiply(res).getValueAt(0, 0) / upsilon;
+			double sigma2Hat = res.transpose().multiply(res).getValueAt(0, 0) / upsilon;
 			return new Model(this, betaHat, invXtX, sigma2Hat, upsilon);
 		}
 		
@@ -113,26 +109,18 @@ public class ComplexNumberSimpleCaseStudy {
 	 * A model fitted to a sample of population units.
 	 * @author Mathieu Fortin - December 2023
 	 */
-	static class Model {
-		final Matrix betaHat;
-		final SymmetricMatrix invXtX;
-		final double sigma2Hat;
-		final double sigmaHat;
-		Matrix invXtXChol;
-		final int upsilon;
-		final Sample sample;
-		final Matrix residuals;
-		final Map<Integer, List<Integer>> sampleIndexMap;
+	private static class Model {
+		private final Matrix betaHat;
+		private final SymmetricMatrix invXtX;
+		private final double sigma2Hat;
+		private Matrix invXtXChol;
+		private final int upsilon;
 		
 		Model(Sample sample, Matrix betaHat, SymmetricMatrix invXtX, double sigma2Hat, int upsilon) {
-			this.sample = sample;
 			this.betaHat = betaHat;
 			this.invXtX = invXtX; 
 			this.sigma2Hat = sigma2Hat;
 			this.upsilon = upsilon;
-			this.sigmaHat = Math.sqrt(sigma2Hat);
-			residuals = sample.getVectorY().subtract(sample.getMatrixX().multiply(betaHat));
-			sampleIndexMap = new HashMap<Integer, List<Integer>>();
 		}
 		
 		private Matrix getOmegaChol() {
@@ -142,16 +130,17 @@ public class ComplexNumberSimpleCaseStudy {
 			return invXtXChol;
 		}
 		
-		Matrix getRandomDeviate(List<Double> xValues) {
+		private Matrix getRandomDeviate(List<Double> xValues) {
 			Matrix xMat = createMatrixX(xValues);
-			Matrix betaDeviates = getOmegaChol().multiply(StatisticalUtility.drawRandomVector(betaHat.m_iRows, Distribution.Type.GAUSSIAN)).scalarMultiply(sigmaHat);
-			Matrix betaHat_b = betaHat.add(betaDeviates);
-			Matrix epsilon_b = StatisticalUtility.drawRandomVector(xMat.m_iRows, Type.GAUSSIAN).scalarMultiply(sigmaHat);
-			Matrix result = xMat.multiply(betaHat_b).add(epsilon_b);
+			double chiSquareDeviate = StatisticalUtility.getRandom().nextChiSquare(upsilon);
+			double sigma2_b = sigma2Hat + sigma2Hat * (chiSquareDeviate/upsilon - 1);
+			Matrix betaHat_b = betaHat.add(
+					getOmegaChol().multiply(StatisticalUtility.drawRandomVector(betaHat.m_iRows, Distribution.Type.GAUSSIAN)).scalarMultiply(Math.sqrt(sigma2_b)));
+			Matrix result = xMat.multiply(betaHat_b).scalarAdd(0.5 * sigma2_b);
 			return result.expMatrix();
 		}
 		
-		Matrix createMatrixX(List<Double> xValues) {
+		private Matrix createMatrixX(List<Double> xValues) {
 			Matrix xMat = new Matrix(xValues.size(),2);
 			for (int i = 0; i < xValues.size(); i++) {
 				xMat.setValueAt(i, 0, 1d);
@@ -160,7 +149,7 @@ public class ComplexNumberSimpleCaseStudy {
 			return xMat;
 		}
 		
-		Matrix getXBeta(List<Double> xValues) {
+		private Matrix getXBeta(List<Double> xValues) {
 			Matrix xMat = createMatrixX(xValues);
 			return xMat.multiply(betaHat);
 		}
@@ -185,67 +174,30 @@ public class ComplexNumberSimpleCaseStudy {
 			return output;
 		}
 
-		private Matrix getBeauchampAndOlsonEstimatorVariance(List<Double> xValues) {
-			Matrix xMat = createMatrixX(xValues);
-			Matrix xBeta = getXBeta(xValues);
-			
-			Matrix output = new Matrix(xValues.size(), 1);
-			
-			for (int ii = 0; ii < xValues.size(); ii++) {
-				double term1 = Math.exp(2*xBeta.getValueAt(ii, 0) + sigma2Hat);
-				Matrix xMat_ii = xMat.getSubMatrix(ii, ii, 0, xMat.m_iCols - 1);
-				int n = upsilon + xMat_ii.m_iCols;
-				Matrix xInvXtXxT = xMat_ii.multiply(invXtX).multiply(xMat_ii.transpose());
-				double phi = xInvXtXxT.getValueAt(0, 0) * n;
-				double sigma2hat2 = sigma2Hat * sigma2Hat;
-				double term2 = Math.exp(sigma2Hat) * (1 - 2 * sigma2Hat * (phi + 2*sigma2Hat)/n + 
-						2* sigma2hat2 * (4*sigma2hat2 + 2 * (16d/3 + 2 * phi) * sigma2Hat + phi * phi + 4 * phi) / (n * n));
-				double term3 = 1 - sigma2Hat/n * (sigma2Hat + 2 * phi) + sigma2hat2 / (2*n*n) * (sigma2hat2 + (16d/3 + 4*phi) * sigma2Hat + 4 * phi * phi + 8 * phi);
-				output.setValueAt(ii, 0, term1 * (term2 - term3));
-			}
-			return output;
-		}
-
-		
 		private Matrix getBaskervilleEstimator(List<Double> xValues) {
 			Matrix xBeta = getXBeta(xValues);
 			return xBeta.scalarAdd(sigma2Hat * .5).expMatrix();
 		}
 		
-		private Matrix getBaskervilleEstimatorVariance(List<Double> xValues) {
-			Matrix xBeta = getXBeta(xValues).scalarMultiply(2d).scalarAdd(sigma2Hat).expMatrix();
-			return xBeta.scalarMultiply(Math.exp(sigma2Hat) - 1);
-		}
-
-		ComplexMatrix[] getComplexRandomDeviate(List<Double> xValues) {
+		private ComplexMatrix getComplexRandomDeviate(List<Double> xValues) {
 			double chiSquareDeviate = StatisticalUtility.getRandom().nextChiSquare(upsilon);
-			ComplexNumber sigma2Hat_b = new ComplexNumber(sigma2Hat, sigma2Hat * (chiSquareDeviate - upsilon) / upsilon);
+			ComplexNumber sigma2Hat_b = new ComplexNumber(sigma2Hat, sigma2Hat * (chiSquareDeviate/upsilon - 1));
 			ComplexNumber sigmaHat_b = sigma2Hat_b.sqrt();
-
 			Matrix xMat = createMatrixX(xValues);
-
-			Matrix betaDeviatesMat = getOmegaChol().multiply(StatisticalUtility.drawRandomVector(betaHat.m_iRows, Distribution.Type.GAUSSIAN));
+			Matrix betaDeviatesMat = getOmegaChol().multiply(StatisticalUtility.drawRandomVector(betaHat.m_iRows, Distribution.Type.GAUSSIAN)); // here we get C * epsilon
 			
-			ComplexNumber[] cnArrayRes = new ComplexNumber[xValues.size()];
 			ComplexNumber[] cnArrayMean = new ComplexNumber[xValues.size()];
 			for (int ii = 0; ii < xValues.size(); ii++) {
 				Matrix xMat_ii = xMat.getSubMatrix(ii, ii, 0, xMat.m_iCols - 1);
-				ComplexNumber betaDeviates = new ComplexNumber(0, xMat_ii.multiply(betaDeviatesMat).getValueAt(0, 0));
-				betaDeviates = betaDeviates.multiply(sigmaHat_b);
-				Number epsilon_b = sigmaHat_b.multiply(StatisticalUtility.getRandom().nextGaussian());
+				ComplexNumber betaDeviates = new ComplexNumber(0, xMat_ii.multiply(betaDeviatesMat).getValueAt(0, 0)); // here we get 0 + x C epsilon i 
+				betaDeviates = betaDeviates.multiply(sigmaHat_b); // here we get 0 + sqrt{sigma2Hat_b} x C epsilon i
 				double xBetaHat = xMat_ii.multiply(betaHat).getValueAt(0, 0); 
-				ComplexNumber mean = betaDeviates.add(xBetaHat);
-				ComplexNumber meanPlusError = mean.add(epsilon_b);
-				ComplexNumber meanPlusCorrectionFactor = mean.add(sigma2Hat_b.divide(2d));				
-				cnArrayRes[ii] = meanPlusError.exp();
+				ComplexNumber mean = betaDeviates.add(xBetaHat); // here we get x beta + + sqrt{sigma2Hat_b} x C epsilon i
+				ComplexNumber meanPlusCorrectionFactor = mean.add(sigma2Hat_b.multiply(0.5)); // here we get x beta + + sqrt{sigma2Hat_b} x C epsilon i + 0.5 * sigma2_b  				
 				cnArrayMean[ii] = meanPlusCorrectionFactor.exp();
 			}
-			ComplexMatrix[] output = new ComplexMatrix[2];
-			output[0] = new ComplexMatrix(cnArrayRes); 
-			output[1] = new ComplexMatrix(cnArrayMean); 
-			return output;
+			return new ComplexMatrix(cnArrayMean); 
 		}
-
 	}
 	
 	private static void doRun(int sampleSize, 
@@ -263,20 +215,16 @@ public class ComplexNumberSimpleCaseStudy {
 		fields.add(new CSVField("b1"));
 		fields.add(new CSVField("sigma2"));
 		fields.add(new CSVField("x"));
-		fields.add(new CSVField("MC_OLD"));
-		fields.add(new CSVField("MC_OLDVar"));
-		fields.add(new CSVField("MC_NEW"));
-		fields.add(new CSVField("MC_NEW_imag"));
-		fields.add(new CSVField("MC_NEWVar_real"));
-		fields.add(new CSVField("MC_NEWVar_imag"));
+		fields.add(new CSVField("BS_mean"));
+		fields.add(new CSVField("BS_var"));
+		fields.add(new CSVField("CBS_mean_real"));
+		fields.add(new CSVField("CBS_mean_imag"));
+		fields.add(new CSVField("CBS_var_real"));
+		fields.add(new CSVField("CBS_var_imag"));
 		fields.add(new CSVField("Beauchamp"));
-		fields.add(new CSVField("BeauchampVar"));
 		fields.add(new CSVField("Baskerville"));
-		fields.add(new CSVField("BaskervilleVar"));
-		fields.add(new CSVField("MC_NEW_mean"));
-		fields.add(new CSVField("MC_NEW_mean_imag"));
-		fields.add(new CSVField("MC_NEW_mean_Var_real"));
-		fields.add(new CSVField("MC_NEW_mean_Var_imag"));
+		fields.add(new CSVField("CBS_psvar_real"));
+		fields.add(new CSVField("CBS_psvar_imag"));
 		writer.setFields(fields);
 		
 		Matrix trueBeta = new Matrix(2,1);
@@ -293,34 +241,26 @@ public class ComplexNumberSimpleCaseStudy {
 				System.out.println("Running realization " + real);
 			}
 			Sample s = Sample.createSample(trueBeta, trueVariance, sampleSize);
-			Model m = s.getModel(null); // null means we are relying on the estimated variance
+			Model m = s.getModel();
 			Matrix beauchampAndOlsonEstimator = m.getBeauchampAndOlsonEstimator(xValues);
-			Matrix beauchampAndOlsonEstimatorVar = m.getBeauchampAndOlsonEstimatorVariance(xValues);
 			Matrix baskervilleEstimator = m.getBaskervilleEstimator(xValues);
-			Matrix baskervilleEstimatorVar = m.getBaskervilleEstimatorVariance(xValues);
 						
 			MonteCarloEstimate mcEstimator = new MonteCarloEstimate();
 			ComplexMonteCarloEstimate cmcEstimator = new ComplexMonteCarloEstimate();
-			ComplexMonteCarloEstimate cmcEstimatorJustMean = new ComplexMonteCarloEstimate();
 
 			for (int innerReal = 0; innerReal < nbInnerReal; innerReal++) {
 				mcEstimator.addRealization(m.getRandomDeviate(xValues)); 
-				ComplexMatrix[] complexRealizations = m.getComplexRandomDeviate(xValues);
-				cmcEstimator.addRealization(complexRealizations[0]); 
-				cmcEstimatorJustMean.addRealization(complexRealizations[1]); 
+				ComplexMatrix complexRealizations = m.getComplexRandomDeviate(xValues);
+				cmcEstimator.addRealization(complexRealizations); 
 			}
 			
 			Matrix mcMean = mcEstimator.getMean();
 			Matrix mcVar = mcEstimator.getVariance();
 			
 			ComplexMatrix cmcMean = cmcEstimator.getMean();
-			Matrix cmcRealPart = cmcEstimator.getVarianceRealPart();
-			Matrix cmcImagPart = cmcEstimator.getVarianceImaginaryPart();
-
-			ComplexMatrix cmcMeanJustMean = cmcEstimatorJustMean.getMean();
-			Matrix cmcMeanJustMeanRealPart = cmcEstimatorJustMean.getVarianceRealPart();
-			Matrix cmcMeanJustMeanImagPart = cmcEstimatorJustMean.getVarianceImaginaryPart();
-
+			Matrix cmcVarReal = cmcEstimator.getVarianceRealPart();
+			Matrix cmcVarImag = cmcEstimator.getVarianceImaginaryPart();
+			ComplexSymmetricMatrix cmcPsVar = cmcEstimator.getPseudoVariance();
 			
 			for (int ii = 0; ii < xValues.size(); ii++) {
 				Object[] record = new Object[fields.size()];
@@ -333,16 +273,12 @@ public class ComplexNumberSimpleCaseStudy {
 				record[6] = mcVar.getValueAt(ii, ii);
 				record[7] = cmcMean.getValueAt(ii, 0).realPart;
 				record[8] = cmcMean.getValueAt(ii, 0).imaginaryPart;
-				record[9] = cmcRealPart.getValueAt(ii, 0);
-				record[10] = cmcImagPart.getValueAt(ii, 0);
+				record[9] = cmcVarReal.getValueAt(ii, 0);
+				record[10] = cmcVarImag.getValueAt(ii, 0);
 				record[11] = beauchampAndOlsonEstimator.getValueAt(ii, 0);
-				record[12] = beauchampAndOlsonEstimatorVar.getValueAt(ii, 0);
-				record[13] = baskervilleEstimator.getValueAt(ii, 0);
-				record[14] = baskervilleEstimatorVar.getValueAt(ii, 0);
-				record[15] = cmcMeanJustMean.getValueAt(ii, 0).realPart;
-				record[16] = cmcMeanJustMean.getValueAt(ii, 0).imaginaryPart;
-				record[17] = cmcMeanJustMeanRealPart.getValueAt(ii, 0);
-				record[18] = cmcMeanJustMeanImagPart.getValueAt(ii, 0);
+				record[12] = baskervilleEstimator.getValueAt(ii, 0);
+				record[13] = cmcPsVar.getValueAt(ii, ii).realPart;
+				record[14] = cmcPsVar.getValueAt(ii, ii).imaginaryPart;
 				writer.addRecord(record);
 			}
 		}
@@ -352,6 +288,7 @@ public class ComplexNumberSimpleCaseStudy {
 
 	public static void main(String[] args) throws IOException {
 		String filename = REpiceaSystem.retrieveArgument("-outdir", Arrays.asList(args));
+		System.out.println("Export filename: " + filename);
 		List<Double> variances = new ArrayList<Double>();
 		variances.add(1.0);
 		variances.add(2.0);
@@ -359,9 +296,9 @@ public class ComplexNumberSimpleCaseStudy {
 			String rootFilename = filename.concat("caseStudy_" + variance + "_");
 			List<Integer> sampleSizes = new ArrayList<Integer>();
 			sampleSizes.add(25);
-//			sampleSizes.add(50);
-//			sampleSizes.add(100);
-//			sampleSizes.add(200);
+			sampleSizes.add(50);
+			sampleSizes.add(100);
+			sampleSizes.add(200);
 			
 			for (int sampleSize : sampleSizes) {
 				doRun(sampleSize, 10000, 2, 0.25, variance, rootFilename);
