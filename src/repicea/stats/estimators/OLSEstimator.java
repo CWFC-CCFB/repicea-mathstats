@@ -36,7 +36,7 @@ import repicea.stats.model.lm.LinearModel;
  * The OLSOptimizer implements the Ordinary Least Squares estimator.
  * @author Mathieu Fortin - November 2012
  */
-public class OLSEstimator extends AbstractEstimator<OLSCompatibleModel> {
+public final class OLSEstimator extends AbstractEstimator<OLSCompatibleModel> {
 
 	public interface OLSCompatibleModel extends EstimatorCompatibleModel {
 	
@@ -53,6 +53,7 @@ public class OLSEstimator extends AbstractEstimator<OLSCompatibleModel> {
 	private VarianceEstimate residualVariance;
 	private boolean hasConverged;
 	private Estimate<Matrix, SymmetricMatrix, ?> betaVector;
+	private SymmetricMatrix inverseProduct;
 	
 	/**
 	 * Constructor.
@@ -73,7 +74,7 @@ public class OLSEstimator extends AbstractEstimator<OLSCompatibleModel> {
 		Matrix matrixY = model.getVectorY();
 		Matrix matrixXT = matrixX.transpose();
 		betaVector = new GaussianEstimate();
-		SymmetricMatrix inverseProduct = SymmetricMatrix.convertToSymmetricIfPossible(matrixXT.multiply(matrixX).getInverseMatrix());
+		inverseProduct = SymmetricMatrix.convertToSymmetricIfPossible(matrixXT.multiply(matrixX).getInverseMatrix());
 		((GaussianEstimate) betaVector).setMean(inverseProduct.multiply(matrixX.transpose()).multiply(matrixY));
 		model.setParameters(betaVector.getMean());
 		hasConverged = true;
@@ -86,13 +87,21 @@ public class OLSEstimator extends AbstractEstimator<OLSCompatibleModel> {
 	}
 
 	/**
-	 * This method returns the residual variance of the OLS algorithm.
+	 * Provides the residual variance.
 	 * @return a VarianceEstimate instance
 	 */
 	public VarianceEstimate getResidualVariance() {
 		return residualVariance;
 	}
 
+	/**
+	 * Provide the inverse of the X^T X.
+	 * @return a SymmetricMatrix instance
+	 */
+	public SymmetricMatrix getInverseXtXMatrix() {
+		return inverseProduct;
+	}
+	
 	@Override
 	public boolean isConvergenceAchieved() {return hasConverged;}
 

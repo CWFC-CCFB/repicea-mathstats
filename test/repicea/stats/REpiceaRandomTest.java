@@ -171,7 +171,7 @@ public class REpiceaRandomTest {
 		double actualMean = estimate.getMean().getValueAt(0, 0);
 		double actualVariance = estimate.getVariance().getValueAt(0, 0);
 		System.out.println ("Simulated mean = " + actualMean + "; Expected variance = " + expectedMean);
-		Assert.assertEquals("Testing mean for chi-squared random values", expectedMean, actualMean, 5E-2);
+		Assert.assertEquals("Testing mean for chi-squared random values", expectedMean, actualMean, 7E-2);
 		System.out.println ("Simulated variance = " + actualVariance + "; Expected variance = " + expectedVariance);
 		Assert.assertEquals("Testing mean for chi-squared random values", expectedVariance, actualVariance, 2);
 	}

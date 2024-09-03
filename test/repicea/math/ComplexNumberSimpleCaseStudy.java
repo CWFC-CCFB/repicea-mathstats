@@ -25,14 +25,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import repicea.io.FormatField;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
 import repicea.lang.REpiceaSystem;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
+import repicea.stats.data.DataSet;
 import repicea.stats.estimates.ComplexMonteCarloEstimate;
 import repicea.stats.estimates.MonteCarloEstimate;
+import repicea.stats.model.lm.LinearModel;
+import repicea.stats.model.lm.LogBackTransformation;
+import repicea.stats.model.lm.LogBackTransformation.Estimator;
 
 /**
  * The ComplexNumberSimpleCaseStudy class implements a simulation study around 
@@ -92,6 +99,20 @@ public class ComplexNumberSimpleCaseStudy {
 			return yVec;
 		}
 		
+		private DataSet convertIntoDataSet() {
+			DataSet ds = new DataSet(Arrays.asList(new String[] {"y", "x"}));
+			Object[] observation;
+			for (int i = 0; i < size(); i++) {
+				observation = new Object[2];
+				observation[0] = get(i).y;
+				observation[1] = get(i).x;
+				ds.addObservation(observation);
+			}
+			ds.indexFieldType();
+			return ds;
+		}
+		
+		
 		private Model getModel() {
 			Matrix xMat = getMatrixX();
 			Matrix yVec = getVectorY();
@@ -140,7 +161,7 @@ public class ComplexNumberSimpleCaseStudy {
 			return result.expMatrix();
 		}
 		
-		private Matrix createMatrixX(List<Double> xValues) {
+		private static Matrix createMatrixX(List<Double> xValues) {
 			Matrix xMat = new Matrix(xValues.size(),2);
 			for (int i = 0; i < xValues.size(); i++) {
 				xMat.setValueAt(i, 0, 1d);
@@ -241,6 +262,7 @@ public class ComplexNumberSimpleCaseStudy {
 				System.out.println("Running realization " + real);
 			}
 			Sample s = Sample.createSample(trueBeta, trueVariance, sampleSize);
+
 			Model m = s.getModel();
 			Matrix beauchampAndOlsonEstimator = m.getBeauchampAndOlsonEstimator(xValues);
 			Matrix baskervilleEstimator = m.getBaskervilleEstimator(xValues);
@@ -261,7 +283,7 @@ public class ComplexNumberSimpleCaseStudy {
 			Matrix cmcVarReal = cmcEstimator.getVarianceRealPart();
 			Matrix cmcVarImag = cmcEstimator.getVarianceImaginaryPart();
 			ComplexSymmetricMatrix cmcPsVar = cmcEstimator.getPseudoVariance();
-			
+
 			for (int ii = 0; ii < xValues.size(); ii++) {
 				Object[] record = new Object[fields.size()];
 				record[0] = real;
@@ -285,6 +307,97 @@ public class ComplexNumberSimpleCaseStudy {
 		writer.close();
 	}
 	
+	@Test
+	public void logBackTransformationImplementionTest() {
+		int nbInnerReal = 1000000;
+		LogBackTransformation.setInnerRealizationsForMonteCarloEstimators(nbInnerReal);
+		double b0 = 2d;
+		double b1 = 0.25;
+		double s2 = 1d;
+		int sampleSize = 25;
+		System.out.println("Simulating [" + b0 + "; " + b1 + "; " + s2 +"] with sample size n = " + sampleSize);
+		
+		Matrix trueBeta = new Matrix(2,1);
+		trueBeta.setValueAt(0, 0, b0);
+		trueBeta.setValueAt(1, 0, b1);
+		double trueVariance = s2;
+		
+		List<Double> xValues = new ArrayList<Double>();
+		for (double i = 3; i <= 10; i++) {
+			xValues.add(i);
+		}
+		Sample s = Sample.createSample(trueBeta, trueVariance, sampleSize);
+
+		Model m = s.getModel();
+		Matrix beauchampAndOlsonEstimator = m.getBeauchampAndOlsonEstimator(xValues);
+		Matrix baskervilleEstimator = m.getBaskervilleEstimator(xValues);
+						
+		MonteCarloEstimate mcEstimator = new MonteCarloEstimate();
+		ComplexMonteCarloEstimate cmcEstimator = new ComplexMonteCarloEstimate();
+
+		for (int innerReal = 0; innerReal < nbInnerReal; innerReal++) {
+			mcEstimator.addRealization(m.getRandomDeviate(xValues)); 
+			ComplexMatrix complexRealizations = m.getComplexRandomDeviate(xValues);
+			cmcEstimator.addRealization(complexRealizations); 
+		}
+
+		Matrix mcMean = mcEstimator.getMean();
+
+		ComplexMatrix cmcMean = cmcEstimator.getMean();
+		ComplexSymmetricMatrix cmcPsVar = cmcEstimator.getPseudoVariance();
+		
+		Matrix cmcMeanReal = new Matrix(cmcMean.m_iRows, 1);
+		Matrix cmcMeanVar = new Matrix(cmcMean.m_iRows, 1);
+		for (int i = 0; i < cmcMean.m_iRows; i++) {
+			cmcMeanReal.setValueAt(i, 0, cmcMean.getValueAt(i, 0).realPart);
+			cmcMeanVar.setValueAt(i, 0, -cmcPsVar.getValueAt(i, i).realPart);
+		}
+
+		DataSet ds = s.convertIntoDataSet();
+		LinearModel lm = new LinearModel(ds, "y ~ x");
+		lm.doEstimation();
+
+		Matrix baskervilleRef = LogBackTransformation.getMeanPredictedValuesOnOriginalScale(lm, 
+				Model.createMatrixX(xValues), 
+				0, 
+				Estimator.Baskerville);
+
+		Assert.assertTrue("Testing Baskerville estimator", !baskervilleRef.subtract(baskervilleEstimator).getAbsoluteValue().anyElementLargerThan(1E-8));
+
+		Matrix beauchampAndOlsonRef = LogBackTransformation.getMeanPredictedValuesOnOriginalScale(lm, 
+				Model.createMatrixX(xValues), 
+				0, 
+				Estimator.BeauchampAndOlson);
+
+		Assert.assertTrue("Testing Beauchamp and Olson estimator", !beauchampAndOlsonRef.subtract(beauchampAndOlsonEstimator).getAbsoluteValue().anyElementLargerThan(1E-8));
+
+		Matrix monteCarlRef = LogBackTransformation.getMeanPredictedValuesOnOriginalScale(lm, 
+				Model.createMatrixX(xValues), 
+				0, 
+				Estimator.MonteCarlo);
+
+		Matrix mc = monteCarlRef.subtract(mcMean).getAbsoluteValue();
+		mc = mc.elementWiseDivide(mcMean);
+		Assert.assertTrue("Testing Monte Carlo predictions", !mc.anyElementLargerThan(5E-3));
+		
+		Matrix complexMonteCarloRef = LogBackTransformation.getMeanPredictedValuesOnOriginalScale(lm, 
+				Model.createMatrixX(xValues), 
+				0, 
+				Estimator.ComplexMonteCarlo);
+		
+		Matrix cmc = complexMonteCarloRef.getSubMatrix(0, complexMonteCarloRef.m_iRows - 1, 0, 0)
+				.subtract(cmcMeanReal).getAbsoluteValue();
+		cmc = cmc.elementWiseDivide(cmcMeanReal);
+		Assert.assertTrue("Testing complex Monte Carlo point estimates", !cmc.anyElementLargerThan(7E-4));
+		
+		Matrix cmcVar = complexMonteCarloRef.getSubMatrix(0, complexMonteCarloRef.m_iRows - 1, 1, 1)
+				.subtract(cmcMeanVar).getAbsoluteValue();
+		cmcVar = cmcVar.elementWiseDivide(cmcMeanVar);
+		Assert.assertTrue("Testing complex Monte Carlo variances", !cmcVar.anyElementLargerThan(5E-3));
+		
+		LogBackTransformation.setInnerRealizationsForMonteCarloEstimators(10000);
+	}
+
 
 	public static void main(String[] args) throws IOException {
 		String filename = REpiceaSystem.retrieveArgument("-outdir", Arrays.asList(args));

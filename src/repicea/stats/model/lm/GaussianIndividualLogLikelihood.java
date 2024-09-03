@@ -27,8 +27,12 @@ import repicea.math.SymmetricMatrix;
 import repicea.stats.LinearStatisticalExpression;
 import repicea.stats.model.IndividualLogLikelihood;
 
+/**
+ * A package class implementing the log likelihood of individual observations.
+ * @author Mathieu Fortin - 2023
+ */
 @SuppressWarnings("serial")
-public class GaussianIndividualLogLikelihood extends AbstractMathematicalFunctionWrapper implements IndividualLogLikelihood {
+class GaussianIndividualLogLikelihood extends AbstractMathematicalFunctionWrapper implements IndividualLogLikelihood {
 
 	protected Matrix yVector;
 	protected double sigma2;
