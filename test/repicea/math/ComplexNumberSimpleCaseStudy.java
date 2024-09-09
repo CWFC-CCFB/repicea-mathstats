@@ -236,16 +236,11 @@ public class ComplexNumberSimpleCaseStudy {
 		fields.add(new CSVField("b1"));
 		fields.add(new CSVField("sigma2"));
 		fields.add(new CSVField("x"));
-		fields.add(new CSVField("BS_mean"));
-		fields.add(new CSVField("BS_var"));
-		fields.add(new CSVField("CBS_mean_real"));
-		fields.add(new CSVField("CBS_mean_imag"));
-		fields.add(new CSVField("CBS_var_real"));
-		fields.add(new CSVField("CBS_var_imag"));
-		fields.add(new CSVField("Beauchamp"));
 		fields.add(new CSVField("Baskerville"));
-		fields.add(new CSVField("CBS_psvar_real"));
-		fields.add(new CSVField("CBS_psvar_imag"));
+		fields.add(new CSVField("Beauchamp"));
+		fields.add(new CSVField("MC_meanEst"));
+		fields.add(new CSVField("CMC_meanEst"));
+		fields.add(new CSVField("CMC_varEst"));
 		writer.setFields(fields);
 		
 		Matrix trueBeta = new Matrix(2,1);
@@ -277,11 +272,11 @@ public class ComplexNumberSimpleCaseStudy {
 			}
 			
 			Matrix mcMean = mcEstimator.getMean();
-			Matrix mcVar = mcEstimator.getVariance();
+//			Matrix mcVar = mcEstimator.getVariance();
 			
 			ComplexMatrix cmcMean = cmcEstimator.getMean();
-			Matrix cmcVarReal = cmcEstimator.getVarianceRealPart();
-			Matrix cmcVarImag = cmcEstimator.getVarianceImaginaryPart();
+//			Matrix cmcVarReal = cmcEstimator.getVarianceRealPart();
+//			Matrix cmcVarImag = cmcEstimator.getVarianceImaginaryPart();
 			ComplexSymmetricMatrix cmcPsVar = cmcEstimator.getPseudoVariance();
 
 			for (int ii = 0; ii < xValues.size(); ii++) {
@@ -291,16 +286,11 @@ public class ComplexNumberSimpleCaseStudy {
 				record[2] = m.betaHat.getValueAt(1, 0);
 				record[3] = m.sigma2Hat;
 				record[4] = xValues.get(ii);
-				record[5] = mcMean.getValueAt(ii, 0);
-				record[6] = mcVar.getValueAt(ii, ii);
-				record[7] = cmcMean.getValueAt(ii, 0).realPart;
-				record[8] = cmcMean.getValueAt(ii, 0).imaginaryPart;
-				record[9] = cmcVarReal.getValueAt(ii, 0);
-				record[10] = cmcVarImag.getValueAt(ii, 0);
-				record[11] = beauchampAndOlsonEstimator.getValueAt(ii, 0);
-				record[12] = baskervilleEstimator.getValueAt(ii, 0);
-				record[13] = cmcPsVar.getValueAt(ii, ii).realPart;
-				record[14] = cmcPsVar.getValueAt(ii, ii).imaginaryPart;
+				record[5] = baskervilleEstimator.getValueAt(ii, 0);
+				record[6] = beauchampAndOlsonEstimator.getValueAt(ii, 0);
+				record[7] = mcMean.getValueAt(ii, 0);
+				record[8] = cmcMean.getValueAt(ii, 0).realPart;
+				record[9] = -cmcPsVar.getValueAt(ii, ii).realPart;
 				writer.addRecord(record);
 			}
 		}
