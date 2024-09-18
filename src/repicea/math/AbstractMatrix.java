@@ -30,9 +30,10 @@ import repicea.util.DeepCloneable;
  * @author Mathieu Fortin - November 2023
  *
  * @param <P> an AbstractMatrix class
+ * @param <I> the input of some functions
  */
 @SuppressWarnings("rawtypes")
-public abstract class AbstractMatrix<P extends AbstractMatrix> implements DeepCloneable {
+public abstract class AbstractMatrix<P extends AbstractMatrix, I extends Number> implements DeepCloneable {
 
 	public final int m_iRows;
 	public final int m_iCols;
@@ -151,14 +152,14 @@ public abstract class AbstractMatrix<P extends AbstractMatrix> implements DeepCl
 	 * @param d the scalar to be added
 	 * @return the result in a new Matrix instance
 	 */
-	public abstract P scalarAdd(double d);
+	public abstract P scalarAdd(I d);
 	
 	/**
 	 * Multiply the elements of the current matrix by the scalar d.
 	 * @param d the multiplier
 	 * @return the result in a new Matrix instance
 	 */
-	public abstract P scalarMultiply(double d);
+	public abstract P scalarMultiply(I d);
 
 
 	/**

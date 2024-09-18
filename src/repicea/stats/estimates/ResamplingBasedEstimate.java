@@ -4,6 +4,7 @@ import java.security.InvalidParameterException;
 import java.util.List;
 
 import repicea.math.AbstractMatrix;
+import repicea.math.Matrix;
 import repicea.stats.distributions.AbstractEmpiricalDistribution;
 
 /*
@@ -56,14 +57,31 @@ abstract class ResamplingBasedEstimate<M extends AbstractMatrix, V extends Abstr
 			return true; 
 		} else {
 			M firstObservation = observations.get(0);
-//			if (value == null || firstObservation == null) {
-//				int u = 0;
-//			}
 			return (firstObservation.m_iRows == value.m_iRows && firstObservation.m_iCols == value.m_iCols);
 		}
 	}
 
 
+	/**
+	 * Provide the quantile associated to a particular probability. 
+	 * @param probability the probability level
+	 * @return a Matrix instance that contains the quantiles
+	 */
+	protected abstract Matrix getQuantileForProbability(double probability); 
+
+	/** 
+	 * {@inheritDoc}<p>
+	 * 
+	 * For classes involving complex numbers, the confidence intervals are based on the 
+	 * real part of the realizations.
+	 */
+	@Override
+	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {
+		Matrix lowerBoundValue = getQuantileForProbability(.5 * (1d - oneMinusAlpha));
+		Matrix upperBoundValue = getQuantileForProbability(1d - .5 * (1d - oneMinusAlpha));
+		return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
+	}
+	
 	/**
 	 * This method returns the list of realizations in the empirical distribution.
 	 * @return a List of Matrix instance

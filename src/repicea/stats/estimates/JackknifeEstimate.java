@@ -54,16 +54,14 @@ public class JackknifeEstimate extends ResamplingBasedEstimate<Matrix, Symmetric
 		if (nCombinations != nRealizations) {
 			throw new InvalidParameterException("The number of realizations is inconsistent with the n and d parameters of the constructor!");
 		}
-		SymmetricMatrix ss = getDistribution().getVariance().scalarMultiply(getNumberOfRealizations() - 1);	// sum of squared difference
+		SymmetricMatrix ss = getDistribution().getVariance().scalarMultiply(getNumberOfRealizations() - 1d);	// sum of squared difference
 		double scalingFactor = ((double) n - d) / (d * nCombinations);
 		return ss.scalarMultiply(scalingFactor);
 	}
 	
-
 	@Override
-	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {
-		// TODO To be implemented
-		return null;
+	protected Matrix getQuantileForProbability(double probability) {
+		throw new UnsupportedOperationException("The getQuantileForProbability has not been implement for class " + this.getClass().getName() + "!");
 	}
 
 }

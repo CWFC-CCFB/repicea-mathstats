@@ -221,7 +221,7 @@ public class ComplexNumberSimpleCaseStudy {
 		}
 	}
 	
-	private static void doRun(int sampleSize, 
+	private void doRun(int sampleSize, 
 			int nbRealizations, 
 			double b0, 
 			double b1, 
@@ -241,6 +241,10 @@ public class ComplexNumberSimpleCaseStudy {
 		fields.add(new CSVField("MC_meanEst"));
 		fields.add(new CSVField("CMC_meanEst"));
 		fields.add(new CSVField("CMC_varEst"));
+//		fields.add(new CSVField("Lower95"));
+//		fields.add(new CSVField("Upper95"));
+//		fields.add(new CSVField("Lower99"));
+//		fields.add(new CSVField("Upper99"));
 		writer.setFields(fields);
 		
 		Matrix trueBeta = new Matrix(2,1);
@@ -272,12 +276,13 @@ public class ComplexNumberSimpleCaseStudy {
 			}
 			
 			Matrix mcMean = mcEstimator.getMean();
-//			Matrix mcVar = mcEstimator.getVariance();
 			
 			ComplexMatrix cmcMean = cmcEstimator.getMean();
-//			Matrix cmcVarReal = cmcEstimator.getVarianceRealPart();
-//			Matrix cmcVarImag = cmcEstimator.getVarianceImaginaryPart();
 			ComplexSymmetricMatrix cmcPsVar = cmcEstimator.getPseudoVariance();
+			
+//			ComplexMonteCarloEstimate cmcInvEstimator = cmcEstimator.getInversedRealizations();
+//			ComplexSymmetricMatrix cmcInvPsVar = cmcInvEstimator.getPseudoVariance();
+//			ConfidenceInterval ci95 = cmcInvEstimator.getConfidenceIntervalBounds(0.95);
 
 			for (int ii = 0; ii < xValues.size(); ii++) {
 				Object[] record = new Object[fields.size()];
@@ -291,6 +296,10 @@ public class ComplexNumberSimpleCaseStudy {
 				record[7] = mcMean.getValueAt(ii, 0);
 				record[8] = cmcMean.getValueAt(ii, 0).realPart;
 				record[9] = -cmcPsVar.getValueAt(ii, ii).realPart;
+//				record[10] = ci95.getLowerLimit().getValueAt(ii, 0);
+//				record[11] = ci95.getUpperLimit().getValueAt(ii, 0);
+//				record[12] = ci99.getLowerLimit().getValueAt(ii, 0);
+//				record[13] = ci99.getUpperLimit().getValueAt(ii, 0);
 				writer.addRecord(record);
 			}
 		}
@@ -389,12 +398,14 @@ public class ComplexNumberSimpleCaseStudy {
 	}
 
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InterruptedException {
 		String filename = REpiceaSystem.retrieveArgument("-outdir", Arrays.asList(args));
 		System.out.println("Export filename: " + filename);
 		List<Double> variances = new ArrayList<Double>();
+//		variances.add(0.5);
 		variances.add(1.0);
 		variances.add(2.0);
+		variances.add(3.0);
 		for (double variance : variances) {
 			String rootFilename = filename.concat("caseStudy_" + variance + "_");
 			List<Integer> sampleSizes = new ArrayList<Integer>();
@@ -402,9 +413,24 @@ public class ComplexNumberSimpleCaseStudy {
 			sampleSizes.add(50);
 			sampleSizes.add(100);
 			sampleSizes.add(200);
-			
+			List<Thread> threads = new ArrayList<Thread>();
 			for (int sampleSize : sampleSizes) {
-				doRun(sampleSize, 10000, 2, 0.25, variance, rootFilename);
+				Runnable doRun = new Runnable() {
+					public void run() {
+						ComplexNumberSimpleCaseStudy s = new ComplexNumberSimpleCaseStudy();
+						try {
+							s.doRun(sampleSize, 50000, 2, 0.25, variance, rootFilename);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					};
+				};
+				Thread t = new Thread(doRun);
+				threads.add(t);
+				t.start();
+			}
+			for (Thread t : threads) {
+				t.join();
 			}
 		}
 	}	

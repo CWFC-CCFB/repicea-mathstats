@@ -19,6 +19,9 @@
  */
 package repicea.stats.distributions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import repicea.math.ComplexMatrix;
 import repicea.math.ComplexNumber;
 import repicea.math.ComplexSymmetricMatrix;
@@ -107,7 +110,6 @@ public class ComplexEmpiricalDistribution extends AbstractEmpiricalDistribution<
 		return new Matrix(sumRes);
 	}
 
-
 	/**
 	 * Provide the pseudovariance of the complex
 	 * random matrices.
@@ -115,11 +117,9 @@ public class ComplexEmpiricalDistribution extends AbstractEmpiricalDistribution<
 	 * @return a ComplexSymmetricMatrix instance
 	 */
 	public ComplexSymmetricMatrix getPseudoVariance() {
-		ComplexMatrix mean = getMean();
 		ComplexMatrix variance = null;
-		for (ComplexMatrix m : getRealizations()) {
-			ComplexMatrix res = m.subtract(mean);
-			ComplexMatrix product = res.multiply(res.transpose());
+		for (ComplexMatrix pseudoResidual : getPseudoResiduals()) {
+			ComplexMatrix product = pseudoResidual.multiply(pseudoResidual.transpose());
 			variance = variance == null ? product : variance.add(product);
 		}
 		variance = variance.scalarMultiply(1d/(getNumberOfRealizations() - 1));
@@ -127,4 +127,27 @@ public class ComplexEmpiricalDistribution extends AbstractEmpiricalDistribution<
 		return formattedMatrix;
 	}
 
+//	/**
+//	 * To be documented.
+//	 * @return
+//	 */
+//	public List<ComplexMatrix> getInversedRealizations() {
+//		ComplexMatrix mean = getMean();
+//		List<ComplexMatrix> inversedRealizations = getPseudoResiduals().
+//				stream().
+//				map(e -> e.scalarMultiply(ComplexNumber.COMPLEX_I).add(mean)).
+//				collect(Collectors.toList());
+//		return inversedRealizations;
+//	}
+	
+	
+	private List<ComplexMatrix> getPseudoResiduals() {
+		List<ComplexMatrix> pseudoResiduals = new ArrayList<ComplexMatrix>();
+		ComplexMatrix mean = getMean();
+		for (ComplexMatrix m : getRealizations()) {
+			pseudoResiduals.add(m.subtract(mean));
+		}
+		return pseudoResiduals;
+	}
+	
 }

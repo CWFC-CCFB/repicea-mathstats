@@ -30,7 +30,7 @@ import java.util.List;
  * @author Mathieu Fortin - November 2023
  *
  */
-public class ComplexMatrix extends AbstractMatrix<ComplexMatrix> {
+public class ComplexMatrix extends AbstractMatrix<ComplexMatrix, Number> {
 	
 	final ComplexNumber[][] m_afData;
 	
@@ -280,7 +280,7 @@ public class ComplexMatrix extends AbstractMatrix<ComplexMatrix> {
 
 	
     @Override
-	public ComplexMatrix scalarAdd(double d) {
+	public ComplexMatrix scalarAdd(Number d) {
 		ComplexMatrix mat = new ComplexMatrix(m_iRows, m_iCols);
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
@@ -296,7 +296,7 @@ public class ComplexMatrix extends AbstractMatrix<ComplexMatrix> {
 	 * @return the result in a new Matrix instance
 	 */
     @Override
-	public ComplexMatrix scalarMultiply(double d) {
+	public ComplexMatrix scalarMultiply(Number d) {
 		ComplexMatrix mat = new ComplexMatrix(m_iRows, m_iCols);
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {

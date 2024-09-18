@@ -123,7 +123,7 @@ public class LogNormalEstimate extends Estimate<Matrix, SymmetricMatrix, Gaussia
 	@Override
 	protected SymmetricMatrix getVarianceFromDistribution() {
 		SymmetricMatrix variance = getDistribution().getVariance();
-		return SymmetricMatrix.convertToSymmetricIfPossible(variance.expMatrix().scalarAdd(-1).elementWiseMultiply(getMeanFromDistribution().elementWisePower(2)));
+		return SymmetricMatrix.convertToSymmetricIfPossible(variance.expMatrix().scalarAdd(-1d).elementWiseMultiply(getMeanFromDistribution().elementWisePower(2)));
 	}
 
 	@Override

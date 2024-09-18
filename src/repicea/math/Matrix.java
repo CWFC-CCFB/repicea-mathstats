@@ -33,7 +33,7 @@ import repicea.util.DeepCloneable;
  * This class implement most of the basic function in linear algebra
  * Authors: Jean-Francois Lavoie and Mathieu Fortin (June 2009)
  */
-public class Matrix extends AbstractMatrix<Matrix> implements Serializable, DeepCloneable {
+public class Matrix extends AbstractMatrix<Matrix, Double> implements Serializable, DeepCloneable {
 
 	private static final long serialVersionUID = 20100804L;
 		
@@ -670,7 +670,7 @@ public class Matrix extends AbstractMatrix<Matrix> implements Serializable, Deep
 	}
 	
 	@Override
-	public Matrix scalarAdd(double d) {
+	public Matrix scalarAdd(Double d) {
 		Matrix mat = new Matrix(m_iRows, m_iCols);
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
@@ -681,7 +681,7 @@ public class Matrix extends AbstractMatrix<Matrix> implements Serializable, Deep
 	}
 	
 	@Override
-	public Matrix scalarMultiply(double d) {
+	public Matrix scalarMultiply(Double d) {
 		Matrix mat = new Matrix(m_iRows, m_iCols);
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
