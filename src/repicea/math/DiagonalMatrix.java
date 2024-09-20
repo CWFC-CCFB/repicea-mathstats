@@ -105,7 +105,7 @@ public class DiagonalMatrix extends SymmetricMatrix {
 
 
 	@Override
-	public final DiagonalMatrix scalarMultiply(double d) {
+	public final DiagonalMatrix scalarMultiply(Double d) {
 		DiagonalMatrix mat = new DiagonalMatrix(m_iRows);
 		for (int i = 0; i < m_iRows; i++) {
 			mat.setValueAt(i, i, getValueAt(i, i) * d);

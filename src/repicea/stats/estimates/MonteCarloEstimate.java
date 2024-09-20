@@ -113,13 +113,9 @@ public class MonteCarloEstimate extends ResamplingBasedEstimate<Matrix, Symmetri
 	}
 
 	
-	/**
-	 * This method returns the percentile of the Monte Carlo simulated distribution.
-	 * @param percentile a value between 0 and 1
-	 * @return a Matrix instance that contains the percentile values
-	 */
-	protected Matrix getQuantileForProbability(double percentile) {
-		if (percentile < 0 || percentile > 1) {
+	@Override
+	protected Matrix getQuantileForProbability(double probability) {
+		if (probability < 0 || probability > 1) {
 			throw new InvalidParameterException("The percentile must be between 0 and 1!");
 		}
 		List<Matrix> realizations = getRealizations();
@@ -132,7 +128,7 @@ public class MonteCarloEstimate extends ResamplingBasedEstimate<Matrix, Symmetri
 				realizationsForThisRow.add(realizations.get(j).getValueAt(i, 0));
 			}
 			Collections.sort(realizationsForThisRow);
-			int index = (int) Math.round(percentile * realizations.size()) - 1;
+			int index = (int) Math.round(probability * realizations.size()) - 1;
 			if (index < 0) {
 				index = 0;
 			} 
@@ -175,12 +171,6 @@ public class MonteCarloEstimate extends ResamplingBasedEstimate<Matrix, Symmetri
 		return "Monte Carlo estimate (mean = " + getMean() + ", n = " + getNumberOfRealizations();
 	}
 
-	@Override
-	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {
-		Matrix lowerBoundValue = getQuantileForProbability(.5 * (1d - oneMinusAlpha));
-		Matrix upperBoundValue = getQuantileForProbability(1d - .5 * (1d - oneMinusAlpha));
-		return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
-	}
 	
 	
 	@Override

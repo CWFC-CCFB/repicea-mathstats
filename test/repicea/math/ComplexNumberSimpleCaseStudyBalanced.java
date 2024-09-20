@@ -21,13 +21,10 @@ package repicea.math;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import repicea.io.FormatField;
 import repicea.io.javacsv.CSVField;
@@ -38,16 +35,13 @@ import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimates.ComplexMonteCarloEstimate;
 import repicea.stats.estimates.MonteCarloEstimate;
-import repicea.stats.model.lm.LinearModel;
-import repicea.stats.model.lm.LogBackTransformation;
-import repicea.stats.model.lm.LogBackTransformation.Estimator;
 
 /**
  * The ComplexNumberSimpleCaseStudy class implements a simulation study around 
  * the exponential, square and log transformation of Gaussian variables.
  * @author Mathieu Fortin - Oct 2023
  */
-public class ComplexNumberSimpleCaseStudy {
+public class ComplexNumberSimpleCaseStudyBalanced {
 
 
 	/**
@@ -60,9 +54,9 @@ public class ComplexNumberSimpleCaseStudy {
 		private final double y;
 		@SuppressWarnings("unused")
 		private final int id;
-		private PopulationUnit(Matrix trueBeta, double trueStd, int id) {
+		private PopulationUnit(Matrix trueBeta, double trueStd, double x, int id) {
 			this.id = id;
-			x = StatisticalUtility.getRandom().nextDouble() * 7 + 3;
+			this.x = x;
 			y = trueBeta.getValueAt(0, 0) + x * trueBeta.getValueAt(1, 0) + StatisticalUtility.getRandom().nextGaussian() * trueStd;
 		}
 	}
@@ -73,12 +67,20 @@ public class ComplexNumberSimpleCaseStudy {
 	 */
 	@SuppressWarnings("serial")
 	private static class Sample extends ArrayList<PopulationUnit> {
+
+		static final List<Double> X_VALUES = Arrays.asList(new Double[] {3d, 5d, 7d, 9d, 11d});
 		
 		private static Sample createSample(Matrix trueBeta, double trueVariance, int sampleSize) {
+			if (sampleSize%X_VALUES.size() != 0) {
+				throw new InvalidParameterException("Requested sample size " + sampleSize + " is not a multiple of the number of x values: " + X_VALUES.size());
+			}
+			int nbRuns = sampleSize / X_VALUES.size();
 			Sample s = new Sample();
 			double trueStd = Math.sqrt(trueVariance);
-			for (int i = 0; i < sampleSize; i++) {
-				s.add(new PopulationUnit(trueBeta, trueStd, i));
+			for (int i = 0; i < nbRuns; i++) {
+				for (double x : X_VALUES) {
+					s.add(new PopulationUnit(trueBeta, trueStd, x, i));
+				}
 			}
 			return s;
 		}
@@ -249,10 +251,7 @@ public class ComplexNumberSimpleCaseStudy {
 		trueBeta.setValueAt(1, 0, b1);
 		double trueVariance = s2;
 		
-		List<Double> xValues = new ArrayList<Double>();
-		for (double i = 4; i <= 9; i++) {
-			xValues.add(i);
-		}
+		List<Double> xValues = Sample.X_VALUES;
 		for (int real = 1; real <= nbRealizations; real++) {
 			if (real % 1000 == 0) {
 				System.out.println("Running realization " + real);
@@ -262,7 +261,7 @@ public class ComplexNumberSimpleCaseStudy {
 			Model m = s.getModel();
 			Matrix beauchampAndOlsonEstimator = m.getBeauchampAndOlsonEstimator(xValues);
 			Matrix baskervilleEstimator = m.getBaskervilleEstimator(xValues);
-						
+			
 			MonteCarloEstimate mcEstimator = new MonteCarloEstimate();
 			ComplexMonteCarloEstimate cmcEstimator = new ComplexMonteCarloEstimate();
 
@@ -299,108 +298,16 @@ public class ComplexNumberSimpleCaseStudy {
 		writer.close();
 	}
 	
-	@Test
-	public void logBackTransformationImplementionTest() {
-		int nbInnerReal = 1000000;
-		LogBackTransformation.setInnerRealizationsForMonteCarloEstimators(nbInnerReal);
-		double b0 = 2d;
-		double b1 = 0.25;
-		double s2 = 1d;
-		int sampleSize = 25;
-		System.out.println("Simulating [" + b0 + "; " + b1 + "; " + s2 +"] with sample size n = " + sampleSize);
-		
-		Matrix trueBeta = new Matrix(2,1);
-		trueBeta.setValueAt(0, 0, b0);
-		trueBeta.setValueAt(1, 0, b1);
-		double trueVariance = s2;
-		
-		List<Double> xValues = new ArrayList<Double>();
-		for (double i = 3; i <= 10; i++) {
-			xValues.add(i);
-		}
-		Sample s = Sample.createSample(trueBeta, trueVariance, sampleSize);
-
-		Model m = s.getModel();
-		Matrix beauchampAndOlsonEstimator = m.getBeauchampAndOlsonEstimator(xValues);
-		Matrix baskervilleEstimator = m.getBaskervilleEstimator(xValues);
-						
-		MonteCarloEstimate mcEstimator = new MonteCarloEstimate();
-		ComplexMonteCarloEstimate cmcEstimator = new ComplexMonteCarloEstimate();
-
-		for (int innerReal = 0; innerReal < nbInnerReal; innerReal++) {
-			mcEstimator.addRealization(m.getRandomDeviate(xValues)); 
-			ComplexMatrix complexRealizations = m.getComplexRandomDeviate(xValues);
-			cmcEstimator.addRealization(complexRealizations); 
-		}
-
-		Matrix mcMean = mcEstimator.getMean();
-
-		ComplexMatrix cmcMean = cmcEstimator.getMean();
-		ComplexSymmetricMatrix cmcPsVar = cmcEstimator.getPseudoVariance();
-		
-		Matrix cmcMeanReal = new Matrix(cmcMean.m_iRows, 1);
-		Matrix cmcMeanVar = new Matrix(cmcMean.m_iRows, 1);
-		for (int i = 0; i < cmcMean.m_iRows; i++) {
-			cmcMeanReal.setValueAt(i, 0, cmcMean.getValueAt(i, 0).realPart);
-			cmcMeanVar.setValueAt(i, 0, -cmcPsVar.getValueAt(i, i).realPart);
-		}
-
-		DataSet ds = s.convertIntoDataSet();
-		LinearModel lm = new LinearModel(ds, "y ~ x");
-		lm.doEstimation();
-
-		Matrix baskervilleRef = LogBackTransformation.getMeanPredictedValuesOnOriginalScale(lm, 
-				Model.createMatrixX(xValues), 
-				0, 
-				Estimator.Baskerville);
-
-		Assert.assertTrue("Testing Baskerville estimator", !baskervilleRef.subtract(baskervilleEstimator).getAbsoluteValue().anyElementLargerThan(1E-8));
-
-		Matrix beauchampAndOlsonRef = LogBackTransformation.getMeanPredictedValuesOnOriginalScale(lm, 
-				Model.createMatrixX(xValues), 
-				0, 
-				Estimator.BeauchampAndOlson);
-
-		Assert.assertTrue("Testing Beauchamp and Olson estimator", !beauchampAndOlsonRef.subtract(beauchampAndOlsonEstimator).getAbsoluteValue().anyElementLargerThan(1E-8));
-
-		Matrix monteCarlRef = LogBackTransformation.getMeanPredictedValuesOnOriginalScale(lm, 
-				Model.createMatrixX(xValues), 
-				0, 
-				Estimator.MonteCarlo);
-
-		Matrix mc = monteCarlRef.subtract(mcMean).getAbsoluteValue();
-		mc = mc.elementWiseDivide(mcMean);
-		Assert.assertTrue("Testing Monte Carlo predictions", !mc.anyElementLargerThan(5E-3));
-		
-		Matrix complexMonteCarloRef = LogBackTransformation.getMeanPredictedValuesOnOriginalScale(lm, 
-				Model.createMatrixX(xValues), 
-				0, 
-				Estimator.ComplexMonteCarlo);
-		
-		Matrix cmc = complexMonteCarloRef.getSubMatrix(0, complexMonteCarloRef.m_iRows - 1, 0, 0)
-				.subtract(cmcMeanReal).getAbsoluteValue();
-		cmc = cmc.elementWiseDivide(cmcMeanReal);
-		Assert.assertTrue("Testing complex Monte Carlo point estimates", !cmc.anyElementLargerThan(7E-4));
-		
-		Matrix cmcVar = complexMonteCarloRef.getSubMatrix(0, complexMonteCarloRef.m_iRows - 1, 1, 1)
-				.subtract(cmcMeanVar).getAbsoluteValue();
-		cmcVar = cmcVar.elementWiseDivide(cmcMeanVar);
-		Assert.assertTrue("Testing complex Monte Carlo variances", !cmcVar.anyElementLargerThan(5E-3));
-		
-		LogBackTransformation.setInnerRealizationsForMonteCarloEstimators(10000);
-	}
-
-
 	public static void main(String[] args) throws IOException, InterruptedException {
 		String filename = REpiceaSystem.retrieveArgument("-outdir", Arrays.asList(args));
 		System.out.println("Export filename: " + filename);
 		List<Double> variances = new ArrayList<Double>();
-		variances.add(0.5);
+//		variances.add(0.5);
 		variances.add(1.0);
 		variances.add(2.0);
 		variances.add(3.0);
 		for (double variance : variances) {
-			String rootFilename = filename.concat("caseStudy_" + variance + "_");
+			String rootFilename = filename.concat("caseStudyBalanced_" + variance + "_");
 			List<Integer> sampleSizes = new ArrayList<Integer>();
 			sampleSizes.add(25);
 			sampleSizes.add(50);
@@ -410,7 +317,7 @@ public class ComplexNumberSimpleCaseStudy {
 			for (int sampleSize : sampleSizes) {
 				Runnable doRun = new Runnable() {
 					public void run() {
-						ComplexNumberSimpleCaseStudy s = new ComplexNumberSimpleCaseStudy();
+						ComplexNumberSimpleCaseStudyBalanced s = new ComplexNumberSimpleCaseStudyBalanced();
 						try {
 							s.doRun(sampleSize, 50000, 2, 0.25, variance, rootFilename);
 						} catch (IOException e) {

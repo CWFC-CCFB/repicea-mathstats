@@ -19,6 +19,11 @@
  */
 package repicea.stats.estimates;
 
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import repicea.math.ComplexMatrix;
 import repicea.math.ComplexSymmetricMatrix;
 import repicea.math.HermitianMatrix;
@@ -44,12 +49,6 @@ public class ComplexMonteCarloEstimate extends ResamplingBasedEstimate<ComplexMa
 		return (ComplexEmpiricalDistribution) super.getDistribution();
 	}
 	
-	@Override
-	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 	/**
 	 * Produce the real part of variance of diagonal element of the Hermitian matrix.
 	 * @see ComplexEmpiricalDistribution#getVarianceRealPart()
@@ -69,11 +68,89 @@ public class ComplexMonteCarloEstimate extends ResamplingBasedEstimate<ComplexMa
 	}
 
 	/**
-	 * Produce the pseudovariance of the vector of complex random variables.
+	 * Produce the pseudo-variance of the vector of complex random variables.
 	 * @return a ComplexSymmetricMatrix instance
 	 */
 	public ComplexSymmetricMatrix getPseudoVariance() {
 		return getDistribution().getPseudoVariance();
+	}
+
+//	/**
+//	 * To be documented
+//	 * @return
+//	 */
+//	public ComplexMonteCarloEstimate getInversedRealizations() {
+//		ComplexMonteCarloEstimate est = new ComplexMonteCarloEstimate();
+//		for (ComplexMatrix m : getDistribution().getInversedRealizations()) {
+//			est.addRealization(m);
+//		}
+//		return est;
+//	}
+
+//	private class ComplexMonteCarloRealization implements Comparable<ComplexMonteCarloRealization> {
+//		final double real;
+//		final double absValue;
+//		
+//		ComplexMonteCarloRealization(ComplexNumber cn) {
+//			real = cn.realPart;
+//			absValue = cn.getAbsoluteValue();
+//		}
+//
+//
+//		@Override
+//		public int compareTo(ComplexMonteCarloRealization o) {
+//			if (absValue < o.absValue) {
+//				return -1;
+//			} else if (absValue > o.absValue) {
+//				return 1;
+//			} else {
+//				return 0;
+//			}
+//		}
+//		
+//	}
+	
+	/**
+	 * {@inheritDoc}<p>
+	 * For this class, the realizations are ranked according to the value of their real part.
+	 */
+	@Override
+	protected Matrix getQuantileForProbability(double probability) {
+		if (probability < 0 || probability > 1) {
+			throw new InvalidParameterException("The percentile must be between 0 and 1!");
+		}
+		List<ComplexMatrix> realizations = getRealizations();
+		List<Double> realizationsForThisRow;
+		int nbRows = realizations.get(0).m_iRows;
+		Matrix percentileValues = new Matrix(nbRows,1);
+		for (int i = 0; i < nbRows; i++) {
+			realizationsForThisRow = new ArrayList<Double>();
+			for (int j = 0; j < realizations.size(); j++) { 
+				realizationsForThisRow.add(realizations.get(j).getValueAt(i, 0).realPart);
+			}
+			Collections.sort(realizationsForThisRow);
+			int index = (int) Math.round(probability * realizations.size()) - 1;
+			if (index < 0) {
+				index = 0;
+			} 
+			percentileValues.setValueAt(i, 0, realizationsForThisRow.get(index));
+		}
+//		List<ComplexMonteCarloRealization> realizationsForThisRow;
+//		int nbRows = realizations.get(0).m_iRows;
+//		Matrix percentileValues = new Matrix(nbRows,1);
+//		for (int i = 0; i < nbRows; i++) {
+//			realizationsForThisRow = new ArrayList<ComplexMonteCarloRealization>();
+//			for (int j = 0; j < realizations.size(); j++) { 
+//				realizationsForThisRow.add(new ComplexMonteCarloRealization(realizations.get(j).getValueAt(i, 0)));
+//			}
+//			Collections.sort(realizationsForThisRow);
+//			int index = (int) Math.round(probability * realizations.size()) - 1;
+//			if (index < 0) {
+//				index = 0;
+//			} 
+//			percentileValues.setValueAt(i, 0, realizationsForThisRow.get(index).real);
+//		}
+		return percentileValues;
 	}
 	
 }

@@ -168,7 +168,7 @@ public class SymmetricMatrix extends Matrix {
 
 	
 	@Override
-	public final SymmetricMatrix scalarAdd(double d) {
+	public final SymmetricMatrix scalarAdd(Double d) {
 		SymmetricMatrix mat = new SymmetricMatrix(m_iRows);
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = i; j < m_iCols; j++) {
@@ -179,7 +179,7 @@ public class SymmetricMatrix extends Matrix {
 	}
 
 	@Override
-	public SymmetricMatrix scalarMultiply(double d) {
+	public SymmetricMatrix scalarMultiply(Double d) {
 		SymmetricMatrix mat = new SymmetricMatrix(m_iRows);
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = i; j < m_iCols; j++) {

@@ -33,6 +33,11 @@ import java.util.List;
 public final class ComplexNumber extends Number implements Cloneable {
 
 	private static final NumberFormat ScientificFormatter = new DecimalFormat("0.##E0");
+
+	/**
+	 * The complex number 0+1i.
+	 */
+	public static ComplexNumber COMPLEX_I = new ComplexNumber(0,1);
 	
 	private static final NumberFormat SimpleDecimalFormatter = NumberFormat.getNumberInstance();
 	static {SimpleDecimalFormatter.setMinimumFractionDigits(2);}
