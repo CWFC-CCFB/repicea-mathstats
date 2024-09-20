@@ -30,6 +30,7 @@ import repicea.stats.estimates.GaussianEstimate;
 import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.stats.estimates.TruncatedGaussianEstimate;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
+import repicea.stats.model.lm.LogBackTransformation.Estimator;
 import repicea.util.ObjectUtility;
 
 public class LinearModelTest {
@@ -89,11 +90,13 @@ public class LinearModelTest {
 		for (int i = 0; i < 1000000; i++) {
 			mcEstimate.addRealization(estimate.getRandomDeviate().expMatrix().scalarAdd(-1d));
 		}
-		Matrix actualPredOrig = lm.getPredOnLogBackTransformedScale(1d, true);
+//		Matrix actualPredOrig = lm.getPredOnLogBackTransformedScale(1d, true);
+		Matrix actualPredOrig = LogBackTransformation.getMeanPredictedValuesOnOriginalScale(lm, 1d, Estimator.Naive);
 		double expectedMean = mcEstimate.getMean().getValueAt(0, 0);
 		Assert.assertEquals("Testing mean on original scale", expectedMean, actualPredOrig.getValueAt(0, 0), 1E-2);
+		Matrix actualResidualVariance = LogBackTransformation.getResidualVariancesOnOriginalScale(lm, Estimator.Naive);
 		double expectedVariance = mcEstimate.getVariance().getValueAt(0, 0);
-		Assert.assertEquals("Testing variance on original scale", expectedVariance, actualPredOrig.getValueAt(0, 1), 1E-2);
+		Assert.assertEquals("Testing variance on original scale", expectedVariance, actualResidualVariance.getValueAt(0, 0), 1E-2);
 	}
 
 	@Test
@@ -153,11 +156,13 @@ public class LinearModelTest {
 		double expectedPred = mcEstimate.getMean().getValueAt(0, 0);
 		Assert.assertEquals("Testing pred on tranformed scale", expectedPred, pred.getValueAt(0, 0), 1E-2);
 		
-		Matrix predOriginalScale = lm.getPredOnLogBackTransformedScale(1d, true); // offset = 1 no variance 
+//		Matrix predOriginalScale = lm.getPredOnLogBackTransformedScale(1d, true); // offset = 1 true : with variance
+		Matrix predOriginalScale = LogBackTransformation.getMeanPredictedValuesOnOriginalScale(lm, 1d, Estimator.Naive); 
 		double expectedPredOrig = mcEstimateOrig.getMean().getValueAt(0, 0);
 		Assert.assertEquals("Testing pred on original scale", expectedPredOrig, predOriginalScale.getValueAt(0, 0), 1E-2);
+		Matrix resVarianceOriginalScale = LogBackTransformation.getResidualVariancesOnOriginalScale(lm, Estimator.Naive); 
 		double expectedVarianceOrig = mcEstimateOrig.getVariance().getValueAt(0, 0);
-		Assert.assertEquals("Testing variance on original scale", expectedVarianceOrig, predOriginalScale.getValueAt(0, 1), 2E-2);
+		Assert.assertEquals("Testing variance on original scale", expectedVarianceOrig, resVarianceOriginalScale.getValueAt(0, 0), 2E-2);
 		
 		double expectedIntercept = -1.82587351;
 		Assert.assertEquals("Testing intercept estimate", expectedIntercept, lm.getParameters().getValueAt(0, 0), 1E-8);

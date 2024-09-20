@@ -138,33 +138,33 @@ public class LinearModel extends AbstractStatisticalModel implements Predictable
 					"Linear model fitted with maximum likelihood estimator";
 	}
 
-	/**
-	 * Calculate the mean predicted value on the original scale under the 
-	 * assumption the transformation was a log transformation, i.e. w = log(y).
-	 * @param xMatrix a design matrix if null the original design matrix is used
-	 * @param transformationOffset a constant. If the transformation was log(y+1), then transformationOffset=1
-	 * @param varianceRequired a boolean to request the variance calculation
-	 * @return the mean predicted value and eventually its variance on the original scale
-	 */
-	public Matrix getPredOnLogBackTransformedScale(Matrix xMatrix, double transformationOffset, boolean varianceRequired) {
-		Matrix pred = getPredicted(xMatrix).scalarAdd(0.5 * getResidualVariance()).expMatrix().scalarAdd(-transformationOffset);
-		if (varianceRequired) {
-			Matrix var = getPredicted(xMatrix).scalarMultiply(2d).scalarAdd(getResidualVariance()).expMatrix().scalarMultiply(Math.exp(getResidualVariance()) - 1);
-			pred = pred.matrixStack(var, false);
-		}
-		return pred;
-	}
+//	/**
+//	 * Calculate the mean predicted value on the original scale under the 
+//	 * assumption the transformation was a log transformation, i.e. w = log(y).
+//	 * @param xMatrix a design matrix if null the original design matrix is used
+//	 * @param transformationOffset a constant. If the transformation was log(y+1), then transformationOffset=1
+//	 * @param varianceRequired a boolean to request the variance calculation
+//	 * @return the mean predicted value and eventually its variance on the original scale
+//	 */
+//	public Matrix getPredOnLogBackTransformedScale(Matrix xMatrix, double transformationOffset, boolean varianceRequired) {
+//		Matrix pred = getPredicted(xMatrix).scalarAdd(0.5 * getResidualVariance()).expMatrix().scalarAdd(-transformationOffset);
+//		if (varianceRequired) {
+//			Matrix var = getPredicted(xMatrix).scalarMultiply(2d).scalarAdd(getResidualVariance()).expMatrix().scalarMultiply(Math.exp(getResidualVariance()) - 1);
+//			pred = pred.matrixStack(var, false);
+//		}
+//		return pred;
+//	}
 	
-	/**
-	 * Calculate the mean predicted value on the original scale under the 
-	 * assumption the transformation was a log transformation, i.e. w = log(y).
-	 * @param transformationOffset a constant. If the transformation was log(y+1), then transformationOffset=1
-	 * @param varianceRequired a boolean to request the variance calculation
-	 * @return the mean predicted value and eventually its variance on the original scale
-	 */
-	public Matrix getPredOnLogBackTransformedScale(double transformationOffset, boolean varianceRequired) {
-		return getPredOnLogBackTransformedScale(null, transformationOffset, varianceRequired);
-	}
+//	/**
+//	 * Calculate the mean predicted value on the original scale under the 
+//	 * assumption the transformation was a log transformation, i.e. w = log(y).
+//	 * @param transformationOffset a constant. If the transformation was log(y+1), then transformationOffset=1
+//	 * @param varianceRequired a boolean to request the variance calculation
+//	 * @return the mean predicted value and eventually its variance on the original scale
+//	 */
+//	public Matrix getPredOnLogBackTransformedScale(double transformationOffset, boolean varianceRequired) {
+//		return getPredOnLogBackTransformedScale(null, transformationOffset, varianceRequired);
+//	}
 	
 
 	@Override

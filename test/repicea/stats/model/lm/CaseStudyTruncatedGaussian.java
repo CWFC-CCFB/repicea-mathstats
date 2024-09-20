@@ -19,8 +19,14 @@
  */
 package repicea.stats.model.lm;
 
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Test;
+
 import repicea.math.Matrix;
 import repicea.stats.data.DataSet;
+import repicea.stats.model.lm.LogBackTransformation.Estimator;
 import repicea.util.ObjectUtility;
 
 /**
@@ -28,7 +34,7 @@ import repicea.util.ObjectUtility;
  * @author Mathieu Fortin - August 2023
  *
  */
-class CaseStudyTruncatedGaussian {
+public class CaseStudyTruncatedGaussian {
 
 	private static Object[] convertMatrixToObjectArray(Matrix m) {
 		Object[] predFieldValues = new Object[m.m_iRows];
@@ -37,14 +43,16 @@ class CaseStudyTruncatedGaussian {
 		return predFieldValues;
 	}
 	
-	public static void main(String[] args) throws Exception {
+	@Test
+	public void predictionTest() throws Exception {
 		String inputFilename = ObjectUtility.getPackagePath(CaseStudyTruncatedGaussian.class) + "datasetSingleObs.csv";
 		DataSet ds = new DataSet(inputFilename, true);
 		String formula = "yTrans ~ lnDt_corr + dbhCm + BAL";
 		LinearModel lm = new LinearModel(ds, formula);
 		lm.doEstimation();
 		ds.addField("meanPredOLS", convertMatrixToObjectArray(lm.getPredicted()));
-		ds.addField("meanPredOLSOrigScale", convertMatrixToObjectArray(lm.getPredOnLogBackTransformedScale(1d, false)));
+		Matrix predOriginal = LogBackTransformation.getMeanPredictedValuesOnOriginalScale(lm, 1, Estimator.Naive);
+		ds.addField("meanPredOLSOrigScale", convertMatrixToObjectArray(predOriginal));
 		System.out.println(lm.getSummary());
 		Matrix p = lm.getParameters();
 		Matrix parmsTrad = new Matrix(p.m_iRows + 1, 1);
@@ -53,12 +61,22 @@ class CaseStudyTruncatedGaussian {
 		LinearModelWithTruncatedGaussianErrorTerm truncatedModel = new LinearModelWithTruncatedGaussianErrorTerm(ds, formula, parmsTrad, 0);
 		truncatedModel.doEstimation();
 		ds.addField("meanPredMML", convertMatrixToObjectArray(truncatedModel.getPredicted()));
-		ds.addField("meanPredMMLOrigScale", convertMatrixToObjectArray(truncatedModel.getPredOnLogBackTransformedScale(1d, false))); // offset = 1 and no variance
+		predOriginal = LogBackTransformation.getMeanPredictedValuesOnOriginalScale(truncatedModel, 1, Estimator.Naive);
+		ds.addField("meanPredMMLOrigScale", convertMatrixToObjectArray(predOriginal)); // offset = 1 and no variance
 		System.out.println(truncatedModel.getSummary());
 		
 		String outputDatasetFilename = ObjectUtility.getPackagePath(CaseStudyTruncatedGaussian.class) + "datasetSingleObsOutput.csv";
-		outputDatasetFilename = outputDatasetFilename.replace("/bin", "");
-		ds.save(outputDatasetFilename);
+		DataSet ref_ds = new DataSet(outputDatasetFilename, true);
+		
+		List<Object> actual = ds.getFieldValues(ds.getIndexOfThisField("meanPredMMLOrigScale"));
+		List<Object> expected = ref_ds.getFieldValues(ds.getIndexOfThisField("meanPredMMLOrigScale"));
+		Assert.assertEquals("Testing nb of observations", expected.size(), actual.size());
+		for (int i = 0; i < actual.size(); i++) {
+			Assert.assertEquals("Testing values", (Double) expected.get(i), (Double) actual.get(i), 0.1);
+		}
+//		String outputDatasetFilename = ObjectUtility.getPackagePath(CaseStudyTruncatedGaussian.class) + "datasetSingleObsOutput.csv";
+//		outputDatasetFilename = outputDatasetFilename.replace("/bin", "");
+//		ds.save(outputDatasetFilename);
 	}
 	
 	

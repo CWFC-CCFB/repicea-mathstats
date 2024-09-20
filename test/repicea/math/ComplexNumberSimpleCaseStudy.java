@@ -352,7 +352,7 @@ public class ComplexNumberSimpleCaseStudy {
 		Matrix baskervilleRef = LogBackTransformation.getMeanPredictedValuesOnOriginalScale(lm, 
 				Model.createMatrixX(xValues), 
 				0, 
-				Estimator.Baskerville);
+				Estimator.Naive);
 
 		Assert.assertTrue("Testing Baskerville estimator", !baskervilleRef.subtract(baskervilleEstimator).getAbsoluteValue().anyElementLargerThan(1E-8));
 
