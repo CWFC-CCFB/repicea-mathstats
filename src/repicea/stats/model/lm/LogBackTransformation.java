@@ -26,6 +26,8 @@ import repicea.math.ComplexNumber;
 import repicea.math.ComplexSymmetricMatrix;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
+import repicea.math.utility.ErrorFunctionUtility;
+import repicea.math.utility.GaussianUtility;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.estimates.ComplexMonteCarloEstimate;
@@ -40,14 +42,40 @@ import repicea.stats.estimators.OLSEstimator;
 public class LogBackTransformation {
 
 	public enum Estimator {
-		Baskerville,
+		/**
+		 * In the context of a pure linear model, this estimator is that of Baskerville.
+		 */
+		Naive,
 		BeauchampAndOlson,
 		MonteCarlo,
 		ComplexMonteCarlo
 	}
 	
 	private static int  NB_INNER_REALIZATIONS = 10000;
+	static double VERY_SMALL = 1E-8;
 
+
+	/**
+	 * Provide the mean predicted values on the original scale. <p>
+	 * The method assumes that the response variable has been transformed using 
+	 * a log transformation: w = ln(y + c), where c is a transformation offset, 
+	 * typically 1. <p>
+	 * 
+	 * The method returns a column vector that contains the mean predicted values.
+	 * If the method argument is set to Estimator.ComplexMonteCarlo, the method
+	 * returns a two-column matrix, with the second column containing the variance
+	 * of the mean predicted values. 
+	 * 
+	 * @param model a LinearModel instance
+	 * @param transformationOffset the transformation offset
+	 * @param method an Enum estimator - the estimator to be used
+	 * @return a Matrix instance
+	 */
+	public static Matrix getMeanPredictedValuesOnOriginalScale(LinearModel model, double transformationOffset, Estimator method) {
+		return getMeanPredictedValuesOnOriginalScale(model, null, transformationOffset, method);
+	}
+
+	
 	/**
 	 * Provide the mean predicted values on the original scale. <p>
 	 * The method assumes that the response variable has been transformed using 
@@ -67,18 +95,33 @@ public class LogBackTransformation {
 	 */
 	public static Matrix getMeanPredictedValuesOnOriginalScale(LinearModel model, Matrix xMat, double transformationOffset, Estimator method) {
 		if (model instanceof LinearModelWithTruncatedGaussianErrorTerm) {
-			throw new UnsupportedOperationException("This method has not been implemented for models with truncated Gaussian error terms yet!");
-		}
-		if (!(model.getEstimator() instanceof OLSEstimator)) {
-			throw new UnsupportedOperationException("This method only works with models fitted using an OLS estimator!");
-		}
+			double sigma2 = model.getResidualVariance();
+			double sigma = Math.sqrt(sigma2);
+			Matrix xBeta = ((LinearModelWithTruncatedGaussianErrorTerm) model).getXBeta(xMat);
+			Matrix meanValues = new Matrix(xBeta.m_iRows, 1);
+			double truncation = ((LinearModelWithTruncatedGaussianErrorTerm) model).truncation;
+			for (int i = 0; i < xBeta.m_iRows; i++) {
+				double xBeta_i = xBeta.getValueAt(i, 0);
+				double F_t = GaussianUtility.getCumulativeProbability((truncation - xBeta_i)/sigma);
+				double meanValue =  (F_t < VERY_SMALL) ?
+						Math.exp(xBeta_i + 0.5 * sigma2) :
+							Math.exp(xBeta_i + 0.5 * sigma2) * ((1 + ErrorFunctionUtility.erf((xBeta_i + sigma2 - truncation)/Math.sqrt(2*sigma2)))/(2*(1-F_t))); 
+				meanValues.setValueAt(i, 0, meanValue - transformationOffset);
+			}
+			return meanValues;
+		} 
+		
+//		// Otherwise it is a simple LinearModel instance
+//		if (!(model.getEstimator() instanceof OLSEstimator)) {
+//			throw new UnsupportedOperationException("This method only works with models fitted using an OLS estimator!");
+//		}
 		Matrix pred;
 		Matrix omegaChol;
 		
 		double sigma2hat = model.getResidualVariance();
 		
 		switch(method) {
-		case Baskerville:
+		case Naive:
 			pred = model.getPredicted(xMat).scalarAdd(0.5 * sigma2hat).expMatrix().scalarAdd(-transformationOffset);
 			return pred;
 		case BeauchampAndOlson:
@@ -168,4 +211,83 @@ public class LogBackTransformation {
 		}
 		NB_INNER_REALIZATIONS = nbRealizations;
 	}
+	
+
+	/**
+	 * Provide the residual variances on the original scale. <p>
+	 * The method assumes that the response variable has been transformed using 
+	 * a log transformation: w = ln(y + c), where c is a transformation offset, 
+	 * typically 1. <p>
+	 * 
+	 * The method returns a column vector that contains the residual variances. No 
+	 * offset is required since it only affects the mean and not the variance. In its
+	 * current form, the method only support the Estimator.Naive enum.
+	 * 
+	 * @param model a LinearModel instance
+	 * @param method an Enum estimator - the estimator to be used
+	 * @return a Matrix instance
+	 */
+	public static Matrix getResidualVariancesOnOriginalScale(LinearModel model, Estimator method) {
+		return 	getResidualVariancesOnOriginalScale(model, null, method);
+	}
+
+	
+	
+	/**
+	 * Provide the residual variances on the original scale. <p>
+	 * The method assumes that the response variable has been transformed using 
+	 * a log transformation: w = ln(y + c), where c is a transformation offset, 
+	 * typically 1. <p>
+	 * 
+	 * The method returns a column vector that contains the residual variances. No 
+	 * offset is required since it only affects the mean and not the variance. In its
+	 * current form, the method only support the Estimator.Naive enum.
+	 * 
+	 * @param model a LinearModel instance
+	 * @param xMat a design matrix for which the predictions are needed
+	 * @param method an Enum estimator - the estimator to be used
+	 * @return a Matrix instance
+	 */
+	public static Matrix getResidualVariancesOnOriginalScale(LinearModel model, Matrix xMat, Estimator method) {
+		if (model instanceof LinearModelWithTruncatedGaussianErrorTerm) {
+			double sigma2 = model.getResidualVariance();
+			double sigma = Math.sqrt(sigma2);
+			Matrix xBeta = ((LinearModelWithTruncatedGaussianErrorTerm) model).getXBeta(xMat);
+			Matrix residualVariances = new Matrix(xBeta.m_iRows, 1);
+			double truncation = ((LinearModelWithTruncatedGaussianErrorTerm) model).truncation;
+			for (int i = 0; i < xBeta.m_iRows; i++) {
+				double xBeta_i = xBeta.getValueAt(i, 0);
+				double F_t = GaussianUtility.getCumulativeProbability((truncation - xBeta_i)/sigma);
+				double meanValue =  (F_t < VERY_SMALL) ?
+						Math.exp(xBeta_i + 0.5 * sigma2) :
+							Math.exp(xBeta_i + 0.5 * sigma2) * ((1 + ErrorFunctionUtility.erf((xBeta_i + sigma2 - truncation)/Math.sqrt(2*sigma2)))/(2*(1-F_t))); 
+				double sqrt2Sigma2 = Math.sqrt(2 * sigma2);
+				double part1 = Math.exp(2*xBeta_i + 2* sigma2) * (1 + ErrorFunctionUtility.erf((xBeta_i + 2*sigma2 - truncation)/sqrt2Sigma2));
+				double part2 = -2 * meanValue * Math.exp(xBeta_i + .5*sigma2) * (1 + ErrorFunctionUtility.erf((xBeta_i + sigma2 - truncation)/sqrt2Sigma2));
+				double part3 = meanValue * meanValue * (1 - ErrorFunctionUtility.erf((truncation - xBeta_i)/sqrt2Sigma2));
+				double var = 1d / (2 - 2*F_t) * (part1 + part2 + part3);
+				residualVariances.setValueAt(i, 0, var);
+			}
+			return residualVariances;
+		} 
+		
+//		// Otherwise it is a simple LinearModel instance
+//		if (!(model.getEstimator() instanceof OLSEstimator)) {
+//			throw new UnsupportedOperationException("This method only works with models fitted using an OLS estimator!");
+//		}
+		
+		double sigma2hat = model.getResidualVariance();
+		
+		switch(method) {
+		case Naive:
+			Matrix var = model.getPredicted(xMat).scalarMultiply(2d).scalarAdd(sigma2hat).expMatrix().scalarMultiply(Math.exp(sigma2hat) - 1);
+			return var;
+		default:
+			throw new InvalidParameterException("The following estimator is not supported yet: " + method.name());
+		}
+		
+	}
+	
+
+	
 }
