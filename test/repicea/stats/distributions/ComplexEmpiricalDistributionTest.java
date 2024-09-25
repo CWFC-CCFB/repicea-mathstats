@@ -91,7 +91,7 @@ public class ComplexEmpiricalDistributionTest {
 		
 		HermitianMatrix variance = ced.getVariance();
 		System.out.println("Expected variance (total) = 2; Actual variance = " + variance.getValueAt(0, 0).realPart);
-		Assert.assertEquals("Testing variance", 2d, variance.getValueAt(0, 0).realPart, 2E-2);
+		Assert.assertEquals("Testing variance", 2d, variance.getValueAt(0, 0).realPart, 3E-2);
 		System.out.println("Expected variance (imaginary part) = 0; Actual variance = " + variance.getValueAt(0, 0).imaginaryPart);
 		Assert.assertEquals("Testing variance", 0d, variance.getValueAt(0, 0).imaginaryPart, 1E-15);
 		

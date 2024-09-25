@@ -390,14 +390,57 @@ public class ComplexNumberSimpleCaseStudy {
 		LogBackTransformation.setInnerRealizationsForMonteCarloEstimators(10000);
 	}
 
+	@Ignore
+	@Test
+	public void logBackTimeTest() {
+		double b0 = 2d;
+		double b1 = 0.25;
+		double s2 = 1d;
+		int sampleSize = 25;
+		System.out.println("Simulating [" + b0 + "; " + b1 + "; " + s2 +"] with sample size n = " + sampleSize);
+		
+		Matrix trueBeta = new Matrix(2,1);
+		trueBeta.setValueAt(0, 0, b0);
+		trueBeta.setValueAt(1, 0, b1);
+		double trueVariance = s2;
+		
+		List<Double> xValues = new ArrayList<Double>();
+		for (double i = 6; i <= 6; i++) {
+			xValues.add(i);
+		}
+		Sample s = Sample.createSample(trueBeta, trueVariance, sampleSize);
+		DataSet ds = s.convertIntoDataSet();
+		LinearModel lm = new LinearModel(ds, "y ~ x");
+		lm.doEstimation();
+
+		double meanTime = 0;
+		int nbRuns = 100;
+		for (int i = 0; i<=nbRuns; i++) { 
+			long initTime = System.currentTimeMillis();
+			Matrix complexMonteCarloRef = LogBackTransformation.getMeanPredictedValuesOnOriginalScale(lm, 
+					Model.createMatrixX(xValues), 
+					0, 
+					Estimator.ComplexMonteCarlo);
+			double totalTime = System.currentTimeMillis() - initTime;
+			if (i >= 1) {		// we do not count run 0 because some time is spent to load the class
+				meanTime += totalTime;
+				System.out.println("Time run " + i + " = " + totalTime);
+			}
+		}
+		System.out.println("Average time = " + (meanTime / nbRuns));
+	}
+
+	
+	
+	
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		String filename = REpiceaSystem.retrieveArgument("-outdir", Arrays.asList(args));
 		System.out.println("Export filename: " + filename);
 		List<Double> variances = new ArrayList<Double>();
-		variances.add(0.5);
-		variances.add(1.0);
-		variances.add(2.0);
+//		variances.add(0.5);
+//		variances.add(1.0);
+//		variances.add(2.0);
 		variances.add(3.0);
 		for (double variance : variances) {
 			String rootFilename = filename.concat("caseStudy_" + variance + "_");

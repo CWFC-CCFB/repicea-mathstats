@@ -231,7 +231,7 @@ public class ComplexNumberSimpleCaseStudyBalanced {
 			double s2,
 			String filename) throws IOException {
 		System.out.println("Simulating [" + b0 + "; " + b1 + "; " + s2 +"] with sample size n = " + sampleSize);
-		int nbInnerReal = 10000;
+		int nbInnerReal = 1000000;
 		CSVWriter writer = new CSVWriter(new File(filename.concat("" + sampleSize + ".csv")), false);
 		List<FormatField> fields = new ArrayList<FormatField>();
 		fields.add(new CSVField("RealID"));
@@ -251,14 +251,29 @@ public class ComplexNumberSimpleCaseStudyBalanced {
 		trueBeta.setValueAt(1, 0, b1);
 		double trueVariance = s2;
 		
+		
 		List<Double> xValues = Sample.X_VALUES;
+		Matrix mse = null;
 		for (int real = 1; real <= nbRealizations; real++) {
 			if (real % 1000 == 0) {
 				System.out.println("Running realization " + real);
 			}
-			Sample s = Sample.createSample(trueBeta, trueVariance, sampleSize);
 
+			Sample s = Sample.createSample(trueBeta, trueVariance, sampleSize);
 			Model m = s.getModel();
+			
+			if (real == 1) {
+				mse  = new Matrix(xValues.size(),1);
+				Matrix xMat = Model.createMatrixX(xValues);
+				Matrix Omega = xMat.multiply(m.invXtX).multiply(xMat.transpose());
+				Matrix xBeta = xMat.multiply(trueBeta);
+				for (int i = 0; i < xValues.size(); i++) {
+					double theta = Math.exp(xBeta.getValueAt(i, 0) + 0.5 * trueVariance);
+					double mseValue = theta * theta * (Math.exp(Omega.getValueAt(i, i) * trueVariance) - 1);
+					mse.setValueAt(i, 0, mseValue);
+				}
+			}
+			
 			Matrix beauchampAndOlsonEstimator = m.getBeauchampAndOlsonEstimator(xValues);
 			Matrix baskervilleEstimator = m.getBaskervilleEstimator(xValues);
 			
@@ -275,6 +290,41 @@ public class ComplexNumberSimpleCaseStudyBalanced {
 			
 			ComplexMatrix cmcMean = cmcEstimator.getMean();
 			ComplexSymmetricMatrix cmcPsVar = cmcEstimator.getPseudoVariance();
+// 			TO CHECK THE RELIABILITY OF THE LIMIT OF THE PSEUDO-VARIANCE			
+//			System.out.println(cmcPsVar.toString());
+//			Matrix approxLimitPseudoVariance = new Matrix(xValues.size(), 1);
+//			ComplexMatrix obsPseudoVariance = new ComplexMatrix(xValues.size(), 1);
+//			ComplexMatrix limitPseudoVariance = new ComplexMatrix(xValues.size(), 1);
+//			Matrix xBetaHat = m.getXBeta(xValues);
+//			Matrix xMat = Model.createMatrixX(xValues);
+//			Matrix Omega = xMat.multiply(m.invXtX).multiply(xMat.transpose());
+//			for (int i = 0; i < xValues.size(); i++) {
+//				double omegaValue = Omega.getValueAt(i, i);
+//				double limApprox = Math.exp(2 * xBetaHat.getValueAt(i, 0)) * 
+//							(Math.exp((1-2*omegaValue)*m.sigma2Hat) - Math.exp((1-omegaValue)*m.sigma2Hat));
+//				ComplexNumber oneMinusI = new ComplexNumber(1,-1);
+//				ComplexNumber term1_1 = oneMinusI.multiply((1-2*omegaValue) * m.sigma2Hat);
+//				ComplexNumber term1_2 = new ComplexNumber(1,-2 * (1-2*omegaValue) * m.sigma2Hat / m.upsilon);
+//				term1_2 = term1_2.log().multiply(-m.upsilon * .5);
+//				ComplexNumber firstExponential = term1_1.add(term1_2).exp();
+//				
+//				ComplexNumber term2_1 = oneMinusI.multiply((1-omegaValue) * m.sigma2Hat);
+//				ComplexNumber term2_2 = new ComplexNumber(1,-(1-omegaValue) * m.sigma2Hat / m.upsilon);
+//				term2_2 = term2_2.log().multiply(-m.upsilon);
+//				ComplexNumber secondExponential = term2_1.add(term2_2).exp();
+//				
+//				ComplexNumber trueLimit = firstExponential.subtract(secondExponential);
+//				double factor = Math.exp(2 * xBetaHat.getValueAt(i, 0));  
+//				trueLimit = trueLimit.multiply(factor);
+//				
+//				approxLimitPseudoVariance.setValueAt(i, 0, limApprox);
+//				limitPseudoVariance.setValueAt(i, 0, trueLimit);
+//				obsPseudoVariance.setValueAt(i, 0, cmcPsVar.getValueAt(i, i));
+//			}
+//			
+//			System.out.println(approxLimitPseudoVariance);
+//			System.out.println(limitPseudoVariance);
+//			System.out.println(obsPseudoVariance);
 			
 //			ComplexMonteCarloEstimate cmcInvEstimator = cmcEstimator.getInversedRealizations();
 //			ComplexSymmetricMatrix cmcInvPsVar = cmcInvEstimator.getPseudoVariance();
@@ -310,9 +360,9 @@ public class ComplexNumberSimpleCaseStudyBalanced {
 			String rootFilename = filename.concat("caseStudyBalanced_" + variance + "_");
 			List<Integer> sampleSizes = new ArrayList<Integer>();
 			sampleSizes.add(25);
-			sampleSizes.add(50);
-			sampleSizes.add(100);
-			sampleSizes.add(200);
+//			sampleSizes.add(50);
+//			sampleSizes.add(100);
+//			sampleSizes.add(200);
 			List<Thread> threads = new ArrayList<Thread>();
 			for (int sampleSize : sampleSizes) {
 				Runnable doRun = new Runnable() {

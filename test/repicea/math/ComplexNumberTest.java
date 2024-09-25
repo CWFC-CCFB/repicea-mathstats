@@ -143,8 +143,5 @@ public class ComplexNumberTest {
 		Assert.assertEquals("Testing variance", 4.3333333333333333333333 + 11.083333333333333333, c, 1E-15);
 	}
 	
-
-	
-	
 	
 }
