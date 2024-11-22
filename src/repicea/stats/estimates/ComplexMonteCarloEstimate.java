@@ -75,17 +75,20 @@ public class ComplexMonteCarloEstimate extends ResamplingBasedEstimate<ComplexMa
 		return getDistribution().getPseudoVariance();
 	}
 
-//	/**
-//	 * To be documented
-//	 * @return
-//	 */
-//	public ComplexMonteCarloEstimate getInversedRealizations() {
-//		ComplexMonteCarloEstimate est = new ComplexMonteCarloEstimate();
-//		for (ComplexMatrix m : getDistribution().getInversedRealizations()) {
-//			est.addRealization(m);
-//		}
-//		return est;
-//	}
+	/**
+	 * Provide imaginary realizations embedded into a 
+	 * ComplexMonteCarloEstimate instance.<p>
+	 * The imaginary realizations are calculated as the 
+	 * residuals times i plus the mean.
+	 * @return a ComplexMonteCarloEstimate instance
+	 */
+	public ComplexMonteCarloEstimate getImaginaryRealizations() {
+		ComplexMonteCarloEstimate est = new ComplexMonteCarloEstimate();
+		for (ComplexMatrix m : getDistribution().getImaginaryRealizations()) {
+			est.addRealization(m);
+		}
+		return est;
+	}
 
 //	private class ComplexMonteCarloRealization implements Comparable<ComplexMonteCarloRealization> {
 //		final double real;
@@ -135,21 +138,6 @@ public class ComplexMonteCarloEstimate extends ResamplingBasedEstimate<ComplexMa
 			} 
 			percentileValues.setValueAt(i, 0, realizationsForThisRow.get(index));
 		}
-//		List<ComplexMonteCarloRealization> realizationsForThisRow;
-//		int nbRows = realizations.get(0).m_iRows;
-//		Matrix percentileValues = new Matrix(nbRows,1);
-//		for (int i = 0; i < nbRows; i++) {
-//			realizationsForThisRow = new ArrayList<ComplexMonteCarloRealization>();
-//			for (int j = 0; j < realizations.size(); j++) { 
-//				realizationsForThisRow.add(new ComplexMonteCarloRealization(realizations.get(j).getValueAt(i, 0)));
-//			}
-//			Collections.sort(realizationsForThisRow);
-//			int index = (int) Math.round(probability * realizations.size()) - 1;
-//			if (index < 0) {
-//				index = 0;
-//			} 
-//			percentileValues.setValueAt(i, 0, realizationsForThisRow.get(index).real);
-//		}
 		return percentileValues;
 	}
 	

@@ -20,7 +20,10 @@
  */
 package repicea.stats.data;
 
+import java.io.IOException;
 import java.lang.reflect.Array;
+import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 
 import org.junit.Assert;
@@ -56,6 +59,16 @@ public class DataSetTest {
 		Assert.assertTrue("Testing first entry in the array", entry1 instanceof LinkedHashMap);
 		String value1 = ((LinkedHashMap) entry1).get("Field1").toString();
 		Assert.assertEquals("Testing value in Field1", "true", value1);
+	}
+
+	
+	@Test
+	public void testLongInt() throws IOException {
+		DataSet myDataSet = new DataSet(Arrays.asList(new String[] {"ID_PE", "TREENO"}));
+		myDataSet.addObservation(new Object[]{"1000000000000", 4});
+		Object idPeValue = myDataSet.getObservations().get(0).getValueAt(0);
+		Assert.assertTrue("Testing BigInteger instance", idPeValue instanceof BigInteger);
+		Assert.assertEquals("Testing string value of id pe", "1000000000000", idPeValue.toString());
 	}
 
 }

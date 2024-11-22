@@ -21,6 +21,7 @@
 package repicea.stats.data;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.InvalidParameterException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -398,13 +399,27 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 
 	private void parseDifferentFields(Object[] lineRead) {
 		for (int i = 0; i < fieldNames.size(); i++) {
-			try {
-				lineRead[i] = (Integer) Integer.parseInt(lineRead[i].toString());
-			} catch (NumberFormatException e1) {
+			String valueStr = lineRead[i].toString();
+			boolean containsPeriod = valueStr.contains(".");
+			if (containsPeriod) { // might be a double
 				try {
 					lineRead[i] = (Double) Double.parseDouble(lineRead[i].toString());
-				} catch (NumberFormatException e2) {
-					lineRead[i] = lineRead[i].toString();
+				} catch (NumberFormatException e1) {
+					lineRead[i] = valueStr;
+				}
+			} else {
+				if (valueStr.length() > 9) { // might be a big integer then
+					try {
+						lineRead[i] = new BigInteger(lineRead[i].toString());
+					} catch (NumberFormatException e1) {
+						lineRead[i] = valueStr;
+					}
+				} else {
+					try {
+						lineRead[i] = (Integer) Integer.parseInt(lineRead[i].toString());
+					} catch (NumberFormatException e1) {
+						lineRead[i] = valueStr;
+					}
 				}
 			}
 		}

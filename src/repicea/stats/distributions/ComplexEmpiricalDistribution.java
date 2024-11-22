@@ -21,6 +21,7 @@ package repicea.stats.distributions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import repicea.math.ComplexMatrix;
 import repicea.math.ComplexNumber;
@@ -118,8 +119,8 @@ public class ComplexEmpiricalDistribution extends AbstractEmpiricalDistribution<
 	 */
 	public ComplexSymmetricMatrix getPseudoVariance() {
 		ComplexMatrix variance = null;
-		for (ComplexMatrix pseudoResidual : getPseudoResiduals()) {
-			ComplexMatrix product = pseudoResidual.multiply(pseudoResidual.transpose());
+		for (ComplexMatrix residual : getResiduals()) {
+			ComplexMatrix product = residual.multiply(residual.transpose());
 			variance = variance == null ? product : variance.add(product);
 		}
 		variance = variance.scalarMultiply(1d/(getNumberOfRealizations() - 1));
@@ -127,27 +128,33 @@ public class ComplexEmpiricalDistribution extends AbstractEmpiricalDistribution<
 		return formattedMatrix;
 	}
 
-//	/**
-//	 * To be documented.
-//	 * @return
-//	 */
-//	public List<ComplexMatrix> getInversedRealizations() {
-//		ComplexMatrix mean = getMean();
-//		List<ComplexMatrix> inversedRealizations = getPseudoResiduals().
-//				stream().
-//				map(e -> e.scalarMultiply(ComplexNumber.COMPLEX_I).add(mean)).
-//				collect(Collectors.toList());
-//		return inversedRealizations;
-//	}
+	/**
+	 * Provide imaginary realizations.<p>
+	 * The imaginary realizations are calculated as the 
+	 * residuals times i plus the mean.
+	 * @return a List of ComplexMatrix instances
+	 */
+	public List<ComplexMatrix> getImaginaryRealizations() {
+		ComplexMatrix mean = getMean();
+		List<ComplexMatrix> realizations = getResiduals().
+				stream().
+				map(e -> e.scalarMultiply(ComplexNumber.COMPLEX_I).add(mean)).
+				collect(Collectors.toList());
+		return realizations;
+	}
 	
-	
-	private List<ComplexMatrix> getPseudoResiduals() {
-		List<ComplexMatrix> pseudoResiduals = new ArrayList<ComplexMatrix>();
+	/**
+	 * Provide the residuals of the realizations.<p>
+	 * Those are the realizations minus the mean.
+	 * @return a List of ComplexMatrix instances
+	 */
+	private List<ComplexMatrix> getResiduals() {
+		List<ComplexMatrix> residuals = new ArrayList<ComplexMatrix>();
 		ComplexMatrix mean = getMean();
 		for (ComplexMatrix m : getRealizations()) {
-			pseudoResiduals.add(m.subtract(mean));
+			residuals.add(m.subtract(mean));
 		}
-		return pseudoResiduals;
+		return residuals;
 	}
 	
 }
