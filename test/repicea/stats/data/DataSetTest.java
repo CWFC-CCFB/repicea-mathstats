@@ -71,4 +71,17 @@ public class DataSetTest {
 		Assert.assertEquals("Testing string value of id pe", "1000000000000", idPeValue.toString());
 	}
 
+	@Test
+	public void testLongInt2() throws IOException {
+		DataSet myDataSet = new DataSet(Arrays.asList(new String[] {"ID_PE", "TREENO"}));
+		myDataSet.addObservation(new Object[]{"1000000000000", 4});
+		myDataSet.addObservation(new Object[]{10, 3});
+		myDataSet.indexFieldType();
+		Class<?> clazz = myDataSet.getFieldTypes().get(0);
+		Assert.assertTrue("Testing BigInteger instance", clazz.equals(BigInteger.class));
+		for (Observation o : myDataSet.getObservations()) {
+			Assert.assertTrue("Testing BigInteger instance", o.getValueAt(0) instanceof BigInteger);
+		}
+	}
+
 }

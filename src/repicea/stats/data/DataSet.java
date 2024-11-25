@@ -156,6 +156,9 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 	private void setClassOfThisField(int fieldIndex) {
 		if (isInteger(fieldIndex)) {
 			setFieldType(fieldIndex, Integer.class);
+		} else if (isBigInteger(fieldIndex)) {
+			setFieldType(fieldIndex, BigInteger.class);
+			reconvertToBigIntegerIfNeedsBe(fieldIndex);
 		} else if (isDouble(fieldIndex)) {
 			setFieldType(fieldIndex, Double.class);
 			reconvertToDoubleIfNeedsBe(fieldIndex);
@@ -178,7 +181,8 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 	private boolean isInteger(int j) {
 		boolean isInteger = true;
 		for (int i = 0; i < getNumberOfObservations(); i++) {
-			if (!(getValueAt(i,j) instanceof Integer)) {
+			Object value = getValueAt(i,j);
+			if (!(value instanceof Integer)) {
 					isInteger = false;
 					break;
 			} 
@@ -186,7 +190,27 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 		return isInteger;
 	}
 
+	private boolean isBigInteger(int j) {
+		boolean isBigInteger = true;
+		for (int i = 0; i < getNumberOfObservations(); i++) {
+			Object value = getValueAt(i,j);
+			if (!(value instanceof Integer) && !(value instanceof BigInteger)) {
+					isBigInteger = false;
+					break;
+			} 
+		}
+		return isBigInteger;
+	}
 
+	private void reconvertToBigIntegerIfNeedsBe(int j) {
+		for (int i = 0; i < getNumberOfObservations(); i++) {
+			Object value = getValueAt(i,j);
+			if ((value instanceof Integer)) {
+				setValueAt(i,j, BigInteger.valueOf(((Integer) value).intValue())); 
+			}
+		} 
+	}
+	
 	private void reconvertToStringIfNeedsBe(int j) {
 		for (int i = 0; i < getNumberOfObservations(); i++) {
 			Object value = getValueAt(i,j);
@@ -199,12 +223,11 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 	private void reconvertToDoubleIfNeedsBe(int j) {
 		for (int i = 0; i < getNumberOfObservations(); i++) {
 			Object value = getValueAt(i,j);
-			if ((value instanceof Integer)) {
-				setValueAt(i,j, ((Integer) value).doubleValue()); // MF2020-04-30 Bug corrected 
+			if ((value instanceof Number) && !(value instanceof Double)) {
+				setValueAt(i,j, ((Number) value).doubleValue()); 
 			}
 		} 
 	}
-
 
 	private boolean isDouble(int indexJ) {
 		boolean isDouble = true;
