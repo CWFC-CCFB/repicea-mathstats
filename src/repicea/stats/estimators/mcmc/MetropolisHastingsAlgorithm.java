@@ -546,6 +546,7 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 	 */
 	public void releaseFinalSampleSelection() {
 		finalMetropolisHastingsSampleSelection = null;
+		mcmcEstimate = null;
 	}
 
 
