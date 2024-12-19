@@ -28,9 +28,12 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataSet;
 import repicea.stats.distributions.GaussianDistribution;
+import repicea.stats.estimates.Estimate;
+import repicea.stats.estimates.GaussianEstimate;
 import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.stats.estimators.AbstractEstimator;
 import repicea.util.REpiceaLogManager;
@@ -51,13 +54,14 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 	protected MetropolisHastingsParameters simParms;
 	protected final MetropolisHastingsPriorHandler priors;
 	private Matrix parameters;
-	private Matrix parmsVarCov;
+	private SymmetricMatrix parmsVarCov;
 	protected double lpml;
 	
 	protected List<MetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
 	private boolean converged;
 	protected int indexCorrelationParameter;
 	private MonteCarloEstimate mcmcEstimate;
+	private GaussianEstimate simplerEstimate;
 
 	/**
 	 * Constructor.<p>
@@ -203,7 +207,7 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 	 * set on the fly to avoid recalculating it from the MonteCarloEstimate every time.
 	 * @return a Matrix containing the estimated variances-covariances of the parameter estimates
 	 */
-	public Matrix getParameterCovarianceMatrix() {
+	public SymmetricMatrix getParameterCovarianceMatrix() {
 		if (isConvergenceAchieved()) {
 			if (parmsVarCov == null) 
 				parmsVarCov = mcmcEstimate.getVariance();
@@ -527,8 +531,13 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 	}
 
 	@Override
-	public MonteCarloEstimate getParameterEstimates() {
-		return isConvergenceAchieved() ? mcmcEstimate : null;
+	public Estimate<Matrix, SymmetricMatrix, ?> getParameterEstimates() {
+		if (isConvergenceAchieved()) {
+			return mcmcEstimate != null ? mcmcEstimate : getSimplerEstimate();
+			
+		} else {
+			return null;
+		}
 	}
 	
 	@Override
@@ -546,10 +555,16 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 	 */
 	public void releaseFinalSampleSelection() {
 		finalMetropolisHastingsSampleSelection = null;
+		getSimplerEstimate();
 		mcmcEstimate = null;
 	}
 
-
+	private GaussianEstimate getSimplerEstimate() {
+		if (simplerEstimate == null) {
+			simplerEstimate = new GaussianEstimate(getFinalParameterEstimates(), getParameterCovarianceMatrix());
+		}
+		return simplerEstimate;
+	}
 	
 	
 }

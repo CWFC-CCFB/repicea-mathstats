@@ -408,6 +408,16 @@ public class MetropolisHastingsTest {
 				refSamplingDist.getMean().getValueAt(0,0) - firstSet.parms.getValueAt(0, 0)) > 1E-8);
 	}
 
+	@Test
+	public void test06ReleasingFinalSample() {
+		DataSet ds1 = hierarchicalWithoutRandomEffects.getParameterEstimatesReport();
+		System.out.println(ds1.toString());
+		hierarchicalWithoutRandomEffects.releaseFinalSampleSelection();
+		DataSet ds2 = hierarchicalWithoutRandomEffects.getParameterEstimatesReport();
+		System.out.println(ds2.toString());
+		Assert.assertEquals("Comparing the two outputs", ds1.toString(), ds2.toString());
+	}
+
 	@AfterClass
     public static void afterClass() {
 		hierarchicalWithoutRandomEffects = null;
