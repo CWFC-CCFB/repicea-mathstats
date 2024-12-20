@@ -29,6 +29,7 @@ import java.util.logging.Level;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
+import repicea.serial.PostUnmarshalling;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataSet;
 import repicea.stats.distributions.GaussianDistribution;
@@ -46,7 +47,7 @@ import repicea.util.REpiceaLogManager;
  * @author Mathieu Fortin - September 2021
  * @see <a href=https://doi.org/10.1214/06-BA117A> Gelman 2006 </a>
  */
-public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHastingsCompatibleModel> {
+public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHastingsCompatibleModel> implements PostUnmarshalling {
 		
 	private String loggerName;
 	private String loggerPrefix;
@@ -54,7 +55,7 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 	protected MetropolisHastingsParameters simParms;
 	protected final MetropolisHastingsPriorHandler priors;
 	private Matrix parameters;
-	private SymmetricMatrix parmsVarCov;
+	private Matrix parmsVarCov;
 	protected double lpml;
 	
 	protected List<MetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
@@ -211,7 +212,7 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 		if (isConvergenceAchieved()) {
 			if (parmsVarCov == null) 
 				parmsVarCov = mcmcEstimate.getVariance();
-			return parmsVarCov;
+			return (SymmetricMatrix) parmsVarCov;
 		} else {
 			return null;
 		}
@@ -565,6 +566,20 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 		}
 		return simplerEstimate;
 	}
+
+	@Override
+	public void postUnmarshallingAction() {
+		if (parmsVarCov != null) {
+			if (!(parmsVarCov instanceof SymmetricMatrix)) {
+				// The next line is required for compatibility.
+				// Although the member parmsVarCov is a Matrix type,
+				// it must be a SymmetricMatrix type for releasing 
+				// the final sample selection MF2024-12-20.
+				parmsVarCov = SymmetricMatrix.convertToSymmetricIfPossible(parmsVarCov);
+			}
+		}
+	}
+	
 	
 	
 }
