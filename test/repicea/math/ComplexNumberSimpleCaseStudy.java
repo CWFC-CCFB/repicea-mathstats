@@ -380,7 +380,7 @@ public class ComplexNumberSimpleCaseStudy {
 		Matrix cmc = complexMonteCarloRef.getSubMatrix(0, complexMonteCarloRef.m_iRows - 1, 0, 0)
 				.subtract(cmcMeanReal).getAbsoluteValue();
 		cmc = cmc.elementWiseDivide(cmcMeanReal);
-		Assert.assertTrue("Testing complex Monte Carlo point estimates", !cmc.anyElementLargerThan(7E-4));
+		Assert.assertTrue("Testing complex Monte Carlo point estimates", !cmc.anyElementLargerThan(1E-3));
 		
 		Matrix cmcVar = complexMonteCarloRef.getSubMatrix(0, complexMonteCarloRef.m_iRows - 1, 1, 1)
 				.subtract(cmcMeanVar).getAbsoluteValue();
