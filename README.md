@@ -27,8 +27,7 @@ License for more details.
 
 Please see the license at http://www.gnu.org/copyleft/lesser.html.
 
-This library is compiled under Java 11. It uses some icons from the GTK library which are protected 
-by a GNU Lesser General Public License. 
+This library is compiled under Java 8.  
 
 This library also relies on 
 - repicea library (https://github.com/CWFC-CCFB/repicea) which is licensed under the Lesser General Public License version 3.0.  
