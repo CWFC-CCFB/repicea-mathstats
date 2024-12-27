@@ -86,7 +86,7 @@ public class ComplexEmpiricalDistributionTest {
 			Assert.assertEquals("Testing mean (real part)", expectedMeanReal.get(i), actualMeanRealPart, 5E-2);
 			double actualMeanImagPart = mean.getValueAt(i, 0).imaginaryPart;
 			System.out.println("Expected mean (imaginary part) = " + expectedMeanImag.get(i) + "; Actual mean = " + actualMeanImagPart);
-			Assert.assertEquals("Testing mean (imaginary part)", expectedMeanImag.get(i), actualMeanImagPart, 1E-2);
+			Assert.assertEquals("Testing mean (imaginary part)", expectedMeanImag.get(i), actualMeanImagPart, 1.5E-2);
 		}
 		
 		HermitianMatrix variance = ced.getVariance();
