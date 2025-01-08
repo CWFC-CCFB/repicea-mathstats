@@ -192,7 +192,7 @@ public class MonteCarloEstimate extends ResamplingBasedEstimate<Matrix, Symmetri
 	}
 
 	@Override
-	public Estimate<Matrix, SymmetricMatrix, ?> getProductEstimate(double scalar) {
+	public AbstractEstimate<Matrix, SymmetricMatrix, ?> getProductEstimate(double scalar) {
 		return multiply(scalar);
 	}
 

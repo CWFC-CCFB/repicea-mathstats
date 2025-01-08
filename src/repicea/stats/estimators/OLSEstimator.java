@@ -25,7 +25,7 @@ import java.util.List;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.stats.data.DataSet;
-import repicea.stats.estimates.Estimate;
+import repicea.stats.estimates.AbstractEstimate;
 import repicea.stats.estimates.GaussianEstimate;
 import repicea.stats.estimates.VarianceEstimate;
 import repicea.stats.estimators.AbstractEstimator.EstimatorCompatibleModel;
@@ -52,7 +52,7 @@ public final class OLSEstimator extends AbstractEstimator<OLSCompatibleModel> {
 	
 	private VarianceEstimate residualVariance;
 	private boolean hasConverged;
-	private Estimate<Matrix, SymmetricMatrix, ?> betaVector;
+	private AbstractEstimate<Matrix, SymmetricMatrix, ?> betaVector;
 	private SymmetricMatrix inverseProduct;
 	
 	/**
@@ -106,7 +106,7 @@ public final class OLSEstimator extends AbstractEstimator<OLSCompatibleModel> {
 	public boolean isConvergenceAchieved() {return hasConverged;}
 
 	@Override
-	public Estimate<Matrix, SymmetricMatrix, ?> getParameterEstimates() {
+	public AbstractEstimate<Matrix, SymmetricMatrix, ?> getParameterEstimates() {
 		return betaVector;
 	}
 

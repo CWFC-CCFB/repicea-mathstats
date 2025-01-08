@@ -43,7 +43,7 @@ import repicea.stats.sampling.PopulationUnit;
  * inference in forest inventories. Forestry 91(3): 354-365. </a>
  */
 @SuppressWarnings("serial")
-public final class BootstrapHybridPointEstimate extends Estimate<Matrix, SymmetricMatrix, UnknownDistribution> implements NumberOfRealizationsProvider {
+public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix, SymmetricMatrix, UnknownDistribution> implements NumberOfRealizationsProvider {
 
 	private static boolean IsVarianceCorrectionEnabled = true; 	// default value
 	

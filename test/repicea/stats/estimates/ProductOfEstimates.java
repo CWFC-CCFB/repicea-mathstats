@@ -123,9 +123,9 @@ public class ProductOfEstimates {
 		double biasedBeta = beta * (1d + biasBeta);
 		double biasedGamma = gamma * (1d + biasGamma);
 
-		Estimate expectedAlpha;
-		Estimate expectedBeta;
-		Estimate expectedGamma;
+		AbstractEstimate expectedAlpha;
+		AbstractEstimate expectedBeta;
+		AbstractEstimate expectedGamma;
 		if (useLogNormal) {
 			expectedAlpha = new LogNormalEstimate(biasedAlpha, varAlpha, false);
 			expectedBeta = new LogNormalEstimate(biasedBeta, varBeta, false);
@@ -159,7 +159,7 @@ public class ProductOfEstimates {
 			estimates.add(getEstimate(expectedBeta, trueVarBeta, useLogNormal));
 			estimates.add(getEstimate(expectedGamma, trueVarGamma, useLogNormal));
 
-			SimpleEstimate productGoodman = Estimate.getProductOfManyEstimates(estimates);
+			SimpleEstimate productGoodman = AbstractEstimate.getProductOfManyEstimates(estimates);
 			muGoodman.addRealization(productGoodman.getMean());
 			varGoodman.addRealization(productGoodman.getVariance());
 

@@ -38,7 +38,7 @@ import repicea.stats.sampling.PopulationUnit;
  * @author Mathieu Fortin - March 2021, January 2025
  */
 @SuppressWarnings("serial")
-public abstract class PointEstimate extends Estimate<Matrix, SymmetricMatrix, GaussianDistribution> {
+public abstract class PointEstimate extends AbstractEstimate<Matrix, SymmetricMatrix, GaussianDistribution> {
 
 	private final Map<String, PopulationUnit> observations;
 	protected int nRows;

@@ -27,7 +27,7 @@ import repicea.stats.distributions.AbstractEmpiricalDistribution;
  */
 @SuppressWarnings({ "serial", "rawtypes" })
 abstract class ResamplingBasedEstimate<M extends AbstractMatrix, V extends AbstractMatrix> 
-					extends Estimate<M, V, AbstractEmpiricalDistribution<M,V>> implements NumberOfRealizationsProvider {
+					extends AbstractEstimate<M, V, AbstractEmpiricalDistribution<M,V>> implements NumberOfRealizationsProvider {
 	
 	/**
 	 * Constructor.

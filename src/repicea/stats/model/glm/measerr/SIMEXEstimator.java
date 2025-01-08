@@ -31,7 +31,7 @@ import java.util.logging.Level;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.stats.data.DataSet;
-import repicea.stats.estimates.Estimate;
+import repicea.stats.estimates.AbstractEstimate;
 import repicea.stats.estimates.GaussianEstimate;
 import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.stats.estimators.AbstractEstimator;
@@ -261,7 +261,7 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 	public boolean isConvergenceAchieved() {return convergenceAchieved;}
 
 	@Override
-	public Estimate<Matrix, SymmetricMatrix, ?> getParameterEstimates() {return parameterEstimates;}
+	public AbstractEstimate<Matrix, SymmetricMatrix, ?> getParameterEstimates() {return parameterEstimates;}
 
 	
 	@Override

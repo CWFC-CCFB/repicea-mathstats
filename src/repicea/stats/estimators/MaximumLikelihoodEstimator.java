@@ -33,7 +33,7 @@ import repicea.math.optimizer.AbstractOptimizer.LineSearchMethod;
 import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
 import repicea.math.optimizer.LikelihoodOptimizer;
 import repicea.stats.data.DataSet;
-import repicea.stats.estimates.Estimate;
+import repicea.stats.estimates.AbstractEstimate;
 import repicea.stats.estimates.GaussianEstimate;
 import repicea.stats.estimators.AbstractEstimator.EstimatorCompatibleModel;
 import repicea.stats.estimators.MaximumLikelihoodEstimator.MaximumLikelihoodCompatibleModel;
@@ -212,7 +212,7 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 	public boolean isConvergenceAchieved() {return nro.isConvergenceAchieved();}
 
 	@Override
-	public Estimate<Matrix, SymmetricMatrix, ?> getParameterEstimates() {
+	public AbstractEstimate<Matrix, SymmetricMatrix, ?> getParameterEstimates() {
 		return parameterEstimate;
 	}
 	
