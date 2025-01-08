@@ -35,7 +35,7 @@ import repicea.stats.sampling.PopulationUnit;
  * @author Mathieu Fortin - September 2016, January 2025
  */
 @SuppressWarnings("serial")
-public class PopulationTotalEstimate extends PointEstimate {
+public class PopulationTotalEstimate extends AbstractPointEstimate {
 
 	private final double individualInclusionProbability;
 	
@@ -123,7 +123,7 @@ public class PopulationTotalEstimate extends PointEstimate {
 
 	
 	@Override
-	protected PopulationTotalEstimate add(PointEstimate pointEstimate) {
+	protected PopulationTotalEstimate add(AbstractPointEstimate pointEstimate) {
 		if (isMergeableEstimate(pointEstimate)) {
 			PopulationTotalEstimate newEstimate = new PopulationTotalEstimate(getPopulationSize());
 			PopulationTotalEstimate totalEstimate = (PopulationTotalEstimate) pointEstimate;
@@ -140,7 +140,7 @@ public class PopulationTotalEstimate extends PointEstimate {
 	}
 
 	@Override
-	protected PopulationTotalEstimate subtract(PointEstimate pointEstimate) {
+	protected PopulationTotalEstimate subtract(AbstractPointEstimate pointEstimate) {
 		if (isMergeableEstimate(pointEstimate)) {
 			PopulationTotalEstimate newEstimate = new PopulationTotalEstimate(getPopulationSize());
 			PopulationTotalEstimate totalEstimate = (PopulationTotalEstimate) pointEstimate;

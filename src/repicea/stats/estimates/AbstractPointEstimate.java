@@ -34,11 +34,12 @@ import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.sampling.PopulationUnit;
 
 /**
- * An abstract class for point estimates (total or mean). 
+ * An abstract class for point estimates (total or mean).<p>
+ * This class is more focused on sampling. 
  * @author Mathieu Fortin - March 2021, January 2025
  */
 @SuppressWarnings("serial")
-public abstract class PointEstimate extends AbstractEstimate<Matrix, SymmetricMatrix, GaussianDistribution> {
+public abstract class AbstractPointEstimate extends AbstractEstimate<Matrix, SymmetricMatrix, GaussianDistribution> {
 
 	private final Map<String, PopulationUnit> observations;
 	protected int nRows;
@@ -49,7 +50,7 @@ public abstract class PointEstimate extends AbstractEstimate<Matrix, SymmetricMa
 	/**
 	 * Basic constructor without population size.
 	 */
-	protected PointEstimate() {
+	protected AbstractPointEstimate() {
 		super(new GaussianDistribution(0d, 1d));
 		observations = new ConcurrentHashMap<String, PopulationUnit>();
 		populationSize = -1d;
@@ -60,7 +61,7 @@ public abstract class PointEstimate extends AbstractEstimate<Matrix, SymmetricMa
 	 * Constructor with population size.
 	 * @param populationSize the number of units in the population.
 	 */
-	protected PointEstimate(double populationSize) {
+	protected AbstractPointEstimate(double populationSize) {
 		super(new GaussianDistribution(0d, 1d));
 		if (populationSize <= 0) {
 			throw new InvalidParameterException("The population size must be greater than 0!");
@@ -141,7 +142,7 @@ public abstract class PointEstimate extends AbstractEstimate<Matrix, SymmetricMa
 	@Override
 	protected boolean isMergeableEstimate(Estimate<?,?,?> estimate) {
 		if (estimate.getClass().equals(getClass())) {
-			PointEstimate pe = (PointEstimate) estimate;
+			AbstractPointEstimate pe = (AbstractPointEstimate) estimate;
 			if (getSampleIds().equals(pe.getSampleIds())) {	// make sure we have the same sample ids
 				if (nRows == pe.nRows) {
 					if (nCols == pe.nCols) {
@@ -173,11 +174,11 @@ public abstract class PointEstimate extends AbstractEstimate<Matrix, SymmetricMa
 	}
 
 	
-	protected abstract PointEstimate add(PointEstimate pointEstimate);
+	protected abstract AbstractPointEstimate add(AbstractPointEstimate pointEstimate);
 
-	protected abstract PointEstimate subtract(PointEstimate pointEstimate);
+	protected abstract AbstractPointEstimate subtract(AbstractPointEstimate pointEstimate);
 
-	protected abstract PointEstimate multiply(double scalar);
+	protected abstract AbstractPointEstimate multiply(double scalar);
 
 
 }

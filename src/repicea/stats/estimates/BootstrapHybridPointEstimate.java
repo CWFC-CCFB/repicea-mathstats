@@ -215,7 +215,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 	}
 	
 	
-	private final List<PointEstimate> estimates;
+	private final List<AbstractPointEstimate> estimates;
 	private VarianceEstimate varianceEstimate;
 	private VarianceEstimatorImplementation vei;
 
@@ -224,7 +224,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 	 */
 	public BootstrapHybridPointEstimate() {
 		super(new UnknownDistribution());
-		estimates = new ArrayList<PointEstimate>();
+		estimates = new ArrayList<AbstractPointEstimate>();
 		vei = VarianceEstimatorImplementation.Corrected; // default value
 	}
 
@@ -272,7 +272,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 	 * an InvalidParameterException is thrown.
 	 * @param estimate a PointEstimate instance
 	 */
-	public void addPointEstimate(PointEstimate estimate) {
+	public void addPointEstimate(AbstractPointEstimate estimate) {
 		if (estimates.isEmpty() || estimates.get(0).isMergeableEstimate(estimate)) {
 			estimates.add(estimate);
 			varianceEstimate = null;	// make sure to reset the variance estimate
@@ -323,7 +323,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 	 * @param estimate a BootstrapHybridPointEstimate instance that relies on the same PointEstimate class in the estimates member
 	 */
 	public void appendBootstrapHybridEstimate(BootstrapHybridPointEstimate estimate) {
-		for (PointEstimate pointEstimate : estimate.estimates) {
+		for (AbstractPointEstimate pointEstimate : estimate.estimates) {
 			addPointEstimate(pointEstimate);
 		}
 	}
@@ -331,7 +331,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 	@Override
 	protected Matrix getMeanFromDistribution() {
 		Matrix mean = null;
-		for (PointEstimate estimate : estimates) {
+		for (AbstractPointEstimate estimate : estimates) {
 			if (mean == null) {
 				mean = estimate.getMean();
 			} else {
@@ -388,7 +388,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 			int sampleSize = estimates.get(0).getObservations().size();
 			EmpiricalDistribution observationMeans = new EmpiricalDistribution();
 			int nbElementsPerObs = 0;
-			for (PointEstimate estimate : estimates) {
+			for (AbstractPointEstimate estimate : estimates) {
 				if (nbElementsPerObs == 0) {
 					nbElementsPerObs = estimate.getNumberOfElementsPerObservation();
 				}
@@ -397,12 +397,12 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 				observationMeans.addRealization(estimate.getObservationMatrix());
 			}
 			
-			PointEstimate meanEstimate; 
+			AbstractPointEstimate meanEstimate; 
 			try {
 				if (estimates.get(0).isPopulationSizeKnown()) {
 					double populationSize = estimates.get(0).getPopulationSize();
 					Constructor<?> cons = estimates.get(0).getClass().getConstructor(double.class);
-					meanEstimate = (PointEstimate) cons.newInstance(populationSize);
+					meanEstimate = (AbstractPointEstimate) cons.newInstance(populationSize);
 				} else {
 					meanEstimate = estimates.get(0).getClass().newInstance();
 				}

@@ -32,7 +32,7 @@ import repicea.stats.sampling.PopulationUnit;
  * @author Mathieu Fortin - April 2016
  */
 @SuppressWarnings("serial")
-public class PopulationMeanEstimate extends PointEstimate {
+public class PopulationMeanEstimate extends AbstractPointEstimate {
 		
 	private final EmpiricalDistribution sample;
 
@@ -84,7 +84,7 @@ public class PopulationMeanEstimate extends PointEstimate {
 	}
 
 	@Override
-	protected PopulationMeanEstimate add(PointEstimate pointEstimate) {
+	protected PopulationMeanEstimate add(AbstractPointEstimate pointEstimate) {
 		if (isMergeableEstimate(pointEstimate)) {
 			PopulationMeanEstimate newEstimate = new PopulationMeanEstimate();
 			PopulationMeanEstimate meanEstimate = (PopulationMeanEstimate) pointEstimate;
@@ -101,7 +101,7 @@ public class PopulationMeanEstimate extends PointEstimate {
 	}
 
 	@Override
-	protected PopulationMeanEstimate subtract(PointEstimate pointEstimate) {
+	protected PopulationMeanEstimate subtract(AbstractPointEstimate pointEstimate) {
 		if (isMergeableEstimate(pointEstimate)) {
 			PopulationMeanEstimate newEstimate = new PopulationMeanEstimate();
 			PopulationMeanEstimate meanEstimate = (PopulationMeanEstimate) pointEstimate;
