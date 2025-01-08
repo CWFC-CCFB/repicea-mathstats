@@ -2,7 +2,9 @@
  * This file is part of the repicea-statistics library.
  *
  * Copyright (C) 2009-2018 Mathieu Fortin for Rouge-Epicea
- *
+ * Copyright (C) 2025 His Majesty the King in right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
+ * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -33,14 +35,12 @@ import repicea.stats.sampling.PopulationUnit;
 
 /**
  * An abstract class for point estimates (total or mean). 
- * @author Mathieu Fortin - March 2021
- *
- * @param <O> a PopulationEstimate-derived class
+ * @author Mathieu Fortin - March 2021, January 2025
  */
 @SuppressWarnings("serial")
-public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<Matrix, SymmetricMatrix, GaussianDistribution> {
+public abstract class PointEstimate extends Estimate<Matrix, SymmetricMatrix, GaussianDistribution> {
 
-	private final Map<String, O> observations;
+	private final Map<String, PopulationUnit> observations;
 	protected int nRows;
 	protected int nCols;
 	private final double populationSize;
@@ -51,7 +51,7 @@ public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<M
 	 */
 	protected PointEstimate() {
 		super(new GaussianDistribution(0d, 1d));
-		observations = new ConcurrentHashMap<String, O>();
+		observations = new ConcurrentHashMap<String, PopulationUnit>();
 		populationSize = -1d;
 		estimatorType = EstimatorType.LeastSquares;
 	}
@@ -65,7 +65,7 @@ public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<M
 		if (populationSize <= 0) {
 			throw new InvalidParameterException("The population size must be greater than 0!");
 		}
-		observations = new ConcurrentHashMap<String, O>();
+		observations = new ConcurrentHashMap<String, PopulationUnit>();
 		this.populationSize = populationSize;
 		estimatorType = EstimatorType.LeastSquares;
 	}
@@ -83,7 +83,7 @@ public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<M
 		List<String> sampleIds = getSampleIds();
 		for (int i = 0; i < sampleIds.size(); i++) {
 			String sampleId = sampleIds.get(i);
-			O obs = getObservations().get(sampleId);
+			PopulationUnit obs = getObservations().get(sampleId);
 			if (outputMatrix == null) {
 				nbElementsPerObs = obs.getData().m_iRows;
 				outputMatrix = new Matrix(nbObservations, nbElementsPerObs);
@@ -110,17 +110,14 @@ public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<M
 		} else {
 			return -1;
 		}
-		
 	}
-	
-	
 
 	/**
 	 * Add an observation to the sample.
 	 * 
 	 * @param obs a PopulationUnitObservation instance
 	 */
-	public void addObservation(O obs) {
+	public void addObservation(PopulationUnit obs) {
 		if (obs == null) {
 			throw new InvalidParameterException("The obs argument must be non null!");
 		}
@@ -141,7 +138,6 @@ public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<M
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
 	protected boolean isMergeableEstimate(Estimate<?,?,?> estimate) {
 		if (estimate.getClass().equals(getClass())) {
@@ -157,7 +153,7 @@ public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<M
 		return false;
 	}
 	
-	protected Map<String, O> getObservations() {return observations;}
+	protected Map<String, PopulationUnit> getObservations() {return observations;}
 
 	public boolean isPopulationSizeKnown() {return populationSize != -1;}
 	
@@ -177,11 +173,11 @@ public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<M
 	}
 
 	
-	protected abstract PointEstimate<?> add(PointEstimate<?> pointEstimate);
+	protected abstract PointEstimate add(PointEstimate pointEstimate);
 
-	protected abstract PointEstimate<?> subtract(PointEstimate<?> pointEstimate);
+	protected abstract PointEstimate subtract(PointEstimate pointEstimate);
 
-	protected abstract PointEstimate<?> multiply(double scalar);
+	protected abstract PointEstimate multiply(double scalar);
 
 
 }

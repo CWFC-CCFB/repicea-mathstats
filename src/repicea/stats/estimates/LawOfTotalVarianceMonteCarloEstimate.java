@@ -23,7 +23,7 @@ import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
-import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
+import repicea.stats.sampling.PopulationUnit;
 
 /**
  * The LawOfTotalVarianceMonteCarloEstimate is a Monte Carlo estimate for random variable.
@@ -76,7 +76,7 @@ public class LawOfTotalVarianceMonteCarloEstimate extends MonteCarloEstimate {
 	private PopulationMeanEstimate unformatObservation(Matrix formattedObservation) {
 		PopulationMeanEstimate estimate = new PopulationMeanEstimate();
 		for (int j = 0; j < formattedObservation.m_iCols; j++) {
-			estimate.addObservation(new PopulationUnitWithEqualInclusionProbability(j + "", formattedObservation.getSubMatrix(0, formattedObservation.m_iRows - 1, j, j)));
+			estimate.addObservation(new PopulationUnit(j + "", formattedObservation.getSubMatrix(0, formattedObservation.m_iRows - 1, j, j)));
 		}
 		return estimate;
 	}

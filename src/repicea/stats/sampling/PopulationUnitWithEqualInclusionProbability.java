@@ -25,15 +25,17 @@ import repicea.math.Matrix;
  * the inclusion probability is even across the units.
  * 
  * @author Mathieu Fortin - May 2018
+ * @deprecated Use the PopulationUnit class instead of this class.
  */
-public class PopulationUnitWithEqualInclusionProbability extends PopulationUnit {
+@Deprecated
+class PopulationUnitWithEqualInclusionProbability extends PopulationUnit {
 
 	/**
 	 * Constructor.
 	 * @param sampleId a string that stands for the sample id
 	 * @param obs a Matrix instance. Must be a column vector
 	 */
-	public PopulationUnitWithEqualInclusionProbability(String sampleId, Matrix obs) {
+	private PopulationUnitWithEqualInclusionProbability(String sampleId, Matrix obs) {
 		super(sampleId, obs);
 	}
 
