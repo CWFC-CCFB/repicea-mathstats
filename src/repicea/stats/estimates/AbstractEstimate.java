@@ -170,7 +170,7 @@ public abstract class AbstractEstimate<M extends AbstractMatrix, V extends Abstr
 	
 	/**
 	 * A static method to compute the product of many estimates.
-	 * @param estimates
+	 * @param estimates a list of Estimate instances
 	 * @return a SimpleEstimate instance
 	 */
 	public static SimpleEstimate getProductOfManyEstimates(List<Estimate<Matrix, SymmetricMatrix, ?>> estimates) {

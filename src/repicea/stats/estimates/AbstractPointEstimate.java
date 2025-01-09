@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea-mathstats library.
  *
  * Copyright (C) 2009-2018 Mathieu Fortin for Rouge-Epicea
  * Copyright (C) 2025 His Majesty the King in right of Canada
@@ -39,7 +39,8 @@ import repicea.stats.sampling.PopulationUnit;
  * @author Mathieu Fortin - March 2021, January 2025
  */
 @SuppressWarnings("serial")
-public abstract class AbstractPointEstimate extends AbstractEstimate<Matrix, SymmetricMatrix, GaussianDistribution> {
+public abstract class AbstractPointEstimate extends AbstractEstimate<Matrix, SymmetricMatrix, GaussianDistribution> 
+											implements PointEstimate {
 
 	private final Map<String, PopulationUnit> observations;
 	protected int nRows;
@@ -156,11 +157,11 @@ public abstract class AbstractPointEstimate extends AbstractEstimate<Matrix, Sym
 	
 	protected Map<String, PopulationUnit> getObservations() {return observations;}
 
-	public boolean isPopulationSizeKnown() {return populationSize != -1;}
-	
+	@Override
 	public double getPopulationSize() {return populationSize;}
 	
-	protected Matrix getQuantileForProbability(double probability) {
+	protected final Matrix getQuantileForProbability(double probability) {
+//		int degreeOfFreedom = getObservations().size() - 1; 
 		Matrix stdDev = getVariance().diagonalVector().elementWisePower(.5); 
 		double quantile = GaussianUtility.getQuantile(probability);
 		return getMean().add(stdDev.scalarMultiply(quantile));

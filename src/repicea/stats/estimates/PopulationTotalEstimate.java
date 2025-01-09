@@ -109,14 +109,6 @@ public class PopulationTotalEstimate extends AbstractPointEstimate {
 			} else if (this.individualInclusionProbability != thatPopulationTotalEstimate.individualInclusionProbability) {
 				return false;
 			}
-//			PopulationTotalEstimate est = (PopulationTotalEstimate) estimate;
-//			for (String sampleId : getSampleIds()) {
-//				PopulationUnitWithEqualInclusionProbability thisUnit = getObservations().get(sampleId);
-//				PopulationUnitWithEqualInclusionProbability thatUnit = est.getObservations().get(sampleId);
-//				if (thisUnit.getInclusionProbability() != thatUnit.getInclusionProbability()) {
-//					return false;
-//				}
-//			}
 		}
 		return isMergeable;
 	}
