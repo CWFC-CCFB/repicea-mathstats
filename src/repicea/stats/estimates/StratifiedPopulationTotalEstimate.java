@@ -26,8 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
-import repicea.math.utility.GaussianUtility;
-import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.sampling.PopulationUnit;
 
 /**
@@ -36,10 +34,15 @@ import repicea.stats.sampling.PopulationUnit;
  * @author Mathieu Fortin - January 2025
  */
 @SuppressWarnings("serial")
-public class StratifiedPopulationTotalEstimate extends AbstractEstimate<Matrix, SymmetricMatrix, GaussianDistribution> 
-												implements PointEstimate {
+public class StratifiedPopulationTotalEstimate extends AbstractPointEstimate {
 
 	private final Map<String, PopulationTotalEstimate> stratumDesign;
+	
+	
+	private StratifiedPopulationTotalEstimate() {
+		super();
+		stratumDesign = new ConcurrentHashMap<String, PopulationTotalEstimate>();
+	}
 	
 	/**
 	 * Constructor.
@@ -47,7 +50,7 @@ public class StratifiedPopulationTotalEstimate extends AbstractEstimate<Matrix, 
 	 * @param strataPopulationSizes a List of Double that stand for the stratum sample sizes.
 	 */
 	public StratifiedPopulationTotalEstimate(List<String> stratumNames, List<Double> strataPopulationSizes) {
-		super(new GaussianDistribution(0d, 1d));
+		this();
 		if (stratumNames == null || stratumNames.isEmpty()) {
 			throw new InvalidParameterException("The strataNames argument must be non null and not empty!");
 		}
@@ -57,7 +60,6 @@ public class StratifiedPopulationTotalEstimate extends AbstractEstimate<Matrix, 
 		if (stratumNames.size() != strataPopulationSizes.size()) {
 			throw new InvalidParameterException("The strataNames and strataPopulationSizes arguments must have the same size!");
 		}
-		stratumDesign = new ConcurrentHashMap<String, PopulationTotalEstimate>();
 		for (int i = 0; i < stratumNames.size(); i++) {
 			String stratumName = stratumNames.get(i);
 			double popSize = strataPopulationSizes.get(i);
@@ -107,17 +109,74 @@ public class StratifiedPopulationTotalEstimate extends AbstractEstimate<Matrix, 
 		return variance;
 	}
 
-	protected final Matrix getQuantileForProbability(double probability) {
-		Matrix stdDev = getVariance().diagonalVector().elementWisePower(.5); 
-		double quantile = GaussianUtility.getQuantile(probability);
-		return getMean().add(stdDev.scalarMultiply(quantile));
-	}
-	
 	@Override
-	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {
-		Matrix lowerBoundValue = getQuantileForProbability(.5 * (1d - oneMinusAlpha));
-		Matrix upperBoundValue = getQuantileForProbability(1d - .5 * (1d - oneMinusAlpha));
-		return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
+	protected boolean isMergeableEstimate(Estimate<?, ?, ?> estimate) {
+		if (getClass().equals(estimate.getClass())) {
+			StratifiedPopulationTotalEstimate pe = (StratifiedPopulationTotalEstimate) estimate;
+			if (nCols == pe.nCols) {
+				if (nRows == pe.nRows) {
+					if (stratumDesign.size() == pe.stratumDesign.size()) {
+						for (String stratumName : stratumDesign.keySet()) {
+							if (pe.stratumDesign.get(stratumName) == null) {
+								return false;
+							} else {
+								PopulationTotalEstimate thisPopTotEstimate = stratumDesign.get(stratumName);
+								PopulationTotalEstimate thatPopTotEstimate = pe.stratumDesign.get(stratumName);
+								if (!thisPopTotEstimate.isMergeableEstimate(thatPopTotEstimate)) {
+									return false;
+								}
+							}
+						}
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
+	@Override
+	protected StratifiedPopulationTotalEstimate add(PointEstimate pointEstimate) {
+		if (isMergeableEstimate(pointEstimate)) {
+			StratifiedPopulationTotalEstimate newEstimate = new StratifiedPopulationTotalEstimate();
+			StratifiedPopulationTotalEstimate thatEstimate = (StratifiedPopulationTotalEstimate) pointEstimate;
+			
+			for (String stratumName : stratumDesign.keySet()) {
+				PopulationTotalEstimate thisPopTotEstimate = stratumDesign.get(stratumName);
+				PopulationTotalEstimate thatPopTotEstimate = thatEstimate.stratumDesign.get(stratumName);
+				newEstimate.stratumDesign.put(stratumName, thisPopTotEstimate.add(thatPopTotEstimate));
+			}
+			return newEstimate;
+		} else {
+			throw new InvalidParameterException("Incompatible point estimates!");
+		}
+	}
+
+	@Override
+	protected StratifiedPopulationTotalEstimate subtract(PointEstimate pointEstimate) {
+		if (isMergeableEstimate(pointEstimate)) {
+			StratifiedPopulationTotalEstimate newEstimate = new StratifiedPopulationTotalEstimate();
+			StratifiedPopulationTotalEstimate thatEstimate = (StratifiedPopulationTotalEstimate) pointEstimate;
+			
+			for (String stratumName : stratumDesign.keySet()) {
+				PopulationTotalEstimate thisPopTotEstimate = stratumDesign.get(stratumName);
+				PopulationTotalEstimate thatPopTotEstimate = thatEstimate.stratumDesign.get(stratumName);
+				newEstimate.stratumDesign.put(stratumName, thisPopTotEstimate.subtract(thatPopTotEstimate));
+			}
+			return newEstimate;
+		} else {
+			throw new InvalidParameterException("Incompatible point estimates!");
+		}
+	}
+
+	@Override
+	protected StratifiedPopulationTotalEstimate multiply(double scalar) {
+		StratifiedPopulationTotalEstimate newEstimate = new StratifiedPopulationTotalEstimate();
+	
+		for (String stratumName : stratumDesign.keySet()) {
+			PopulationTotalEstimate thisPopTotEstimate = stratumDesign.get(stratumName);
+			newEstimate.stratumDesign.put(stratumName, thisPopTotEstimate.multiply(scalar));
+		}
+		return newEstimate;
+	}
 }

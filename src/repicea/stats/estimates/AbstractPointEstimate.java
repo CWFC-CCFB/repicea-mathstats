@@ -20,18 +20,10 @@
  */
 package repicea.stats.estimates;
 
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.math.utility.GaussianUtility;
 import repicea.stats.distributions.GaussianDistribution;
-import repicea.stats.sampling.PopulationUnit;
 
 /**
  * An abstract class for point estimates (total or mean).<p>
@@ -42,142 +34,37 @@ import repicea.stats.sampling.PopulationUnit;
 public abstract class AbstractPointEstimate extends AbstractEstimate<Matrix, SymmetricMatrix, GaussianDistribution> 
 											implements PointEstimate {
 
-	private final Map<String, PopulationUnit> observations;
 	protected int nRows;
 	protected int nCols;
-	private final double populationSize;
 
 	
 	/**
-	 * Basic constructor without population size.
+	 * Basic constructor.
 	 */
 	protected AbstractPointEstimate() {
 		super(new GaussianDistribution(0d, 1d));
-		observations = new ConcurrentHashMap<String, PopulationUnit>();
-		populationSize = -1d;
 		estimatorType = EstimatorType.LeastSquares;
 	}
 
-	/**
-	 * Constructor with population size.
-	 * @param populationSize the number of units in the population.
-	 */
-	protected AbstractPointEstimate(double populationSize) {
-		super(new GaussianDistribution(0d, 1d));
-		if (populationSize <= 0) {
-			throw new InvalidParameterException("The population size must be greater than 0!");
-		}
-		observations = new ConcurrentHashMap<String, PopulationUnit>();
-		this.populationSize = populationSize;
-		estimatorType = EstimatorType.LeastSquares;
-	}
-	
-
-	/**
-	 * Create a Matrix instance with each row representing one observation. The order is ensured by
-	 * the list of sample Ids.
-	 * @return a Matrix
-	 */
-	protected Matrix getObservationMatrix() {
-		Matrix outputMatrix = null;
-		int nbObservations = getObservations().size();
-		int nbElementsPerObs = 0;
-		List<String> sampleIds = getSampleIds();
-		for (int i = 0; i < sampleIds.size(); i++) {
-			String sampleId = sampleIds.get(i);
-			PopulationUnit obs = getObservations().get(sampleId);
-			if (outputMatrix == null) {
-				nbElementsPerObs = obs.getData().m_iRows;
-				outputMatrix = new Matrix(nbObservations, nbElementsPerObs);
-			}
-			outputMatrix.setSubMatrix(obs.getData().transpose(), i, 0);
-		}
-		return outputMatrix;
-	}
-
-	/**
-	 * Create a List with the ordered sample ids 
-	 * @return a List instance
-	 */
-	protected final List<String> getSampleIds() {
-		List<String> sampleIds = new ArrayList<String>();
-		sampleIds.addAll(observations.keySet());
-		Collections.sort(sampleIds);
-		return sampleIds;
-	}
-	
-	protected int getNumberOfElementsPerObservation() {
-		if (!getObservations().isEmpty()) {
-			return getObservations().values().iterator().next().getData().m_iRows;
-		} else {
-			return -1;
-		}
-	}
-
-	/**
-	 * Add an observation to the sample.
-	 * 
-	 * @param obs a PopulationUnitObservation instance
-	 */
-	public void addObservation(PopulationUnit obs) {
-		if (obs == null) {
-			throw new InvalidParameterException("The obs argument must be non null!");
-		}
-		String sampleId = obs.getSampleId();
-		if (observations.containsKey(sampleId)) {
-			throw new InvalidParameterException("The sample id " + sampleId + " is already contained in the observation map!");
-		}
-		if (nCols == 0) {
-			nCols = obs.getData().m_iCols;
-		}
-		if (nRows == 0) {
-			nRows = obs.getData().m_iRows;
-		}
-		if (obs.getData().m_iCols != nCols || obs.getData().m_iRows != nRows) {
-			throw new InvalidParameterException("The observation is incompatible with what was already observed!");
-		} else {
-			observations.put(sampleId, obs);
-		}
-	}
-
 	@Override
-	protected boolean isMergeableEstimate(Estimate<?,?,?> estimate) {
-		if (estimate.getClass().equals(getClass())) {
-			AbstractPointEstimate pe = (AbstractPointEstimate) estimate;
-			if (getSampleIds().equals(pe.getSampleIds())) {	// make sure we have the same sample ids
-				if (nRows == pe.nRows) {
-					if (nCols == pe.nCols) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
-	
-	protected Map<String, PopulationUnit> getObservations() {return observations;}
-
-	@Override
-	public double getPopulationSize() {return populationSize;}
+	protected abstract boolean isMergeableEstimate(Estimate<?,?,?> estimate);	
 	
 	protected final Matrix getQuantileForProbability(double probability) {
-//		int degreeOfFreedom = getObservations().size() - 1; 
 		Matrix stdDev = getVariance().diagonalVector().elementWisePower(.5); 
 		double quantile = GaussianUtility.getQuantile(probability);
 		return getMean().add(stdDev.scalarMultiply(quantile));
 	}
 	
 	@Override
-	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {
+	public final ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {
 		Matrix lowerBoundValue = getQuantileForProbability(.5 * (1d - oneMinusAlpha));
 		Matrix upperBoundValue = getQuantileForProbability(1d - .5 * (1d - oneMinusAlpha));
 		return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
 	}
 
-	
-	protected abstract AbstractPointEstimate add(AbstractPointEstimate pointEstimate);
+	protected abstract AbstractPointEstimate add(PointEstimate pointEstimate);
 
-	protected abstract AbstractPointEstimate subtract(AbstractPointEstimate pointEstimate);
+	protected abstract AbstractPointEstimate subtract(PointEstimate pointEstimate);
 
 	protected abstract AbstractPointEstimate multiply(double scalar);
 

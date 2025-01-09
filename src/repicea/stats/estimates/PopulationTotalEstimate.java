@@ -35,7 +35,7 @@ import repicea.stats.sampling.PopulationUnit;
  * @author Mathieu Fortin - September 2016, January 2025
  */
 @SuppressWarnings("serial")
-public class PopulationTotalEstimate extends AbstractPointEstimate {
+public class PopulationTotalEstimate extends AbstractSimplePointEstimate {
 
 	private final double individualInclusionProbability;
 	
@@ -79,12 +79,9 @@ public class PopulationTotalEstimate extends AbstractPointEstimate {
 			for (int j = i; j < getObservations().size(); j++) {
 				obs_i = getObservations().get(sampleIds.get(i));
 				obs_j = getObservations().get(sampleIds.get(j));
-//				pi_i 
-//				pi_j = n * individualInclusionProbability;
 				if (i == j) {
 					varianceContribution = obs_i.getData().multiply(obs_i.getData().transpose()).scalarMultiply((1 - pi_i)/(pi_i*pi_i));
 				} else {
-//					pi_ij = pi_i * (n-1) * obs_j.getInclusionProbability() / (1 - obs_i.getInclusionProbability());
 					double factor = (pi_ij - pi_i * pi_j)/(pi_i * pi_j * pi_ij);
 					varianceContribution = obs_i.getData().multiply(obs_j.getData().transpose()).scalarMultiply(2 * factor);
 				}
@@ -104,18 +101,16 @@ public class PopulationTotalEstimate extends AbstractPointEstimate {
 		boolean isMergeable = super.isMergeableEstimate(estimate);
 		if (isMergeable) {
 			PopulationTotalEstimate thatPopulationTotalEstimate = (PopulationTotalEstimate) estimate;
-			if (getPopulationSize() != thatPopulationTotalEstimate.getPopulationSize()) {
-				return false;
-			} else if (this.individualInclusionProbability != thatPopulationTotalEstimate.individualInclusionProbability) {
-				return false;
+			if (this.individualInclusionProbability == thatPopulationTotalEstimate.individualInclusionProbability) {
+				return true;
 			}
 		}
-		return isMergeable;
+		return false;
 	}
 
 	
 	@Override
-	protected PopulationTotalEstimate add(AbstractPointEstimate pointEstimate) {
+	protected PopulationTotalEstimate add(PointEstimate pointEstimate) {
 		if (isMergeableEstimate(pointEstimate)) {
 			PopulationTotalEstimate newEstimate = new PopulationTotalEstimate(getPopulationSize());
 			PopulationTotalEstimate totalEstimate = (PopulationTotalEstimate) pointEstimate;
@@ -132,7 +127,7 @@ public class PopulationTotalEstimate extends AbstractPointEstimate {
 	}
 
 	@Override
-	protected PopulationTotalEstimate subtract(AbstractPointEstimate pointEstimate) {
+	protected PopulationTotalEstimate subtract(PointEstimate pointEstimate) {
 		if (isMergeableEstimate(pointEstimate)) {
 			PopulationTotalEstimate newEstimate = new PopulationTotalEstimate(getPopulationSize());
 			PopulationTotalEstimate totalEstimate = (PopulationTotalEstimate) pointEstimate;

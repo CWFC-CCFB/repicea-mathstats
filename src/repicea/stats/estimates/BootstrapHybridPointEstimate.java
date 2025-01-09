@@ -215,7 +215,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 	}
 	
 	
-	private final List<AbstractPointEstimate> estimates;
+	private final List<AbstractSimplePointEstimate> estimates;
 	private VarianceEstimate varianceEstimate;
 	private VarianceEstimatorImplementation vei;
 
@@ -224,7 +224,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 	 */
 	public BootstrapHybridPointEstimate() {
 		super(new UnknownDistribution());
-		estimates = new ArrayList<AbstractPointEstimate>();
+		estimates = new ArrayList<AbstractSimplePointEstimate>();
 		vei = VarianceEstimatorImplementation.Corrected; // default value
 	}
 
@@ -272,7 +272,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 	 * an InvalidParameterException is thrown.
 	 * @param estimate a PointEstimate instance
 	 */
-	public void addPointEstimate(AbstractPointEstimate estimate) {
+	public void addPointEstimate(AbstractSimplePointEstimate estimate) {
 		if (estimates.isEmpty() || estimates.get(0).isMergeableEstimate(estimate)) {
 			estimates.add(estimate);
 			varianceEstimate = null;	// make sure to reset the variance estimate
@@ -323,7 +323,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 	 * @param estimate a BootstrapHybridPointEstimate instance that relies on the same PointEstimate class in the estimates member
 	 */
 	public void appendBootstrapHybridEstimate(BootstrapHybridPointEstimate estimate) {
-		for (AbstractPointEstimate pointEstimate : estimate.estimates) {
+		for (AbstractSimplePointEstimate pointEstimate : estimate.estimates) {
 			addPointEstimate(pointEstimate);
 		}
 	}
@@ -345,33 +345,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 	
 	
 
-//	/**
-//	 * This method returns the uncorrected variance of the total estimate. 
-//	 * This estimator is based on the law of total variance. It tends to overestimate 
-//	 * the true variance. This method is deprecated and the getCorrectedVariance method
-//	 * should be used in place.
-//	 * @return a Matrix
-//	 * @see <a href=https://academic.oup.com/forestry/article/91/3/354/4647707>
-//	 * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
-//	 * inference in forest inventories. Forestry 91(3): 354-365. </a>
-//	 */
-//	@Deprecated
-//	public final VarianceEstimate getUncorrectedVariance() {
-//		MonteCarloEstimate variance = new MonteCarloEstimate();
-//		MonteCarloEstimate mean = new MonteCarloEstimate();
-//		for (PointEstimate<?> estimate : estimates) {
-//			mean.addRealization(estimate.getMean());
-//			variance.addRealization(estimate.getVariance());
-//		}
-//		return new VariancePointEstimate(mean.getNumberOfRealizations(),
-//				mean.getMean(), 
-//				mean.getVariance(), 
-//				variance.getMean(),
-//				null,
-//				rowIndex);
-//	}
 
-	
 	/**
 	 * This method calculates the corrected variance of the total estimate. 
 	 * This estimator is theoretically unbiased. 
@@ -388,7 +362,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 			int sampleSize = estimates.get(0).getObservations().size();
 			EmpiricalDistribution observationMeans = new EmpiricalDistribution();
 			int nbElementsPerObs = 0;
-			for (AbstractPointEstimate estimate : estimates) {
+			for (AbstractSimplePointEstimate estimate : estimates) {
 				if (nbElementsPerObs == 0) {
 					nbElementsPerObs = estimate.getNumberOfElementsPerObservation();
 				}
@@ -397,12 +371,12 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 				observationMeans.addRealization(estimate.getObservationMatrix());
 			}
 			
-			AbstractPointEstimate meanEstimate; 
+			AbstractSimplePointEstimate meanEstimate; 
 			try {
 				if (estimates.get(0).isPopulationSizeKnown()) {
 					double populationSize = estimates.get(0).getPopulationSize();
 					Constructor<?> cons = estimates.get(0).getClass().getConstructor(double.class);
-					meanEstimate = (AbstractPointEstimate) cons.newInstance(populationSize);
+					meanEstimate = (AbstractSimplePointEstimate) cons.newInstance(populationSize);
 				} else {
 					meanEstimate = estimates.get(0).getClass().newInstance();
 				}
@@ -554,24 +528,6 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 	public Estimate<Matrix, SymmetricMatrix, ?> getProductEstimate(double scalar) {
 		return multiply(scalar);
 	}
-
-//	@Override
-//	public Estimate<?> collapseEstimate(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
-//		VarianceEstimate vpe = getVarianceEstimate();
-//		Matrix collapsedPointEstimate = collapseRowVector(vpe.getMean(), desiredIndicesForCollapsing);
-//		Matrix collapsedVarMean = collapseSquareMatrix(vpe.varMean, desiredIndicesForCollapsing);
-//		Matrix collapsedMeanVar = collapseSquareMatrix(vpe.meanVar, desiredIndicesForCollapsing);
-//		Matrix collapsedDesignVarianceOfMeanRealizedY = collapseSquareMatrix(vpe.designVarianceOfMeanRealizedY, desiredIndicesForCollapsing);
-//		List<String> newIndexRow = new ArrayList<String>(desiredIndicesForCollapsing.keySet());
-//		Collections.sort(newIndexRow);
-//		VarianceEstimate outputEstimate = new VarianceEstimate(vpe.numberOfRealizations,
-//				collapsedPointEstimate,
-//				collapsedVarMean,
-//				collapsedMeanVar,
-//				collapsedDesignVarianceOfMeanRealizedY,
-//				newIndexRow);
-//		return outputEstimate;
-//	}
 
 	
 }
