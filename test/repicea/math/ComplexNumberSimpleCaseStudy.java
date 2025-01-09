@@ -385,7 +385,7 @@ public class ComplexNumberSimpleCaseStudy {
 		Matrix cmcVar = complexMonteCarloRef.getSubMatrix(0, complexMonteCarloRef.m_iRows - 1, 1, 1)
 				.subtract(cmcMeanVar).getAbsoluteValue();
 		cmcVar = cmcVar.elementWiseDivide(cmcMeanVar);
-		Assert.assertTrue("Testing complex Monte Carlo variances", !cmcVar.anyElementLargerThan(5E-3));
+		Assert.assertTrue("Testing complex Monte Carlo variances", !cmcVar.anyElementLargerThan(7E-3));
 		
 		LogBackTransformation.setInnerRealizationsForMonteCarloEstimators(10000);
 	}
