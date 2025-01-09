@@ -24,7 +24,7 @@ import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataSet;
-import repicea.stats.estimates.Estimate;
+import repicea.stats.estimates.AbstractEstimate;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 import repicea.stats.model.glm.Family.GLMDistribution;
 import repicea.stats.model.glm.LinkFunction.Type;
@@ -116,7 +116,7 @@ class SpatialPopulation extends AbstractPopulation<SpatialPopulationUnit> {
 		
 		if (glm.getEstimator().isConvergenceAchieved()) {
 			record = new Object[8];
-			Estimate<Matrix, SymmetricMatrix, ?> est = glm.getEstimator().getParameterEstimates();
+			AbstractEstimate<Matrix, SymmetricMatrix, ?> est = glm.getEstimator().getParameterEstimates();
 			record[0] = trueBeta.getValueAt(0, 0);
 			record[1] = trueBeta.getValueAt(1, 0);
 			record[2] = est.getMean().getValueAt(0, 0);

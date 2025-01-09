@@ -26,8 +26,11 @@ import repicea.math.Matrix;
  * This class implements the sampling with uneven inclusion probabilities across the units.
  * 
  * @author Mathieu Fortin - May 2018
+ * @deprecated this class cannot be used as is because the joint inclusion probability cannot
+ * be properly calculated.
  */
-public class PopulationUnitWithUnequalInclusionProbability extends PopulationUnit {
+@Deprecated
+class PopulationUnitWithUnequalInclusionProbability extends PopulationUnit {
 
 	private final double inclusionProbability;
 	
@@ -39,7 +42,7 @@ public class PopulationUnitWithUnequalInclusionProbability extends PopulationUni
 	 * @param sampleId a string that stands for the sample id
 	 * @param inclusionProbability the probability that this unit is part of the sample.
 	 */
-	public PopulationUnitWithUnequalInclusionProbability(String sampleId, Matrix obs, double inclusionProbability) {
+	private PopulationUnitWithUnequalInclusionProbability(String sampleId, Matrix obs, double inclusionProbability) {
 		super(sampleId, obs);
 		if (inclusionProbability <= 0 || inclusionProbability >= 1d) {
 			throw new InvalidParameterException("The inclusion probability must be larger than 0 and smaller than 1");

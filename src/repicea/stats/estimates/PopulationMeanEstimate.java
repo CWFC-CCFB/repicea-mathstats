@@ -23,7 +23,7 @@ import java.security.InvalidParameterException;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.stats.distributions.EmpiricalDistribution;
-import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
+import repicea.stats.sampling.PopulationUnit;
 
 /**
  * This class implements an estimator of the mean of the population, which is the 
@@ -32,7 +32,7 @@ import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
  * @author Mathieu Fortin - April 2016
  */
 @SuppressWarnings("serial")
-public class PopulationMeanEstimate extends PointEstimate<PopulationUnitWithEqualInclusionProbability> {
+public class PopulationMeanEstimate extends AbstractSimplePointEstimate {
 		
 	private final EmpiricalDistribution sample;
 
@@ -59,15 +59,13 @@ public class PopulationMeanEstimate extends PointEstimate<PopulationUnitWithEqua
 		return sample.getMean();
 	}
 	
-	private int getSampleSize() {return getObservations().size();}
-	
 	@Override
 	protected SymmetricMatrix getVarianceFromDistribution() {
-		double smallAreaCorrectionFactor = 1d;
+		double finitePopulationCorrectionFactor = 1d;
 		if (isPopulationSizeKnown()) {
-			smallAreaCorrectionFactor = 1d - getSampleSize()/getPopulationSize();
+			finitePopulationCorrectionFactor = 1d - getSampleSize()/getPopulationSize();
 		}
-		return sample.getVariance().scalarMultiply(1d/getSampleSize() * smallAreaCorrectionFactor);
+		return sample.getVariance().scalarMultiply(1d/getSampleSize() * finitePopulationCorrectionFactor);
 	}
 
 	@Override
@@ -78,20 +76,20 @@ public class PopulationMeanEstimate extends PointEstimate<PopulationUnitWithEqua
 	}
 
 	@Override
-	public void addObservation(PopulationUnitWithEqualInclusionProbability obs) {
+	public void addObservation(PopulationUnit obs) {
 		super.addObservation(obs);
 		sample.addRealization(obs.getData());
 	}
 
 	@Override
-	protected PopulationMeanEstimate add(PointEstimate<?> pointEstimate) {
+	protected PopulationMeanEstimate add(PointEstimate pointEstimate) {
 		if (isMergeableEstimate(pointEstimate)) {
 			PopulationMeanEstimate newEstimate = new PopulationMeanEstimate();
 			PopulationMeanEstimate meanEstimate = (PopulationMeanEstimate) pointEstimate;
-			for (String sampleId : getSampleIds()) {
-				PopulationUnitWithEqualInclusionProbability thisUnit = getObservations().get(sampleId);
-				PopulationUnitWithEqualInclusionProbability thatUnit = meanEstimate.getObservations().get(sampleId);
-				PopulationUnitWithEqualInclusionProbability newUnit = new PopulationUnitWithEqualInclusionProbability(sampleId, thisUnit.getData().add(thatUnit.getData()));
+			for (String sampleId : getPopulationUnitIds()) {
+				PopulationUnit thisUnit = getObservations().get(sampleId);
+				PopulationUnit thatUnit = meanEstimate.getObservations().get(sampleId);
+				PopulationUnit newUnit = new PopulationUnit(sampleId, thisUnit.getData().add(thatUnit.getData()));
 				newEstimate.addObservation(newUnit);
 			}
 			return newEstimate;
@@ -101,14 +99,14 @@ public class PopulationMeanEstimate extends PointEstimate<PopulationUnitWithEqua
 	}
 
 	@Override
-	protected PopulationMeanEstimate subtract(PointEstimate<?> pointEstimate) {
+	protected PopulationMeanEstimate subtract(PointEstimate pointEstimate) {
 		if (isMergeableEstimate(pointEstimate)) {
 			PopulationMeanEstimate newEstimate = new PopulationMeanEstimate();
 			PopulationMeanEstimate meanEstimate = (PopulationMeanEstimate) pointEstimate;
-			for (String sampleId : getSampleIds()) {
-				PopulationUnitWithEqualInclusionProbability thisUnit = getObservations().get(sampleId);
-				PopulationUnitWithEqualInclusionProbability thatUnit = meanEstimate.getObservations().get(sampleId);
-				PopulationUnitWithEqualInclusionProbability newUnit = new PopulationUnitWithEqualInclusionProbability(sampleId, thisUnit.getData().subtract(thatUnit.getData())); 
+			for (String sampleId : getPopulationUnitIds()) {
+				PopulationUnit thisUnit = getObservations().get(sampleId);
+				PopulationUnit thatUnit = meanEstimate.getObservations().get(sampleId);
+				PopulationUnit newUnit = new PopulationUnit(sampleId, thisUnit.getData().subtract(thatUnit.getData())); 
 				newEstimate.addObservation(newUnit);
 			}
 			return newEstimate;
@@ -120,9 +118,9 @@ public class PopulationMeanEstimate extends PointEstimate<PopulationUnitWithEqua
 	@Override
 	protected PopulationMeanEstimate multiply(double scalar) {
 		PopulationMeanEstimate newEstimate = new PopulationMeanEstimate();
-		for (String sampleId : getSampleIds()) {
-			PopulationUnitWithEqualInclusionProbability thisUnit = getObservations().get(sampleId);
-			PopulationUnitWithEqualInclusionProbability newUnit = new PopulationUnitWithEqualInclusionProbability(sampleId, thisUnit.getData().scalarMultiply(scalar)); 
+		for (String sampleId : getPopulationUnitIds()) {
+			PopulationUnit thisUnit = getObservations().get(sampleId);
+			PopulationUnit newUnit = new PopulationUnit(sampleId, thisUnit.getData().scalarMultiply(scalar)); 
 			newEstimate.addObservation(newUnit);
 		}
 		return newEstimate;

@@ -29,7 +29,7 @@ import repicea.stats.distributions.UnknownDistribution;
  * The Estimate class is the general class for all estimates.
  * @author Mathieu Fortin - July 2011
  */
-public class SimpleEstimate extends Estimate<Matrix, SymmetricMatrix, UnknownDistribution> implements CentralMomentsSettable, Serializable {
+public class SimpleEstimate extends AbstractEstimate<Matrix, SymmetricMatrix, UnknownDistribution> implements CentralMomentsSettable, Serializable {
 
 	private static final long serialVersionUID = 20110912L;
 	

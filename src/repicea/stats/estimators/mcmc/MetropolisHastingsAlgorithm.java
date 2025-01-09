@@ -33,7 +33,7 @@ import repicea.serial.PostUnmarshalling;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataSet;
 import repicea.stats.distributions.GaussianDistribution;
-import repicea.stats.estimates.Estimate;
+import repicea.stats.estimates.AbstractEstimate;
 import repicea.stats.estimates.GaussianEstimate;
 import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.stats.estimators.AbstractEstimator;
@@ -532,7 +532,7 @@ public class MetropolisHastingsAlgorithm extends AbstractEstimator<MetropolisHas
 	}
 
 	@Override
-	public Estimate<Matrix, SymmetricMatrix, ?> getParameterEstimates() {
+	public AbstractEstimate<Matrix, SymmetricMatrix, ?> getParameterEstimates() {
 		if (isConvergenceAchieved()) {
 			return mcmcEstimate != null ? mcmcEstimate : getSimplerEstimate();
 			

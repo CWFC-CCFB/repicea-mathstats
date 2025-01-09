@@ -35,7 +35,7 @@ public class MultivariateAndCollapseTest {
 		est.setRowIndex(rowIndex);
 		LinkedHashMap<String, List<String>> collapseIndices = new LinkedHashMap<String, List<String>>();
 		collapseIndices.put("all", rowIndex);
-		Estimate<Matrix, SymmetricMatrix, ?> collapsedEstimate = est.collapseEstimate(collapseIndices);
+		AbstractEstimate<Matrix, SymmetricMatrix, ?> collapsedEstimate = est.collapseEstimate(collapseIndices);
 		
 		Matrix collapsedMean = collapsedEstimate.getMean();
 		Assert.assertTrue("Testing we have 1 row", collapsedMean.m_iRows == 1);
@@ -76,7 +76,7 @@ public class MultivariateAndCollapseTest {
 			}
 		}
 			
-		Estimate<Matrix, SymmetricMatrix, ?> collapsedEstimate = est.collapseEstimate(collapseIndices);
+		AbstractEstimate<Matrix, SymmetricMatrix, ?> collapsedEstimate = est.collapseEstimate(collapseIndices);
 		
 		Matrix collapsedMean = collapsedEstimate.getMean();
 		Assert.assertTrue("Testing we have 2 rows", collapsedMean.m_iRows == 2);

@@ -24,7 +24,7 @@ import java.util.List;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.stats.data.DataSet;
-import repicea.stats.estimates.Estimate;
+import repicea.stats.estimates.AbstractEstimate;
 
 public interface Estimator {
 
@@ -58,7 +58,7 @@ public interface Estimator {
 	 * This method returns the parameter estimates.
 	 * @return an Estimate instance
 	 */
-	public Estimate<Matrix, SymmetricMatrix, ?> getParameterEstimates();
+	public AbstractEstimate<Matrix, SymmetricMatrix, ?> getParameterEstimates();
 
 	/**
 	 * Produces a DataSet instance with the convergence status.

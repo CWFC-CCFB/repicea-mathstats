@@ -32,7 +32,7 @@ public class GaussianUtility {
 	private static final double[] w = {0.018854042, 0.038088059, 0.0452707394, 0.038088059, 0.018854042};
 
 	/**
-	 * This method returns the cumulative probability probability of a bivariate standard normal 
+	 * This method returns the cumulative probability of a bivariate standard normal 
 	 * distribution for quantiles x1 and x2. The algorithm was translated from West's code.
 	 * @param x1 the first quantile
 	 * @param x2 the second quantile

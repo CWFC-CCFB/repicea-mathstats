@@ -30,7 +30,7 @@ import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
-import repicea.stats.estimates.Estimate;
+import repicea.stats.estimates.AbstractEstimate;
 import repicea.stats.estimators.AbstractEstimator.EstimatorCompatibleModel;
 import repicea.stats.estimators.Estimator;
 import repicea.stats.model.AbstractStatisticalModel;
@@ -60,7 +60,7 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 		 */
 		final class FakeEstimator implements Estimator {
 
-			Estimate<Matrix, SymmetricMatrix, ?> parameterEstimates;
+			AbstractEstimate<Matrix, SymmetricMatrix, ?> parameterEstimates;
 			
 			@Override
 			public boolean doEstimation() throws EstimatorException {return true;}
@@ -69,7 +69,7 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 			public boolean isConvergenceAchieved() {return true;}
 
 			@Override
-			public Estimate<Matrix, SymmetricMatrix, ?> getParameterEstimates() {return parameterEstimates;}
+			public AbstractEstimate<Matrix, SymmetricMatrix, ?> getParameterEstimates() {return parameterEstimates;}
 
 			@Override
 			public DataSet getParameterEstimatesReport() {return null;}
