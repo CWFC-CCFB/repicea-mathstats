@@ -59,8 +59,6 @@ public class PopulationMeanEstimate extends AbstractSimplePointEstimate {
 		return sample.getMean();
 	}
 	
-	private int getSampleSize() {return getObservations().size();}
-	
 	@Override
 	protected SymmetricMatrix getVarianceFromDistribution() {
 		double finitePopulationCorrectionFactor = 1d;
@@ -88,7 +86,7 @@ public class PopulationMeanEstimate extends AbstractSimplePointEstimate {
 		if (isMergeableEstimate(pointEstimate)) {
 			PopulationMeanEstimate newEstimate = new PopulationMeanEstimate();
 			PopulationMeanEstimate meanEstimate = (PopulationMeanEstimate) pointEstimate;
-			for (String sampleId : getSampleIds()) {
+			for (String sampleId : getPopulationUnitIds()) {
 				PopulationUnit thisUnit = getObservations().get(sampleId);
 				PopulationUnit thatUnit = meanEstimate.getObservations().get(sampleId);
 				PopulationUnit newUnit = new PopulationUnit(sampleId, thisUnit.getData().add(thatUnit.getData()));
@@ -105,7 +103,7 @@ public class PopulationMeanEstimate extends AbstractSimplePointEstimate {
 		if (isMergeableEstimate(pointEstimate)) {
 			PopulationMeanEstimate newEstimate = new PopulationMeanEstimate();
 			PopulationMeanEstimate meanEstimate = (PopulationMeanEstimate) pointEstimate;
-			for (String sampleId : getSampleIds()) {
+			for (String sampleId : getPopulationUnitIds()) {
 				PopulationUnit thisUnit = getObservations().get(sampleId);
 				PopulationUnit thatUnit = meanEstimate.getObservations().get(sampleId);
 				PopulationUnit newUnit = new PopulationUnit(sampleId, thisUnit.getData().subtract(thatUnit.getData())); 
@@ -120,7 +118,7 @@ public class PopulationMeanEstimate extends AbstractSimplePointEstimate {
 	@Override
 	protected PopulationMeanEstimate multiply(double scalar) {
 		PopulationMeanEstimate newEstimate = new PopulationMeanEstimate();
-		for (String sampleId : getSampleIds()) {
+		for (String sampleId : getPopulationUnitIds()) {
 			PopulationUnit thisUnit = getObservations().get(sampleId);
 			PopulationUnit newUnit = new PopulationUnit(sampleId, thisUnit.getData().scalarMultiply(scalar)); 
 			newEstimate.addObservation(newUnit);

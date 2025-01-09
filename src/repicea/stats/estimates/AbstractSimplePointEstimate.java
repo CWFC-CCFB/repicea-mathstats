@@ -49,7 +49,7 @@ public abstract class AbstractSimplePointEstimate extends AbstractPointEstimate 
 		Matrix outputMatrix = null;
 		int nbObservations = getObservations().size();
 		int nbElementsPerObs = 0;
-		List<String> sampleIds = getSampleIds();
+		List<String> sampleIds = getPopulationUnitIds();
 		for (int i = 0; i < sampleIds.size(); i++) {
 			String sampleId = sampleIds.get(i);
 			PopulationUnit obs = getObservations().get(sampleId);
@@ -66,20 +66,14 @@ public abstract class AbstractSimplePointEstimate extends AbstractPointEstimate 
 	 * Create a List with the ordered sample ids 
 	 * @return a List instance
 	 */
-	protected final List<String> getSampleIds() {
-		List<String> sampleIds = new ArrayList<String>();
-		sampleIds.addAll(observations.keySet());
-		Collections.sort(sampleIds);
-		return sampleIds;
+	@Override
+	protected final List<String> getPopulationUnitIds() {
+		List<String> puIds = new ArrayList<String>();
+		puIds.addAll(observations.keySet());
+		Collections.sort(puIds);
+		return puIds;
 	}
 	
-	protected int getNumberOfElementsPerObservation() {
-		if (!getObservations().isEmpty()) {
-			return getObservations().values().iterator().next().getData().m_iRows;
-		} else {
-			return -1;
-		}
-	}
 
 	/**
 	 * Add an observation to the sample.
@@ -107,7 +101,7 @@ public abstract class AbstractSimplePointEstimate extends AbstractPointEstimate 
 		}
 	}
 
-	protected Map<String, PopulationUnit> getObservations() {return observations;}
+	protected final Map<String, PopulationUnit> getObservations() {return observations;}
 
 	@Override
 	public double getPopulationSize() {return populationSize;}
@@ -117,7 +111,7 @@ public abstract class AbstractSimplePointEstimate extends AbstractPointEstimate 
 	protected boolean isMergeableEstimate(Estimate<?,?,?> estimate) {
 		if (getClass().equals(estimate.getClass())) {
 			AbstractSimplePointEstimate pe = (AbstractSimplePointEstimate) estimate;
-			if (getSampleIds().equals(pe.getSampleIds())) {	// make sure we have the same sample ids
+			if (getPopulationUnitIds().equals(pe.getPopulationUnitIds())) {	// make sure we have the same sample ids
 				if (nRows == pe.nRows) {
 					if (nCols == pe.nCols) {
 						if (getPopulationSize() == pe.getPopulationSize()) {
@@ -139,4 +133,6 @@ public abstract class AbstractSimplePointEstimate extends AbstractPointEstimate 
 	@Override
 	protected abstract AbstractSimplePointEstimate multiply(double scalar);
 
+	@Override
+	public final int getSampleSize() {return observations.size();}
 }

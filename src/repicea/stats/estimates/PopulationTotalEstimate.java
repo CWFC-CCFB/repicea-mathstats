@@ -74,7 +74,7 @@ public class PopulationTotalEstimate extends AbstractSimplePointEstimate {
 		double pi_ij = pi_i * (n-1d) / (getPopulationSize() - 1d);
 		Matrix varianceContribution;
 		Matrix variance = null;
-		List<String> sampleIds = getSampleIds();
+		List<String> sampleIds = getPopulationUnitIds();
 		for (int i = 0; i < getObservations().size(); i++) {
 			for (int j = i; j < getObservations().size(); j++) {
 				obs_i = getObservations().get(sampleIds.get(i));
@@ -114,7 +114,7 @@ public class PopulationTotalEstimate extends AbstractSimplePointEstimate {
 		if (isMergeableEstimate(pointEstimate)) {
 			PopulationTotalEstimate newEstimate = new PopulationTotalEstimate(getPopulationSize());
 			PopulationTotalEstimate totalEstimate = (PopulationTotalEstimate) pointEstimate;
-			for (String sampleId : getSampleIds()) {
+			for (String sampleId : getPopulationUnitIds()) {
 				PopulationUnit thisUnit = getObservations().get(sampleId);
 				PopulationUnit thatUnit = totalEstimate.getObservations().get(sampleId);
 				PopulationUnit newUnit = new PopulationUnit(sampleId, thisUnit.getData().add(thatUnit.getData()));
@@ -131,7 +131,7 @@ public class PopulationTotalEstimate extends AbstractSimplePointEstimate {
 		if (isMergeableEstimate(pointEstimate)) {
 			PopulationTotalEstimate newEstimate = new PopulationTotalEstimate(getPopulationSize());
 			PopulationTotalEstimate totalEstimate = (PopulationTotalEstimate) pointEstimate;
-			for (String sampleId : getSampleIds()) {
+			for (String sampleId : getPopulationUnitIds()) {
 				PopulationUnit thisUnit = getObservations().get(sampleId);
 				PopulationUnit thatUnit = totalEstimate.getObservations().get(sampleId);
 				PopulationUnit newUnit = new PopulationUnit(sampleId, thisUnit.getData().subtract(thatUnit.getData()));
@@ -146,7 +146,7 @@ public class PopulationTotalEstimate extends AbstractSimplePointEstimate {
 	@Override
 	protected PopulationTotalEstimate multiply(double scalar) {
 		PopulationTotalEstimate newEstimate = new PopulationTotalEstimate(getPopulationSize());
-		for (String sampleId : getSampleIds()) {
+		for (String sampleId : getPopulationUnitIds()) {
 			PopulationUnit thisUnit = getObservations().get(sampleId);
 			PopulationUnit newUnit =	new PopulationUnit(sampleId, thisUnit.getData().scalarMultiply(scalar));
 			newEstimate.addObservation(newUnit);

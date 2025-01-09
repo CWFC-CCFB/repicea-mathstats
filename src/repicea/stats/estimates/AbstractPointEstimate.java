@@ -20,10 +20,14 @@
  */
 package repicea.stats.estimates;
 
+import java.util.List;
+import java.util.Map;
+
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.math.utility.GaussianUtility;
 import repicea.stats.distributions.GaussianDistribution;
+import repicea.stats.sampling.PopulationUnit;
 
 /**
  * An abstract class for point estimates (total or mean).<p>
@@ -62,11 +66,25 @@ public abstract class AbstractPointEstimate extends AbstractEstimate<Matrix, Sym
 		return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
 	}
 
+	/**
+	 * Map the observations with their id as key and the population units
+	 * as values.
+	 * @return a Map instance
+	 */
+	protected abstract Map<String, PopulationUnit> getObservations();
+
+	protected final int getNumberOfElementsPerObservation() {return nRows;}
+
 	protected abstract AbstractPointEstimate add(PointEstimate pointEstimate);
 
 	protected abstract AbstractPointEstimate subtract(PointEstimate pointEstimate);
 
 	protected abstract AbstractPointEstimate multiply(double scalar);
 
-
+	/**
+	 * Provide a list of the population unit ids.
+	 * @return a List of String
+	 */
+	protected abstract List<String> getPopulationUnitIds();
+	
 }

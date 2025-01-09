@@ -45,4 +45,12 @@ public interface PointEstimate extends Estimate<Matrix, SymmetricMatrix, Gaussia
 	 */
 	public double getPopulationSize();
 
+	/**
+	 * Provide the sample size.<p>
+	 * In case of stratified sample design, this method returns the 
+	 * total sample size.
+	 * @return an integer
+	 */
+	public int getSampleSize();
+
 }

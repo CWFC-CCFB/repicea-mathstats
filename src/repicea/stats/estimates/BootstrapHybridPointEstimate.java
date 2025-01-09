@@ -21,7 +21,9 @@ package repicea.stats.estimates;
 import java.lang.reflect.Constructor;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
@@ -215,7 +217,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 	}
 	
 	
-	private final List<AbstractSimplePointEstimate> estimates;
+	private final List<AbstractPointEstimate> estimates;
 	private VarianceEstimate varianceEstimate;
 	private VarianceEstimatorImplementation vei;
 
@@ -224,7 +226,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 	 */
 	public BootstrapHybridPointEstimate() {
 		super(new UnknownDistribution());
-		estimates = new ArrayList<AbstractSimplePointEstimate>();
+		estimates = new ArrayList<AbstractPointEstimate>();
 		vei = VarianceEstimatorImplementation.Corrected; // default value
 	}
 
@@ -272,7 +274,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 	 * an InvalidParameterException is thrown.
 	 * @param estimate a PointEstimate instance
 	 */
-	public void addPointEstimate(AbstractSimplePointEstimate estimate) {
+	public void addPointEstimate(AbstractPointEstimate estimate) {
 		if (estimates.isEmpty() || estimates.get(0).isMergeableEstimate(estimate)) {
 			estimates.add(estimate);
 			varianceEstimate = null;	// make sure to reset the variance estimate
@@ -323,7 +325,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 	 * @param estimate a BootstrapHybridPointEstimate instance that relies on the same PointEstimate class in the estimates member
 	 */
 	public void appendBootstrapHybridEstimate(BootstrapHybridPointEstimate estimate) {
-		for (AbstractSimplePointEstimate pointEstimate : estimate.estimates) {
+		for (AbstractPointEstimate pointEstimate : estimate.estimates) {
 			addPointEstimate(pointEstimate);
 		}
 	}
@@ -359,40 +361,47 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 		if (getNumberOfRealizations() > 1) {
 			MonteCarloEstimate variance = new MonteCarloEstimate();
 			MonteCarloEstimate mean = new MonteCarloEstimate();
-			int sampleSize = estimates.get(0).getObservations().size();
-			EmpiricalDistribution observationMeans = new EmpiricalDistribution();
+//			int sampleSize = estimates.get(0).getSampleSize();
+			Map<String, EmpiricalDistribution> observationMeansMap = new HashMap<String, EmpiricalDistribution>();
 			int nbElementsPerObs = 0;
-			for (AbstractSimplePointEstimate estimate : estimates) {
+			for (AbstractPointEstimate estimate : estimates) {
 				if (nbElementsPerObs == 0) {
 					nbElementsPerObs = estimate.getNumberOfElementsPerObservation();
 				}
 				mean.addRealization(estimate.getMean());
 				variance.addRealization(estimate.getVariance());
-				observationMeans.addRealization(estimate.getObservationMatrix());
+				Map<String, PopulationUnit> observationMap = estimate.getObservations();
+				for (String puId : observationMap.keySet()) {
+					if (!observationMeansMap.containsKey(puId)) {
+						observationMeansMap.put(puId, new EmpiricalDistribution());
+					}
+					observationMeansMap.get(puId).addRealization(observationMap.get(puId).getData());
+				}
 			}
 			
-			AbstractSimplePointEstimate meanEstimate; 
+			AbstractPointEstimate meanEstimate; 
 			try {
 				if (estimates.get(0).isPopulationSizeKnown()) {
 					double populationSize = estimates.get(0).getPopulationSize();
 					Constructor<?> cons = estimates.get(0).getClass().getConstructor(double.class);
-					meanEstimate = (AbstractSimplePointEstimate) cons.newInstance(populationSize);
+					meanEstimate = (AbstractPointEstimate) cons.newInstance(populationSize);
 				} else {
 					meanEstimate = estimates.get(0).getClass().newInstance();
 				}
 				
-				Matrix observationMeanMatrix = observationMeans.getMean();
-				List<String> sampleIds = estimates.get(0).getSampleIds();
-				for (int i = 0; i < sampleSize; i++) {
-					String sampleId = sampleIds.get(i);
-					Matrix meanForThisI = observationMeanMatrix.getSubMatrix(i, i, 0, nbElementsPerObs - 1).transpose();		// need to transpose because it is a row vector
-//					if (meanEstimate instanceof PopulationTotalEstimate) {
-//						PopulationUnitWithUnequalInclusionProbability popUnit = new PopulationUnitWithUnequalInclusionProbability(sampleId, meanForThisI, ((PopulationTotalEstimate) estimates.get(0)).getObservations().get(sampleId).getInclusionProbability());
-//						((PopulationTotalEstimate) meanEstimate).addObservation(popUnit);
-//					} else {
-						PopulationUnit popUnit = new PopulationUnit(sampleId, meanForThisI);
-						meanEstimate.addObservation(popUnit);
-//					}
+				boolean isStratified = meanEstimate instanceof StratifiedPopulationTotalEstimate;
+				Map<String, String> puIdToStrataMap = isStratified ?
+						((StratifiedPopulationTotalEstimate) estimates.get(0)).getPopulationUnitToStrataMap() :
+							null;
+				for (String puId : estimates.get(0).getPopulationUnitIds()) {
+					Matrix meanForThisI = observationMeansMap.get(puId).getMean();
+					PopulationUnit popUnit = new PopulationUnit(puId, meanForThisI);
+					if (isStratified) {
+						String stratumName = puIdToStrataMap.get(puId);
+						((StratifiedPopulationTotalEstimate) meanEstimate).addObservation(stratumName, popUnit);
+					} else {
+						((AbstractSimplePointEstimate) meanEstimate).addObservation(popUnit);
+					}
 				}
 						
 				VarianceEstimate varEst = new VarianceEstimate(getNumberOfRealizations(),
@@ -451,7 +460,7 @@ public final class BootstrapHybridPointEstimate extends AbstractEstimate<Matrix,
 		if (estimates == null || estimates.isEmpty()) {
 			return -1;
 		} else {
-			return estimates.get(0).getObservations().size();
+			return estimates.get(0).getSampleSize();
 		}
 	}
 	

@@ -20,6 +20,8 @@
 package repicea.stats.estimates;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -84,7 +86,20 @@ public class StratifiedPopulationTotalEstimate extends AbstractPointEstimate {
 		if (!stratumDesign.containsKey(stratumName)) {
 			throw new InvalidParameterException("This stratum name has not been specified in the constructor: " + stratumName);
 		}
-		stratumDesign.get(stratumName).addObservation(pu);
+		if (pu == null) {
+			throw new InvalidParameterException("The pu argument must be non null!");
+		}
+		if (nCols == 0) {
+			nCols = pu.getData().m_iCols;
+		}
+		if (nRows == 0) {
+			nRows = pu.getData().m_iRows;
+		}
+		if (pu.getData().m_iCols != nCols || pu.getData().m_iRows != nRows) {
+			throw new InvalidParameterException("The observation is incompatible with what was already observed!");
+		} else {
+			stratumDesign.get(stratumName).addObservation(pu);
+		}
 	}
 
 	@Override
@@ -179,4 +194,43 @@ public class StratifiedPopulationTotalEstimate extends AbstractPointEstimate {
 		}
 		return newEstimate;
 	}
+
+	@Override
+	public int getSampleSize() {
+		int sampleSize = 0;
+		for (PopulationTotalEstimate pte : stratumDesign.values()) {
+			sampleSize += pte.getSampleSize();
+		}
+		return sampleSize;
+	}
+	
+	@Override
+	protected final Map<String, PopulationUnit> getObservations() {
+		Map<String, PopulationUnit> outputMap = new HashMap<String, PopulationUnit>();
+		for (PopulationTotalEstimate pte : stratumDesign.values()) {
+			outputMap.putAll(pte.getObservations());
+		}
+		return outputMap;
+	}
+
+	@Override
+	protected final List<String> getPopulationUnitIds() {
+		List<String> puIds = new ArrayList<String>();
+		for (PopulationTotalEstimate pte : stratumDesign.values()) {
+			puIds.addAll(pte.getPopulationUnitIds());
+		}
+		return puIds;
+	}
+	
+	final Map<String, String> getPopulationUnitToStrataMap() {
+		Map<String, String> outputMap = new HashMap<String, String>();
+		for (String stratumName : stratumDesign.keySet()) {
+			PopulationTotalEstimate pte = stratumDesign.get(stratumName);
+			for (String puId : pte.getPopulationUnitIds()) {
+				outputMap.put(puId, stratumName);
+			}
+		}
+		return outputMap;
+	}
+	
 }

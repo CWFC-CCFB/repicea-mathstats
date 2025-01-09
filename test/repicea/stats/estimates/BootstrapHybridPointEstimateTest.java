@@ -107,7 +107,7 @@ public class BootstrapHybridPointEstimateTest {
 			PopulationMeanEstimate peNew = new PopulationMeanEstimate();
 			Matrix obsNew;
 			double slope = meanModel + RANDOM.nextGaussian() * stdModel; 
-			for (String sampleId : pe.getSampleIds()) {
+			for (String sampleId : pe.getPopulationUnitIds()) {
 				obsNew = new Matrix(1,1);
 				double x = pe.getObservations().get(sampleId).getData().getValueAt(0, 0);
 				obsNew.setValueAt(0, 0, x * slope + stdRes * RANDOM.nextGaussian());
@@ -169,7 +169,7 @@ public class BootstrapHybridPointEstimateTest {
 			PopulationMeanEstimate peNew = new PopulationMeanEstimate();
 			Matrix obsNew;
 			Matrix slope = new Matrix(1,1,meanModel + RANDOM.nextGaussian() * stdModel,0); 
-			for (String sampleId : pe.getSampleIds()) {
+			for (String sampleId : pe.getPopulationUnitIds()) {
 				Matrix x = pe.getObservations().get(sampleId).getData();
 				obsNew =  x.multiply(slope).add(StatisticalUtility.drawRandomVector(x.m_iRows, Distribution.Type.GAUSSIAN).scalarMultiply(stdRes));
 				peNew.addObservation(new PopulationUnit(sampleId, obsNew));
