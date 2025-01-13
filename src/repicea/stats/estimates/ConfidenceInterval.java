@@ -45,7 +45,13 @@ public class ConfidenceInterval {
 	private final CIBound upperBound;
 	private final double probabilityLevel;
 	
-	protected ConfidenceInterval(Matrix lowerBoundValue, Matrix upperBoundValue, double probabilityLevel) {
+	/**
+	 * Constructor.
+	 * @param lowerBoundValue a Matrix instance standing for the lower bound
+	 * @param upperBoundValue a Matrix instance standing for the upper bound
+	 * @param probabilityLevel the probability level associated with these bounds (e.g. 0.95)
+	 */
+	public ConfidenceInterval(Matrix lowerBoundValue, Matrix upperBoundValue, double probabilityLevel) {
 		lowerBound = new CIBound(false);
 		upperBound = new CIBound(true);
 		lowerBound.setBoundValue(lowerBoundValue);
