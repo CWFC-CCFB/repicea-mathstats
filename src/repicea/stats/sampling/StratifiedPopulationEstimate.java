@@ -79,7 +79,11 @@ public class StratifiedPopulationEstimate extends AbstractPointEstimate
 
 	/**
 	 * Validate the population unit before adding it to the
-	 * observations.
+	 * observations. <p>
+	 * 
+	 * For this class, the method checks if the stratum name is found in 
+	 * the stratumDesign member.
+	 * 
 	 * @param obs a Matrix instance instance
 	 * @param obsId the observation id
 	 * @param stratumName the stratum name

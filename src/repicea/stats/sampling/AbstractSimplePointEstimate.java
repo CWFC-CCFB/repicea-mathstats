@@ -19,7 +19,6 @@
  */
 package repicea.stats.sampling;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -56,19 +55,6 @@ public abstract class AbstractSimplePointEstimate extends AbstractPointEstimate 
 		return puIds;
 	}
 	
-	/**
-	 * Validate the population unit before adding it to the
-	 * observations.
-	 * @param obs a Matrix instance instance
-	 * @param obsId the observation id
-	 * @param stratumName useless argument for this class. Can be set to null.
-	 */
-	@Override
-	protected final void validateUnit(Matrix obs, String obsId, String stratumName) {
-		if (observations.containsKey(obsId)) {
-			throw new InvalidParameterException("The sample id " + obsId + " is already contained in the observation map!");
-		}
-	}
 
 	/**
 	 * Add an observation to the sample.

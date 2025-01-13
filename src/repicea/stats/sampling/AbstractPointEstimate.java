@@ -96,7 +96,14 @@ public abstract class AbstractPointEstimate extends AbstractEstimate<Matrix, Sym
 	 */
 	protected abstract List<String> getPopulationUnitIds();
 
-	protected abstract void validateUnit(Matrix obs, String obsId, String stratumName);
+	/**
+	 * Validate the population unit before adding it to the
+	 * observations.
+	 * @param obs a Matrix instance instance
+	 * @param obsId the observation id
+	 * @param stratumName useless argument for this class. Can be set to null.
+	 */
+	protected void validateUnit(Matrix obs, String obsId, String stratumName) {}
 	
 	/**
 	 * Add an observation to the sample.
