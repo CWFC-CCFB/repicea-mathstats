@@ -45,8 +45,12 @@ public class PopulationMeanEstimate extends AbstractSimplePointEstimate {
 	}
 	
 	protected void recalculate() {
-		mean = sample.getMean();
-		variance = sample.getVariance().scalarMultiply(1d/getSampleSize());// * finitePopulationCorrectionFactor);
+		mean = sample.getNumberOfRealizations() > 0 ? 
+				sample.getMean() : 
+					null;
+		variance = sample.getNumberOfRealizations() > 1 ? 
+				sample.getVariance().scalarMultiply(1d/getSampleSize()) : // * finitePopulationCorrectionFactor);
+					null;
 		getDistribution().setMean(mean);		// the mean and variance and not tied to the the distribution
 		getDistribution().setVariance(variance);	// consequently, they have to be specified before drawing the random deviates
 		needsToBeRecalculated = false;
