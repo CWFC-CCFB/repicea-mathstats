@@ -1,7 +1,6 @@
 /*
  * This file is part of the repicea-mathstats library.
  *
- * Copyright (C) 2009-2018 Mathieu Fortin for Rouge-Epicea
  * Copyright (C) 2025 His Majesty the King in right of Canada
  * Author: Mathieu Fortin, Canadian Forest Service
  * 
@@ -18,39 +17,39 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.stats.estimates;
+package repicea.stats.sampling;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
-import repicea.stats.distributions.GaussianDistribution;
 
 /**
- * An abstract class for point estimates (total or mean).<p>
- * This class is more focused on sampling. 
- * @author Mathieu Fortin - March 2021, January 2025
+ * An interface to define finite population point estimates.
+ * 
+ * @author Mathieu Fortin - January 2025
  */
-public interface PointEstimate extends Estimate<Matrix, SymmetricMatrix, GaussianDistribution> {
+public interface FinitePopulationPointEstimate extends PointEstimate {
 
 	/**
-	 * Check if the population size is available.
-	 * @return a boolean
-	 */
-	public default boolean isPopulationSizeKnown() {
-		return getPopulationSize() != -1;
-	}
-
-	/**
-	 * Provide the population size in terms of number of population units.
+	 * Provide the size of the population.<p>
+	 * The size is expressed in terms of number of population units
+	 * under the assumption they are all the same size.
 	 * @return a double
 	 */
 	public double getPopulationSize();
+	
+	/**
+	 * Provide the estimated total of the population.
+	 * @return a Matrix instance
+	 */
+	public default Matrix getTotal() {
+		return getMean().scalarMultiply(getPopulationSize());
+	}
 
 	/**
-	 * Provide the sample size.<p>
-	 * In case of stratified sample design, this method returns the 
-	 * total sample size.
-	 * @return an integer
+	 * Provide the estimated variance for the total of the population.
+	 * @return a SymmetricMatrix instance
 	 */
-	public int getSampleSize();
-
+	public default SymmetricMatrix getVarianceOfTotal() {
+		return getVariance().scalarMultiply(getPopulationSize() * getPopulationSize());
+	}
 }

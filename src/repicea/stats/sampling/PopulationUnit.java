@@ -28,7 +28,7 @@ import repicea.math.Matrix;
  *
  * @author Mathieu Fortin - May 2018
  */
-public class PopulationUnit {
+class PopulationUnit {
 
 	private final Matrix data;
 	private final String sampleId;
@@ -38,7 +38,7 @@ public class PopulationUnit {
 	 * @param sampleId a string that stands for the sample id
 	 * @param obs a Matrix instance. Must be a column vector
 	 */
-	public PopulationUnit(String sampleId, Matrix obs) {
+	PopulationUnit(String sampleId, Matrix obs) {
 		if (sampleId == null) {
 			throw new InvalidParameterException("The sample argument must be non null!");
 		}

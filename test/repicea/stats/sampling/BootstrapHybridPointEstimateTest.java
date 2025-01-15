@@ -1,4 +1,4 @@
-package repicea.stats.estimates;
+package repicea.stats.sampling;
 
 import java.util.Random;
 
@@ -10,7 +10,7 @@ import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
-import repicea.stats.sampling.PopulationUnit;
+import repicea.stats.estimates.GaussianEstimate;
 
 public class BootstrapHybridPointEstimateTest {
 
@@ -27,7 +27,7 @@ public class BootstrapHybridPointEstimateTest {
 		for (int i = 0; i < 50; i++) {
 			obs = new Matrix(1,1);
 			obs.setValueAt(0, 0, RANDOM.nextGaussian() * 2 + 12);
-			pe.addObservation(new PopulationUnit(i + "", obs));
+			pe.addObservation(obs, i + "");
 		}
 
 		BootstrapHybridPointEstimate bhpe = new BootstrapHybridPointEstimate(); 
@@ -62,7 +62,7 @@ public class BootstrapHybridPointEstimateTest {
 			for (int j = 0; j < 50; j++) {
 				obs = new Matrix(1,1);
 				obs.setValueAt(0, 0, deviate);
-				pe.addObservation(new PopulationUnit(j + "", obs));
+				pe.addObservation(obs, j + "");
 			}
 			bhpe.addPointEstimate(pe);
 		}
@@ -93,7 +93,7 @@ public class BootstrapHybridPointEstimateTest {
 		for (int j = 0; j < sampleSize; j++) {
 			obs = new Matrix(1,1);
 			obs.setValueAt(0, 0, meanX + RANDOM.nextGaussian() * stdPopUnit);
-			pe.addObservation(new PopulationUnit(j + "", obs));
+			pe.addObservation(obs, j + "");
 		}
 		
 		double mu_x_hat = pe.getMean().getValueAt(0, 0);
@@ -109,9 +109,9 @@ public class BootstrapHybridPointEstimateTest {
 			double slope = meanModel + RANDOM.nextGaussian() * stdModel; 
 			for (String sampleId : pe.getPopulationUnitIds()) {
 				obsNew = new Matrix(1,1);
-				double x = pe.getObservations().get(sampleId).getData().getValueAt(0, 0);
+				double x = pe.getObservations().get(sampleId).getValueAt(0, 0);
 				obsNew.setValueAt(0, 0, x * slope + stdRes * RANDOM.nextGaussian());
-				peNew.addObservation(new PopulationUnit(sampleId, obsNew));
+				peNew.addObservation(obsNew, sampleId);
 			}
 			bhpe.addPointEstimate(peNew);
 		}
@@ -155,7 +155,7 @@ public class BootstrapHybridPointEstimateTest {
 		PopulationMeanEstimate pe = new PopulationMeanEstimate();
 		for (int j = 0; j < sampleSize; j++) {
 			Matrix randomObs = popUnitGenerator.getRandomDeviate();
-			pe.addObservation(new PopulationUnit(j + "", randomObs));
+			pe.addObservation(randomObs, j + "");
 		}
 		
 		Matrix mu_x_hat = pe.getMean();
@@ -169,10 +169,10 @@ public class BootstrapHybridPointEstimateTest {
 			PopulationMeanEstimate peNew = new PopulationMeanEstimate();
 			Matrix obsNew;
 			Matrix slope = new Matrix(1,1,meanModel + RANDOM.nextGaussian() * stdModel,0); 
-			for (String sampleId : pe.getPopulationUnitIds()) {
-				Matrix x = pe.getObservations().get(sampleId).getData();
+			for (String obsId : pe.getPopulationUnitIds()) {
+				Matrix x = pe.getObservations().get(obsId);
 				obsNew =  x.multiply(slope).add(StatisticalUtility.drawRandomVector(x.m_iRows, Distribution.Type.GAUSSIAN).scalarMultiply(stdRes));
-				peNew.addObservation(new PopulationUnit(sampleId, obsNew));
+				peNew.addObservation(obsNew, obsId);
 			}
 			bhpe.addPointEstimate(peNew);
 		}

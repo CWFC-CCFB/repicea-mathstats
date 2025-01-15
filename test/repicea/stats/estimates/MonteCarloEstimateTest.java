@@ -6,7 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.math.Matrix;
-import repicea.stats.sampling.PopulationUnit;
+import repicea.stats.sampling.PopulationMeanEstimate;
 
 public class MonteCarloEstimateTest {
 
@@ -43,7 +43,7 @@ public class MonteCarloEstimateTest {
 			for (int j = 0; j < sampleSize; j++) {
 				obs = new Matrix(1,1);
 				obs.setValueAt(0, 0, generator.nextGaussian() * innerStd + meanForThisRealization); 
-				estimate.addObservation(new PopulationUnit(j + "", obs));
+				estimate.addObservation(obs, j + "");
 			}
 			output.addRealization(estimate);
 		}
