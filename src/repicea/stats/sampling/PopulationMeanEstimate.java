@@ -115,7 +115,7 @@ public class PopulationMeanEstimate extends AbstractSimplePointEstimate {
 		PopulationMeanEstimate newEstimate = getEmptyEstimate();
 		for (String obsId : getPopulationUnitIds()) {
 			Matrix thisUnit = getObservations().get(obsId);
-			addObservation(thisUnit.scalarMultiply(scalar), obsId);
+			newEstimate.addObservation(thisUnit.scalarMultiply(scalar), obsId);
 		}
 		return newEstimate;
 	}
