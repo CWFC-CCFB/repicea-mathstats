@@ -46,9 +46,9 @@ public final class CenteredGaussianDistribution implements Distribution<Matrix, 
 	private final TypeMatrixR type;
 	private final boolean isStructured;
 	
-	private final Map<List<Integer>, Matrix> structuredVarianceCovarianceMap;
+	private final Map<List<Integer>, SymmetricMatrix> structuredVarianceCovarianceMap;
 	private final Map<List<Integer>, Matrix> structuredLowerCholeskyMap;
-	private final Map<Integer, Matrix> simpleVarianceCovarianceMap;
+	private final Map<Integer, SymmetricMatrix> simpleVarianceCovarianceMap;
 	private final Map<Integer, Matrix> simpleLowerCholeskyMap;
 	
 	/**
@@ -69,9 +69,9 @@ public final class CenteredGaussianDistribution implements Distribution<Matrix, 
 		} else {
 			isStructured = false;
 		}
-		structuredVarianceCovarianceMap = new HashMap<List<Integer>, Matrix>();
+		structuredVarianceCovarianceMap = new HashMap<List<Integer>, SymmetricMatrix>();
 		structuredLowerCholeskyMap = new HashMap<List<Integer>, Matrix>();
-		simpleVarianceCovarianceMap = new HashMap<Integer, Matrix>();
+		simpleVarianceCovarianceMap = new HashMap<Integer, SymmetricMatrix>();
 		simpleLowerCholeskyMap = new HashMap<Integer, Matrix>();
 	}
 
@@ -119,7 +119,7 @@ public final class CenteredGaussianDistribution implements Distribution<Matrix, 
 		}
 	}
 
-	private Matrix getVariance(List<Integer> indexList) {
+	private SymmetricMatrix getVariance(List<Integer> indexList) {
 		if (isStructured()) {
 			if (!structuredVarianceCovarianceMap.containsKey(indexList)) {
 				updateMaps(indexList);
@@ -158,7 +158,13 @@ public final class CenteredGaussianDistribution implements Distribution<Matrix, 
 		return underlyingDistribution.getVariance();
 	}
 
-	public Matrix getVariance(GaussianErrorTermList errorTermList) {
+	/**
+	 * Provide the variance of the distribution given some error terms.<p>
+	 * The class adapts the variance matrix as the number of error terms increases.
+	 * @param errorTermList a GaussianErrorTermList instance
+	 * @return a SymmetricMatrix instance
+	 */
+	public SymmetricMatrix getVariance(GaussianErrorTermList errorTermList) {
 		if (errorTermList != null & !errorTermList.isEmpty()) {
 			return getVariance(errorTermList.getDistanceIndex());
 		} else {
