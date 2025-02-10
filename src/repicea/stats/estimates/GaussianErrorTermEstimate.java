@@ -58,7 +58,13 @@ public final class GaussianErrorTermEstimate extends AbstractEstimate<Matrix, Sy
 		return getDistribution().getMean(errorTermList);
 	}
 	
-	public Matrix getVariance(GaussianErrorTermList errorTermList) {
+	/**
+	 * Provide the variance of the distribution given some error terms.<p>
+	 * The class adapts the variance matrix as the number of error terms increases.
+	 * @param errorTermList a GaussianErrorTermList instance
+	 * @return a SymmetricMatrix instance
+	 */
+	public SymmetricMatrix getVariance(GaussianErrorTermList errorTermList) {
 		return getDistribution().getVariance(errorTermList);
 	}
 	
