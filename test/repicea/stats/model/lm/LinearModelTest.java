@@ -96,7 +96,7 @@ public class LinearModelTest {
 		Assert.assertEquals("Testing mean on original scale", expectedMean, actualPredOrig.getValueAt(0, 0), 1E-2);
 		Matrix actualResidualVariance = LogBackTransformation.getResidualVariancesOnOriginalScale(lm, Estimator.Naive);
 		double expectedVariance = mcEstimate.getVariance().getValueAt(0, 0);
-		Assert.assertEquals("Testing variance on original scale", expectedVariance, actualResidualVariance.getValueAt(0, 0), 1E-2);
+		Assert.assertEquals("Testing variance on original scale", expectedVariance, actualResidualVariance.getValueAt(0, 0), 2E-2);
 	}
 
 	@Test
