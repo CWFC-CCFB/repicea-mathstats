@@ -42,9 +42,9 @@ public class FinitePopulationEstimate extends PopulationMeanEstimate implements 
 
 	@Override
 	protected final void recalculate() {
-		mean = sample.getMean();
+		mean = computeMeanInternally();
 		double finitePopulationCorrectionFactor = 1d - getSampleSize()/getPopulationSize();
-		variance = sample.getVariance().scalarMultiply(1d/getSampleSize() * finitePopulationCorrectionFactor);
+		variance = computeVarianceInternally().scalarMultiply(finitePopulationCorrectionFactor);
 		getDistribution().setMean(mean);		// the mean and variance and not tied to the the distribution
 		getDistribution().setVariance(variance);	// consequently, they have to be specified before drawing the random deviates
 		needsToBeRecalculated = false;
