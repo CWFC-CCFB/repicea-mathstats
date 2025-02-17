@@ -31,7 +31,7 @@ import repicea.stats.estimates.Estimate;
 @SuppressWarnings("serial")
 public abstract class AbstractSimplePointEstimate extends AbstractPointEstimate {
 
-	private final Map<String, Matrix> observations;
+	protected final Map<String, Matrix> observations;
 	protected boolean needsToBeRecalculated;
 	
 	/**

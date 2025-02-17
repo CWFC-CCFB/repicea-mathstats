@@ -35,6 +35,8 @@ import repicea.stats.estimates.Estimate;
 /**
  * An abstract class for point estimates.<p>
  * This abstract class deals with the size of the response vector. 
+ * The response is allowed to be multivariate, in which case, 
+ * the observations must be column vectors of the same size.
  * @author Mathieu Fortin - March 2021, January 2025
  */
 @SuppressWarnings("serial")
@@ -106,7 +108,10 @@ public abstract class AbstractPointEstimate extends AbstractEstimate<Matrix, Sym
 	protected void validateUnit(Matrix obs, String obsId, String stratumName) {}
 	
 	/**
-	 * Add an observation to the sample.
+	 * Add an observation to the sample.<p>
+	 * 
+	 * The obs argument must be a column vector to ensure
+	 * a proper variance estimation.
 	 * 
 	 * @param obs a Matrix instance instance
 	 * @param obsId the observation id
@@ -115,6 +120,9 @@ public abstract class AbstractPointEstimate extends AbstractEstimate<Matrix, Sym
 	public void addObservation(Matrix obs, String obsId, String stratumName) {
 		if (obs == null) {
 			throw new InvalidParameterException("The obs argument must be non null!");
+		}
+		if (!obs.isColumnVector()) {
+			throw new InvalidParameterException("The obs argument must be a column vector!");
 		}
 		validateUnit(obs, obsId, stratumName);
 		if (nCols == 0) {

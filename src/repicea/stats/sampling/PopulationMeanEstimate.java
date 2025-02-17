@@ -22,17 +22,18 @@ import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
-import repicea.stats.distributions.EmpiricalDistribution;
 
 /**
  * An implementation of the estimator of the mean.<p>
- * The population is assumed to be infinite.
+ * The population is assumed to be infinite. The variance is 
+ * that of the estimate (ie. s^2 / (n * (n-1))) and not the
+ * residual variance.
  * @author Mathieu Fortin - April 2016
  */
 @SuppressWarnings("serial")
 public class PopulationMeanEstimate extends AbstractSimplePointEstimate {
 		
-	protected final EmpiricalDistribution sample;
+//	protected final EmpiricalDistribution sample;
 	protected Matrix mean;
 	protected SymmetricMatrix variance;
 	
@@ -41,19 +42,47 @@ public class PopulationMeanEstimate extends AbstractSimplePointEstimate {
 	 */
 	public PopulationMeanEstimate() {
 		super();
-		sample = new EmpiricalDistribution();
+//		sample = new EmpiricalDistribution();
 	}
 	
 	protected void recalculate() {
-		mean = sample.getNumberOfRealizations() > 0 ? 
-				sample.getMean() : 
-					null;
-		variance = sample.getNumberOfRealizations() > 1 ? 
-				sample.getVariance().scalarMultiply(1d/getSampleSize()) : // * finitePopulationCorrectionFactor);
-					null;
+		mean = computeMeanInternally();
+		variance = computeVarianceInternally();
 		getDistribution().setMean(mean);		// the mean and variance and not tied to the the distribution
 		getDistribution().setVariance(variance);	// consequently, they have to be specified before drawing the random deviates
 		needsToBeRecalculated = false;
+	}
+	
+	
+	protected Matrix computeMeanInternally() {
+		if (observations.size() > 0) {
+			Matrix mean = new Matrix(nRows, nCols);
+			for (Matrix m : observations.values()) {
+				mean = mean.add(m);
+			}
+			return mean.scalarMultiply(1d / getSampleSize());
+		} else {
+			return null;
+		}
+	}
+
+	protected SymmetricMatrix computeVarianceInternally() {
+		if (observations.size() > 1) {
+			Matrix sse = null;
+			Matrix error;
+			for (Matrix mat : observations.values()) {
+				error = mat.subtract(mean);
+				if (sse == null) {
+					sse = error.multiply(error.transpose());
+				} else {
+					sse = sse.add(error.multiply(error.transpose()));
+				}
+			}
+			int n = observations.size();
+			sse = sse.scalarMultiply(1d / (n * (n-1)));
+			return  SymmetricMatrix.convertToSymmetricIfPossible(sse);
+		}
+		return null;
 	}
 	
 	@Override
@@ -72,11 +101,11 @@ public class PopulationMeanEstimate extends AbstractSimplePointEstimate {
 		return variance;
 	}
 
-	@Override
-	public void addObservation(Matrix obs, String obsId, String stratumName) {
-		super.addObservation(obs, obsId, stratumName);
-		sample.addRealization(obs);
-	}
+//	@Override
+//	public void addObservation(Matrix obs, String obsId, String stratumName) {
+//		super.addObservation(obs, obsId, stratumName);
+////		sample.addRealization(obs);
+//	}
 
 	@Override
 	protected final PopulationMeanEstimate add(PointEstimate pointEstimate) {

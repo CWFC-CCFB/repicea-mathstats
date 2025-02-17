@@ -1,17 +1,10 @@
-package repicea.stats.estimates;
-
-import java.security.InvalidParameterException;
-import java.util.List;
-
-import repicea.math.AbstractMatrix;
-import repicea.math.Matrix;
-import repicea.stats.distributions.AbstractEmpiricalDistribution;
-
 /*
  * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2019 Mathieu Fortin for Rouge-Epicea
- *
+ * Copyright (C) 2025 His Majesty the King in right of Canada 
+ * Author: Mathieu Fortin, Canadian Forest Service
+ * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,6 +18,15 @@ import repicea.stats.distributions.AbstractEmpiricalDistribution;
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
+package repicea.stats.estimates;
+
+import java.security.InvalidParameterException;
+import java.util.List;
+
+import repicea.math.AbstractMatrix;
+import repicea.math.Matrix;
+import repicea.stats.distributions.AbstractEmpiricalDistribution;
+
 @SuppressWarnings({ "serial", "rawtypes" })
 abstract class ResamplingBasedEstimate<M extends AbstractMatrix, V extends AbstractMatrix> 
 					extends AbstractEstimate<M, V, AbstractEmpiricalDistribution<M,V>> implements NumberOfRealizationsProvider {
@@ -39,9 +41,11 @@ abstract class ResamplingBasedEstimate<M extends AbstractMatrix, V extends Abstr
 
 
 	/**
-	 * This method adds a realization to the empirical distribution. The conformity of the
-	 * new realization is checked before adding it.
-	 * @param value a Matrix
+	 * Add a realization to the empirical distribution.<p>
+	 * The method checks the conformity of the value argument,
+	 * which must be a column vector to ensure a proper variance
+	 * estimation. 
+	 * @param value a Matrix instance
 	 */
 	public void addRealization(M value) {
 		if (checkConformity(value)) {
@@ -52,12 +56,15 @@ abstract class ResamplingBasedEstimate<M extends AbstractMatrix, V extends Abstr
 	}
 
 	private boolean checkConformity(M value) {
+		if (value == null) {
+			throw new InvalidParameterException("The value argument must be a non null Matrix instance!");
+		}
 		List<M> observations = getDistribution().getRealizations();
 		if (observations.isEmpty()) {
 			return true; 
 		} else {
 			M firstObservation = observations.get(0);
-			return (firstObservation.m_iRows == value.m_iRows && firstObservation.m_iCols == value.m_iCols);
+			return firstObservation.m_iRows == value.m_iRows && firstObservation.m_iCols == value.m_iCols;
 		}
 	}
 
