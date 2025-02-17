@@ -56,8 +56,8 @@ abstract class ResamplingBasedEstimate<M extends AbstractMatrix, V extends Abstr
 	}
 
 	private boolean checkConformity(M value) {
-		if (value == null || !value.isColumnVector()) {
-			throw new InvalidParameterException("The value argument must be a non null Matrix instance that qualifies as a column vector!");
+		if (value == null) {
+			throw new InvalidParameterException("The value argument must be a non null Matrix instance!");
 		}
 		List<M> observations = getDistribution().getRealizations();
 		if (observations.isEmpty()) {

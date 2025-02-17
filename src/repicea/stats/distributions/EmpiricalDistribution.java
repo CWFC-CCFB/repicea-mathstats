@@ -52,6 +52,9 @@ public class EmpiricalDistribution extends AbstractEmpiricalDistribution<Matrix,
 	@Override
 	public SymmetricMatrix getVariance() {
 		Matrix mean = getMean();
+		if (!mean.isColumnVector()) {
+			throw new UnsupportedOperationException("The variance cannot be calculated since the vector is not a column vector!");
+		}
 		Matrix sse = null;
 		Matrix error;
 		for (Matrix mat : observations) {
