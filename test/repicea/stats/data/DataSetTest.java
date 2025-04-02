@@ -35,7 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DataSetTest {
 
 	@Test
-	public void createDataSetFromScratch() {
+	public void test01CreateDataSetFromScratch() {
 		DataSet myDataSet = new DataSet();
 		myDataSet.addField("Field1", new Object[] {"true", "allo", "patate"});
 		myDataSet.addField("Field2", new Object[] {"false", "hello", "carotte"});
@@ -46,7 +46,7 @@ public class DataSetTest {
 	
 	@SuppressWarnings("rawtypes")
 	@Test
-	public void testJSONConversion() throws JsonProcessingException {
+	public void test02JSONConversion() throws JsonProcessingException {
 		DataSet myDataSet = new DataSet();
 		myDataSet.addField("Field1", new Object[] {"true", "allo", "patate"});
 		myDataSet.addField("Field2", new Object[] {"false", "hello", "carotte"});
@@ -63,7 +63,7 @@ public class DataSetTest {
 
 	
 	@Test
-	public void testLongInt() throws IOException {
+	public void test03LongInt() throws IOException {
 		DataSet myDataSet = new DataSet(Arrays.asList(new String[] {"ID_PE", "TREENO"}));
 		myDataSet.addObservation(new Object[]{"1000000000000", 4});
 		Object idPeValue = myDataSet.getObservations().get(0).getValueAt(0);
@@ -72,7 +72,7 @@ public class DataSetTest {
 	}
 
 	@Test
-	public void testLongInt2() throws IOException {
+	public void test04LongInt2() throws IOException {
 		DataSet myDataSet = new DataSet(Arrays.asList(new String[] {"ID_PE", "TREENO"}));
 		myDataSet.addObservation(new Object[]{"1000000000000", 4});
 		myDataSet.addObservation(new Object[]{10, 3});
@@ -82,6 +82,15 @@ public class DataSetTest {
 		for (Observation o : myDataSet.getObservations()) {
 			Assert.assertTrue("Testing BigInteger instance", o.getValueAt(0) instanceof BigInteger);
 		}
+	}
+
+	@Test
+	public void test05DoubleParsing() {
+		DataSet myDataSet = new DataSet();
+		myDataSet.addField("Field1", new Object[] {"1.0", "1e-4", "2"});
+		myDataSet.indexFieldType();
+		Class<?> clazz = myDataSet.getFieldTypeOfThisField(myDataSet.getIndexOfThisField("Field1"));
+		Assert.assertTrue("Testing Double instance", clazz.equals(Double.class));
 	}
 
 }
