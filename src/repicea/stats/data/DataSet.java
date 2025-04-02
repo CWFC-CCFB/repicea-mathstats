@@ -2,7 +2,7 @@
  * This file is part of the repicea-mathstats library.
  *
  * Copyright (C) 2009-2019 Mathieu Fortin for Rouge-Epicea
- * Copyright (C) 2024 His Majesty the King in Right of Canada
+ * Copyright (C) 2024-2025 His Majesty the King in Right of Canada
  * Author: Mathieu Fortin, Canadian Forest Service
  *
  * This library is free software; you can redistribute it and/or
@@ -46,10 +46,13 @@ import repicea.io.Saveable;
 import repicea.math.Matrix;
 
 /**
- * The DataSet class contains Observation instances and implements the methods 
- * to read a dataset with a FormatReader instance or to write data to file.
- * @author Mathieu Fortin - November 2012
- * 
+ * The DataSet class contains Observation instances.<p>
+ * The class has different constructors for different purpose. Observations or 
+ * fields can be added using the {@link DataSet#addObservation(Object[])} and
+ * the {@link DataSet#addField(String, Object[])} methods, respectively. It is
+ * mandatory to execute the {@link DataSet#indexFieldType()} method before the
+ * DataSet instance is formally used as it properly set the type of each field.
+ * @author Mathieu Fortin - November 2012, April 2025
  */
 public class DataSet implements Table, Saveable, REpiceaUIObject {
 
@@ -329,7 +332,9 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 	 * @param observationFrame an array of Object instances.
 	 */
 	public void addObservation(Object[] observationFrame) {
-		parseDifferentFields(observationFrame);
+		for (int i = 0; i < fieldNames.size(); i++) {
+			observationFrame[i] = parseValue(observationFrame[i]);
+		}
 		observations.add(new Observation(observationFrame));
 	}
 	
@@ -356,10 +361,11 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 		addFieldName(name);
 		
 		for (int i = 0; i < field.length; i++) {
+			Object parsedValue = this.parseValue(field[i]);
 			if (i < observations.size()) { // means the observation exists already 
-				observations.get(i).values.add(field[i]);
+				observations.get(i).values.add(parsedValue);
 			} else {
-				observations.add(new Observation(new Object[] {field[i]}));
+				observations.add(new Observation(new Object[] {parsedValue}));
 			}
 		}
 		
@@ -420,33 +426,32 @@ public class DataSet implements Table, Saveable, REpiceaUIObject {
 		}
 	}
 
-	private void parseDifferentFields(Object[] lineRead) {
-		for (int i = 0; i < fieldNames.size(); i++) {
-			String valueStr = lineRead[i].toString();
-			boolean containsPeriod = valueStr.contains(".");
-			if (containsPeriod) { // might be a double
+	private Object parseValue(Object value) {
+		String valueStr = value.toString();
+		boolean mightBeADouble = valueStr.contains(".") || valueStr.contains("E") || valueStr.contains("e");
+		if (mightBeADouble) { // might be a double
+			try {
+				return Double.parseDouble(valueStr);
+			} catch (NumberFormatException e1) {
+				return valueStr;
+			}
+		} else {
+			if (valueStr.length() > 9) { // might be a big integer then
 				try {
-					lineRead[i] = (Double) Double.parseDouble(lineRead[i].toString());
+					return new BigInteger(valueStr);
 				} catch (NumberFormatException e1) {
-					lineRead[i] = valueStr;
+					return valueStr;
 				}
 			} else {
-				if (valueStr.length() > 9) { // might be a big integer then
-					try {
-						lineRead[i] = new BigInteger(lineRead[i].toString());
-					} catch (NumberFormatException e1) {
-						lineRead[i] = valueStr;
-					}
-				} else {
-					try {
-						lineRead[i] = (Integer) Integer.parseInt(lineRead[i].toString());
-					} catch (NumberFormatException e1) {
-						lineRead[i] = valueStr;
-					}
+				try {
+					return Integer.parseInt(valueStr);
+				} catch (NumberFormatException e1) {
+					return valueStr;
 				}
 			}
 		}
 	}
+
 		
 	@Override
 	public List<String> getFieldNames() {
