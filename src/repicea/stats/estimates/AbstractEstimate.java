@@ -174,7 +174,6 @@ public abstract class AbstractEstimate<M extends AbstractMatrix, V extends Abstr
 	 * @param estimates a list of Estimate instances
 	 * @return a SimpleEstimate instance
 	 */
-	@SuppressWarnings("unchecked")
 	public static Estimate<Matrix, SymmetricMatrix, ?> getProductOfManyEstimates(List<Estimate<Matrix, SymmetricMatrix, ?>> estimates) {
 		Estimate<Matrix, SymmetricMatrix, ?> currentEstimate = null;
 		for (int i = 1; i < estimates.size(); i++) {

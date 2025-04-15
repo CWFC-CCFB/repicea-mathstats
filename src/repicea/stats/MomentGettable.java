@@ -28,6 +28,7 @@ import repicea.math.AbstractMatrix;
  * @param <M> an AbstractMatrix-derived class that stands for the mean
  * @param <V> an AbstractMatrix-derived class that stands for the variance
  */
+@SuppressWarnings("rawtypes")
 public interface MomentGettable<M extends AbstractMatrix, V extends AbstractMatrix> {
 
 	/**

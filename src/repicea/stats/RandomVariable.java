@@ -30,6 +30,7 @@ import repicea.stats.estimates.DistributionProvider;
  * @author Mathieu Fortin - May 2012
  * @param <D> a Distribution derived instance
  */
+@SuppressWarnings("rawtypes")
 public abstract class RandomVariable<M extends AbstractMatrix, V extends AbstractMatrix, D extends Distribution<M,V>> implements MomentGettable<M,V>, 
 																	Serializable,
 																	DistributionProvider<D> {
