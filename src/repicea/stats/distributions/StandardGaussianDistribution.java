@@ -33,7 +33,7 @@ public class StandardGaussianDistribution implements ContinuousDistribution, Pos
 	private static StandardGaussianDistribution Singleton;
 	
 	private Matrix mu;
-	private SymmetricMatrix sigma2;
+	private Matrix sigma2;
 	private Matrix lowerCholTriangle;
 		
 	/**
