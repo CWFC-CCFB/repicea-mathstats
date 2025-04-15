@@ -145,7 +145,7 @@ public final class CenteredGaussianDistribution implements Distribution<Matrix, 
 	 * @return a Matrix instance
 	 */
 	public Matrix getMean(GaussianErrorTermList errorTermList) {
-		if (errorTermList != null & !errorTermList.isEmpty()) {
+		if (errorTermList != null && !errorTermList.isEmpty()) {
 			Matrix chol = getLowerCholesky(errorTermList.getDistanceIndex());
 			return chol.multiply(errorTermList.getNormalizedErrors());
 		} else {

@@ -36,7 +36,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * @param <M> an AbstractMatrix-derived class that stands for the mean
  * @param <V> an AbstractMatrix-derived class that stands for the variance
  */
-public interface Distribution<M extends AbstractMatrix, V extends AbstractMatrix> extends CentralMomentsGettable<M,V>, Serializable {
+public interface Distribution<M extends AbstractMatrix, V extends AbstractMatrix> extends MomentGettable<M,V>, Serializable {
 
 	public enum Type implements TextableEnum {
 		GAUSSIAN("Gaussian", "Gaussienne"), 

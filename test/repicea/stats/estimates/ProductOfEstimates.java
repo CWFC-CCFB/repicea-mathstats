@@ -159,7 +159,7 @@ public class ProductOfEstimates {
 			estimates.add(getEstimate(expectedBeta, trueVarBeta, useLogNormal));
 			estimates.add(getEstimate(expectedGamma, trueVarGamma, useLogNormal));
 
-			SimpleEstimate productGoodman = AbstractEstimate.getProductOfManyEstimates(estimates);
+			Estimate<Matrix, SymmetricMatrix, ?> productGoodman = AbstractEstimate.getProductOfManyEstimates(estimates);
 			muGoodman.addRealization(productGoodman.getMean());
 			varGoodman.addRealization(productGoodman.getVariance());
 

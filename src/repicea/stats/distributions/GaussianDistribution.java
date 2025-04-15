@@ -20,14 +20,14 @@ package repicea.stats.distributions;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
-import repicea.stats.CentralMomentsSettable;
+import repicea.stats.MomentSettable;
 
 /**
  * This class implements the Gaussian probability density function.
  * @author Mathieu Fortin - August 2012
  */
 @SuppressWarnings("serial")
-public class GaussianDistribution extends StandardGaussianDistribution implements CentralMomentsSettable {
+public class GaussianDistribution extends StandardGaussianDistribution implements MomentSettable {
 		
 	/**
 	 * Constructor. <br>

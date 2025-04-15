@@ -20,7 +20,7 @@ package repicea.stats.distributions;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
-import repicea.stats.CentralMomentsSettable;
+import repicea.stats.MomentSettable;
 import repicea.stats.Distribution;
 
 /**
@@ -29,7 +29,7 @@ import repicea.stats.Distribution;
  * @author Mathieu Fortin - August 2012
  */
 @SuppressWarnings("serial")
-public class UnknownDistribution implements Distribution<Matrix, SymmetricMatrix>, CentralMomentsSettable {
+public class UnknownDistribution implements Distribution<Matrix, SymmetricMatrix>, MomentSettable {
 
 	private Matrix mean;
 	private SymmetricMatrix variance;

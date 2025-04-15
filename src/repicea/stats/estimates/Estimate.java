@@ -26,7 +26,7 @@ import java.util.List;
 import repicea.math.AbstractMatrix;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
-import repicea.stats.CentralMomentsGettable;
+import repicea.stats.MomentGettable;
 import repicea.stats.Distribution;
 
 /**
@@ -39,7 +39,7 @@ import repicea.stats.Distribution;
  */
 @SuppressWarnings("rawtypes")
 public interface Estimate<M extends AbstractMatrix, V extends AbstractMatrix, D extends Distribution<M,V>> 
-						extends CentralMomentsGettable<M,V>, DistributionProvider<D> {
+						extends MomentGettable<M,V>, DistributionProvider<D> {
 
 
 	/**
@@ -118,7 +118,7 @@ s	 */
 	 * @param estimate an Estimate instance
 	 * @return a SimpleEstimate instance
 	 */
-	public SimpleEstimate getProductEstimate(Estimate<M, V, ?> estimate);
+	public Estimate<M, V, ?> getProductEstimate(Estimate<M, V, ?> estimate);
 
 	
 	/**

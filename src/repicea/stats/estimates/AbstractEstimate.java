@@ -99,7 +99,7 @@ public abstract class AbstractEstimate<M extends AbstractMatrix, V extends Abstr
 		}
 		Matrix variance = (Matrix) getVariance().add(estimate2.getVariance());
 		if (variance instanceof SymmetricMatrix) {
-			return (AbstractEstimate<M, V, ?>) new GaussianEstimate((Matrix) diff, (SymmetricMatrix) variance);
+			return (AbstractEstimate<M, V, ?>) new SimpleEstimate((Matrix) diff, (SymmetricMatrix) variance);
 		} else {
 			throw new UnsupportedOperationException("The variance object is not a SymmetricMatrix instance!");
 		}
@@ -114,7 +114,7 @@ public abstract class AbstractEstimate<M extends AbstractMatrix, V extends Abstr
 		}
 		Matrix variance = (Matrix) getVariance().add(estimate2.getVariance());
 		if (variance instanceof SymmetricMatrix) {
-			return (AbstractEstimate<M, V, ?>) new GaussianEstimate((Matrix) diff, (SymmetricMatrix) variance);
+			return (Estimate<M, V, ?>) new SimpleEstimate((Matrix) diff, (SymmetricMatrix) variance);
 		} else {
 			throw new UnsupportedOperationException("The variance object is not a SymmetricMatrix instance!");
 		}
@@ -129,7 +129,7 @@ public abstract class AbstractEstimate<M extends AbstractMatrix, V extends Abstr
 			throw new UnsupportedOperationException("The method getProductEstimate has not been implemented for ComplexMatrix yet!");
 		}
 		SymmetricMatrix variance = (SymmetricMatrix) getVariance().scalarMultiply(scalar * scalar);
-		return (AbstractEstimate<M, V, ?>) new GaussianEstimate((Matrix) diff, variance);
+		return (Estimate<M, V, ?>) new SimpleEstimate((Matrix) diff, variance);
 	}
 
 	@Override
@@ -147,8 +147,9 @@ public abstract class AbstractEstimate<M extends AbstractMatrix, V extends Abstr
 	}
 	
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public SimpleEstimate getProductEstimate(Estimate<M, V, ?> estimate) {
+	public Estimate<M, V, ?> getProductEstimate(Estimate<M, V, ?> estimate) {
 		if (estimate.getDistribution().isUnivariate() && getDistribution().isUnivariate()) {
 			M alphaMu = getMean();
 			M betaMu = estimate.getMean();
@@ -163,7 +164,7 @@ public abstract class AbstractEstimate<M extends AbstractMatrix, V extends Abstr
 			Matrix newVariance = alphaMean.elementWisePower(2d).multiply(betaVariance).
 					add(betaMean.elementWisePower(2d).multiply(alphaVariance)).
 					subtract(alphaVariance.multiply(betaVariance));
-			return new SimpleEstimate(newMean,  SymmetricMatrix.convertToSymmetricIfPossible(newVariance));
+			return (Estimate<M, V, ?>) new SimpleEstimate(newMean,  SymmetricMatrix.convertToSymmetricIfPossible(newVariance));
 		}
 		throw new InvalidParameterException("The getProductEstimate is only implemented for parametric univariate distribution ");
 	}
@@ -173,7 +174,8 @@ public abstract class AbstractEstimate<M extends AbstractMatrix, V extends Abstr
 	 * @param estimates a list of Estimate instances
 	 * @return a SimpleEstimate instance
 	 */
-	public static SimpleEstimate getProductOfManyEstimates(List<Estimate<Matrix, SymmetricMatrix, ?>> estimates) {
+	@SuppressWarnings("unchecked")
+	public static Estimate<Matrix, SymmetricMatrix, ?> getProductOfManyEstimates(List<Estimate<Matrix, SymmetricMatrix, ?>> estimates) {
 		Estimate<Matrix, SymmetricMatrix, ?> currentEstimate = null;
 		for (int i = 1; i < estimates.size(); i++) {
 			if (i == 1) {
@@ -181,15 +183,15 @@ public abstract class AbstractEstimate<M extends AbstractMatrix, V extends Abstr
 			} 
 			currentEstimate = currentEstimate.getProductEstimate(estimates.get(i));
 		}
-		return (SimpleEstimate) currentEstimate;
+		return (Estimate<Matrix, SymmetricMatrix, ?>) currentEstimate;
 	}
 	
 	@Override
-	public AbstractEstimate<Matrix, SymmetricMatrix, ?> collapseEstimate(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
+	public Estimate<Matrix, SymmetricMatrix, ?> collapseEstimate(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
 		return collapseMeanAndVariance(desiredIndicesForCollapsing);
 	}
 	
-	protected final AbstractEstimate<Matrix, SymmetricMatrix, ?> collapseMeanAndVariance(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
+	protected final Estimate<Matrix, SymmetricMatrix, ?> collapseMeanAndVariance(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
 		M m = getMean();
 		if (!(m instanceof Matrix)) {
 			throw new UnsupportedOperationException("The collapseEstimate method is meant for Estimate based on Matrix instance!");
@@ -213,7 +215,6 @@ public abstract class AbstractEstimate<M extends AbstractMatrix, V extends Abstr
 			throw new InvalidParameterException("Some indices are missing in the desiredIndicesForCollapsing or cannot be found in the row indices!");
 		} 
 
-//		P oldMean = getMean();
 		Matrix newMean = collapseRowVector(mean, desiredIndicesForCollapsing);
 		
 		Matrix oldVariance = (Matrix) getVariance();

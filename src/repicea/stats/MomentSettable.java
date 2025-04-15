@@ -26,7 +26,7 @@ import repicea.math.SymmetricMatrix;
  * The CentralMomentsSettable interface ensures the mean and the variance can be set.
  * @author Mathieu Fortin - August 2012
  */
-public interface CentralMomentsSettable {
+public interface MomentSettable {
 
 	
 	/**

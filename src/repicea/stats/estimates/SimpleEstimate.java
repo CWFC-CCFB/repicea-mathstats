@@ -22,14 +22,15 @@ import java.io.Serializable;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
-import repicea.stats.CentralMomentsSettable;
+import repicea.stats.MomentSettable;
 import repicea.stats.distributions.UnknownDistribution;
 
 /**
- * The Estimate class is the general class for all estimates.
+ * The most basic implementation of the Estimate interface.<p> 
+ * A SimpleEstimate does not assume any distribution.
  * @author Mathieu Fortin - July 2011
  */
-public class SimpleEstimate extends AbstractEstimate<Matrix, SymmetricMatrix, UnknownDistribution> implements CentralMomentsSettable, Serializable {
+public class SimpleEstimate extends AbstractEstimate<Matrix, SymmetricMatrix, UnknownDistribution> implements MomentSettable, Serializable {
 
 	private static final long serialVersionUID = 20110912L;
 	

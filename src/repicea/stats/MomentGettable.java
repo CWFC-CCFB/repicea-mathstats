@@ -28,7 +28,7 @@ import repicea.math.AbstractMatrix;
  * @param <M> an AbstractMatrix-derived class that stands for the mean
  * @param <V> an AbstractMatrix-derived class that stands for the variance
  */
-public interface CentralMomentsGettable<M extends AbstractMatrix, V extends AbstractMatrix> {
+public interface MomentGettable<M extends AbstractMatrix, V extends AbstractMatrix> {
 
 	/**
 	 * This method returns the first central moment, i.e. the mean vector, of the random variable.

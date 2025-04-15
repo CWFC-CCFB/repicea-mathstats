@@ -23,14 +23,14 @@ import java.io.Serializable;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.math.utility.GaussianUtility;
-import repicea.stats.CentralMomentsSettable;
+import repicea.stats.MomentSettable;
 import repicea.stats.distributions.GaussianDistribution;
 
 /**
  * This class contains the elements related to the random effects, i.e. the best linear unbiased predictors (blups) as well as their variances.
  * @author Mathieu Fortin - October 2011
  */
-public class GaussianEstimate extends AbstractEstimate<Matrix, SymmetricMatrix, GaussianDistribution> implements CentralMomentsSettable, Serializable {
+public class GaussianEstimate extends AbstractEstimate<Matrix, SymmetricMatrix, GaussianDistribution> implements MomentSettable, Serializable {
 
 	private static final long serialVersionUID = 20120725L;
 	

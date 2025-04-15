@@ -24,7 +24,7 @@ import java.security.InvalidParameterException;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.math.utility.GaussianUtility;
-import repicea.stats.CentralMomentsSettable;
+import repicea.stats.MomentSettable;
 import repicea.stats.distributions.GaussianDistribution;
 
 /**
@@ -34,7 +34,7 @@ import repicea.stats.distributions.GaussianDistribution;
  * @author Mathieu Fortin - January 2021
  */
 @SuppressWarnings("serial")
-public class LogNormalEstimate extends AbstractEstimate<Matrix, SymmetricMatrix, GaussianDistribution> implements CentralMomentsSettable, Serializable{
+public class LogNormalEstimate extends AbstractEstimate<Matrix, SymmetricMatrix, GaussianDistribution> implements MomentSettable, Serializable{
 
 	/**
 	 * Constructor.
