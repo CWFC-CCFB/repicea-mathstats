@@ -418,29 +418,32 @@ public class Matrix extends AbstractMatrix<Matrix, Double> implements Serializab
 	 * @param columnIndex a List of integers (if null all the columns are selected)
 	 * @return a Matrix instance
 	 */
+	@Override
 	public final Matrix getSubMatrix(List<Integer> rowIndex, List<Integer> columnIndex) { 
+		List<Integer> internalRowIndex = new ArrayList<Integer>();
+		List<Integer> internalColumnIndex = new ArrayList<Integer>();
 		if (rowIndex != null && !rowIndex.isEmpty()) {
-			Collections.sort(rowIndex);
+			internalRowIndex.addAll(rowIndex);
+			Collections.sort(internalRowIndex);
 		} else {
-			rowIndex = new ArrayList<Integer>();
 			for (int i = 0; i < m_iRows; i++) {
-				rowIndex.add(i);
+				internalRowIndex.add(i);
 			}
 		}
 		
 		if (columnIndex != null && !columnIndex.isEmpty()) {
-			Collections.sort(columnIndex);
+			internalColumnIndex.addAll(columnIndex);
+			Collections.sort(internalColumnIndex);
 		} else {
-			columnIndex = new ArrayList<Integer>();
 			for (int j = 0; j < m_iCols; j++) {
-				columnIndex.add(j);
+				internalColumnIndex.add(j);
 			}
 		}
 		
-		Matrix outputMatrix = new Matrix(rowIndex.size(), columnIndex.size());
-		for (int i = 0; i < rowIndex.size(); i++) {
-			for (int j = 0; j < columnIndex.size(); j++) {
-				outputMatrix.setValueAt(i, j, getValueAt(rowIndex.get(i), columnIndex.get(j)));
+		Matrix outputMatrix = new Matrix(internalRowIndex.size(), internalColumnIndex.size());
+		for (int i = 0; i < internalRowIndex.size(); i++) {
+			for (int j = 0; j < internalColumnIndex.size(); j++) {
+				outputMatrix.setValueAt(i, j, getValueAt(internalRowIndex.get(i), internalColumnIndex.get(j)));
 			}
 		}
 	
