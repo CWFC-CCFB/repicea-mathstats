@@ -184,8 +184,7 @@ public final class ComplexNumber extends Number implements Cloneable {
 	}
 	
 	/**
-	 * Compute the square root of this complex number.<p>
-	 * It may occasionally return a double if the imaginary part is equal to 0.
+	 * Compute the principal square root of this complex number.<p>
 	 * @return a ComplexNumber instance
 	 */
 	public ComplexNumber sqrt() {

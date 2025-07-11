@@ -21,7 +21,6 @@ package repicea.math;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,126 +32,26 @@ import repicea.lang.REpiceaSystem;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.estimates.ComplexMonteCarloEstimate;
-import repicea.stats.estimates.ConfidenceInterval;
 import repicea.stats.estimates.MonteCarloEstimate;
 
 /**
  * The ComplexNumberSimpleCaseStudy class implements a simulation study around 
- * the square transformation of Gaussian variables.
+ * the exponential, square and log transformation of Gaussian variables.
  * @author Mathieu Fortin - Oct 2023
  */
-public class ComplexNumberSquareTransformationCaseStudyBalanced {
+public class ComplexNumberSquareRootTransformationBalancedSimulationStudy extends AbstractComplexNumberSimulationStudy {
 
-	/**
-	 * A population unit.<p>
-	 * The variable x follows a uniform distribution (3,10).
-	 * @author Mathieu Fortin - December 2023
-	 */
-	private static class PopulationUnit {
-		private final double x;
-		private final double y;
-		@SuppressWarnings("unused")
-		private final int id;
-		private PopulationUnit(Matrix trueBeta, double trueStd, double x, int id) {
-			this.id = id;
-			this.x = x;
-			y = trueBeta.getValueAt(0, 0) + x * trueBeta.getValueAt(1, 0) + StatisticalUtility.getRandom().nextGaussian() * trueStd;
-		}
-	}
 
-	/**
-	 * A sample of population units.
-	 * @author Mathieu Fortin - December 2023
-	 */
-	@SuppressWarnings("serial")
-	private static class Sample extends ArrayList<PopulationUnit> {
-
-		static final List<Double> X_VALUES = Arrays.asList(new Double[] {1d, 2d, 3d, 4d, 5d, 6d, 7d, 8d, 9d, 10d});
-		
-		private static Sample createSample(Matrix trueBeta, double trueVariance, int sampleSize) {
-			if (sampleSize%X_VALUES.size() != 0) {
-				throw new InvalidParameterException("Requested sample size " + sampleSize + " is not a multiple of the number of x values: " + X_VALUES.size());
-			}
-			int nbRuns = sampleSize / X_VALUES.size();
-			Sample s = new Sample();
-			double trueStd = Math.sqrt(trueVariance);
-			for (int i = 0; i < nbRuns; i++) {
-				for (double x : X_VALUES) {
-					s.add(new PopulationUnit(trueBeta, trueStd, x, i));
-				}
-			}
-			return s;
-		}
-		
-		private Matrix getMatrixX() {
-			Matrix xMat = new Matrix(size(), 2);
-			for (int i = 0; i < size(); i++) {
-				xMat.setValueAt(i, 0, 1d);
-				xMat.setValueAt(i, 1, get(i).x);
-			}
-			return xMat;
-		}
-
-		private Matrix getVectorY() {
-			Matrix yVec = new Matrix(size(), 1);
-			for (int i = 0; i < size(); i++) {
-				yVec.setValueAt(i, 0, get(i).y);
-			}
-			return yVec;
-		}
-		
-//		private DataSet convertIntoDataSet() {
-//			DataSet ds = new DataSet(Arrays.asList(new String[] {"y", "x"}));
-//			Object[] observation;
-//			for (int i = 0; i < size(); i++) {
-//				observation = new Object[2];
-//				observation[0] = get(i).y;
-//				observation[1] = get(i).x;
-//				ds.addObservation(observation);
-//			}
-//			ds.indexFieldType();
-//			return ds;
-//		}
-		
-		
-		private Model getModel() {
-			Matrix xMat = getMatrixX();
-			Matrix yVec = getVectorY();
-			SymmetricMatrix invXtX = SymmetricMatrix.convertToSymmetricIfPossible(xMat.transpose().multiply(xMat).getInverseMatrix());
-			Matrix betaHat = invXtX.multiply(xMat.transpose()).multiply(yVec);
-			Matrix res = yVec.subtract(xMat.multiply(betaHat));
-			int upsilon = yVec.m_iRows - xMat.m_iCols;
-			double sigma2Hat = res.transpose().multiply(res).getValueAt(0, 0) / upsilon;
-			return new Model(this, betaHat, invXtX, sigma2Hat, upsilon);
-		}
-		
-	}
-	
 	/**
 	 * A model fitted to a sample of population units.
 	 * @author Mathieu Fortin - December 2023
 	 */
-	private static class Model {
-		private final Matrix betaHat;
-		private final SymmetricMatrix invXtX;
-		private final double sigma2Hat;
-		private Matrix invXtXChol;
-		private final int upsilon;
+	static class Model extends AbstractComplexNumberSimulationStudy.Model {
 		
 		Model(Sample sample, Matrix betaHat, SymmetricMatrix invXtX, double sigma2Hat, int upsilon) {
-			this.betaHat = betaHat;
-			this.invXtX = invXtX; 
-			this.sigma2Hat = sigma2Hat;
-			this.upsilon = upsilon;
+			super(sample, betaHat, invXtX, sigma2Hat, upsilon);
 		}
-		
-		private Matrix getOmegaChol() {
-			if (invXtXChol == null) {
-				invXtXChol = invXtX.getLowerCholTriangle();
-			}
-			return invXtXChol;
-		}
-		
+
 		private Matrix getRandomDeviate(List<Double> xValues) {
 			Matrix xMat = createMatrixX(xValues);
 			double chiSquareDeviate = StatisticalUtility.getRandom().nextChiSquare(upsilon);
@@ -163,20 +62,13 @@ public class ComplexNumberSquareTransformationCaseStudyBalanced {
 			return result;
 		}
 		
-		private static Matrix createMatrixX(List<Double> xValues) {
-			Matrix xMat = new Matrix(xValues.size(),2);
-			for (int i = 0; i < xValues.size(); i++) {
-				xMat.setValueAt(i, 0, 1d);
-				xMat.setValueAt(i, 1, xValues.get(i));
-			}
-			return xMat;
+		private Matrix getNaiveEstimator(List<Double> xValues) {
+			Matrix xMat = createMatrixX(xValues);
+			Matrix xBeta = xMat.multiply(betaHat);
+			Matrix pred = xBeta.elementWisePower(2d).scalarAdd(sigma2Hat);
+			return pred;
 		}
 		
-//		private Matrix getXBeta(List<Double> xValues) {
-//			Matrix xMat = createMatrixX(xValues);
-//			return xMat.multiply(betaHat);
-//		}
-
 		private Matrix getGregoireEstimator(List<Double> xValues) {
 			Matrix xMat = createMatrixX(xValues);
 			Matrix varMuHat = xMat.multiply(invXtX).multiply(xMat.transpose()).scalarMultiply(sigma2Hat);
@@ -215,25 +107,14 @@ public class ComplexNumberSquareTransformationCaseStudyBalanced {
 		}
 	}
 	
-//	private static CSVWriter createWriterForIndividualEstimate(String filename) throws IOException {
-//		CSVWriter writer = new CSVWriter(new File(filename.concat("exampleSingleEstimate.csv")), false);
-//		List<FormatField> fields = new ArrayList<FormatField>();
-//		fields.add(new CSVField("RealID"));
-//		fields.add(new CSVField("x"));
-//		fields.add(new CSVField("real"));
-//		fields.add(new CSVField("imag"));
-//		writer.setFields(fields);
-//		return writer;
-//	}
-	
 	private void doRun(int sampleSize, 
 			int nbRealizations, 
+			int nbCMCRealization,
 			double b0, 
 			double b1, 
 			double s2,
 			String filename) throws IOException {
 		System.out.println("Simulating [" + b0 + "; " + b1 + "; " + s2 +"] with sample size n = " + sampleSize);
-		int nbInnerReal = 10000;
 		CSVWriter writer = new CSVWriter(new File(filename.concat("" + sampleSize + ".csv")), false);
 		List<FormatField> fields = new ArrayList<FormatField>();
 		fields.add(new CSVField("RealID"));
@@ -241,17 +122,14 @@ public class ComplexNumberSquareTransformationCaseStudyBalanced {
 		fields.add(new CSVField("b1"));
 		fields.add(new CSVField("sigma2"));
 		fields.add(new CSVField("x"));
-		fields.add(new CSVField("MC_meanEst"));
-		fields.add(new CSVField("CMC_meanEst"));
-		fields.add(new CSVField("CMC_varEst"));
-		fields.add(new CSVField("Lower95"));
-		fields.add(new CSVField("Upper95"));
-		fields.add(new CSVField("Lower99"));
-		fields.add(new CSVField("Upper99"));
+		fields.add(new CSVField("Naive"));
 		fields.add(new CSVField("GregoireEstimator"));
 		fields.add(new CSVField("GregoireVarianceEstimator"));
-		fields.add(new CSVField("TrueExp"));
-		fields.add(new CSVField("TrueMSE"));
+		fields.add(new CSVField("MC_meanEst"));
+		fields.add(new CSVField("CMC_meanEst_real"));
+		fields.add(new CSVField("CMC_meanEst_imag"));
+		fields.add(new CSVField("CMC_varEst_real"));
+		fields.add(new CSVField("CMC_varEst_imag"));
 		writer.setFields(fields);
 		
 		Matrix trueBeta = new Matrix(2,1);
@@ -269,7 +147,7 @@ public class ComplexNumberSquareTransformationCaseStudyBalanced {
 			}
 
 			Sample s = Sample.createSample(trueBeta, trueVariance, sampleSize);
-			Model m = s.getModel();
+			Model m = (Model) s.getModel(this);
 						
 			if (real == 1) {
 				mse  = new Matrix(xValues.size(),1);
@@ -289,37 +167,21 @@ public class ComplexNumberSquareTransformationCaseStudyBalanced {
 			
 			MonteCarloEstimate mcEstimator = new MonteCarloEstimate();
 			ComplexMonteCarloEstimate cmcEstimator = new ComplexMonteCarloEstimate();
-//			CSVWriter singleEstWriter = null;
-//			if (real == 1) {
-//				singleEstWriter = createWriterForIndividualEstimate(filename);
-//			}
 			
-			for (int innerReal = 0; innerReal < nbInnerReal; innerReal++) {
+			for (int innerReal = 0; innerReal < nbCMCRealization; innerReal++) {
 				mcEstimator.addRealization(m.getRandomDeviate(xValues)); 
 				ComplexMatrix complexRealizations = m.getComplexRandomDeviate(xValues);
 				cmcEstimator.addRealization(complexRealizations); 
-//				if (real == 1) {
-//					for (int innerLoc = 0; innerLoc < complexRealizations.m_iRows; innerLoc++) {
-//						Object[] record = new Object[4];
-//						record[0] = innerReal;
-//						record[1] = xValues.get(innerLoc);
-//						record[2] = complexRealizations.getValueAt(innerLoc, 0).realPart;
-//						record[3] = complexRealizations.getValueAt(innerLoc, 0).imaginaryPart;
-//						singleEstWriter.addRecord(record);
-//					}
-//				}
 			}
-//			if (real == 1) {
-//				singleEstWriter.close();
-//			}
 			
 			Matrix mcMean = mcEstimator.getMean();
 			ComplexMatrix cmcMean = cmcEstimator.getMean();
 			ComplexSymmetricMatrix cmcPsVar = cmcEstimator.getPseudoVariance();
+			Matrix naiveEstimator = m.getNaiveEstimator(xValues);
 			
-			ComplexMonteCarloEstimate imaginaryRealizations = cmcEstimator.getImaginaryRealizations();
-			ConfidenceInterval ci95 = imaginaryRealizations.getConfidenceIntervalBounds(0.95);
-			ConfidenceInterval ci99 = imaginaryRealizations.getConfidenceIntervalBounds(0.99);
+//			ComplexMonteCarloEstimate imaginaryRealizations = cmcEstimator.getImaginaryRealizations();
+//			ConfidenceInterval ci95 = imaginaryRealizations.getConfidenceIntervalBounds(0.95);
+//			ConfidenceInterval ci99 = imaginaryRealizations.getConfidenceIntervalBounds(0.99);
 
 			Matrix gregoireEstimator = m.getGregoireEstimator(xValues);
 			Matrix gregoireVarianceEstimator = m.getGregoireVarianceEstimator(xValues);
@@ -331,17 +193,14 @@ public class ComplexNumberSquareTransformationCaseStudyBalanced {
 				record[2] = m.betaHat.getValueAt(1, 0);
 				record[3] = m.sigma2Hat;
 				record[4] = xValues.get(ii);
-				record[5] = mcMean.getValueAt(ii, 0);
-				record[6] = cmcMean.getValueAt(ii, 0).realPart;
-				record[7] = -cmcPsVar.getValueAt(ii, ii).realPart;
-				record[8] = ci95.getLowerLimit().getValueAt(ii, 0);
-				record[9] = ci95.getUpperLimit().getValueAt(ii, 0);
-				record[10] = ci99.getLowerLimit().getValueAt(ii, 0);
-				record[11] = ci99.getUpperLimit().getValueAt(ii, 0);
-				record[12] = gregoireEstimator.getValueAt(ii, 0);
-				record[13] = gregoireVarianceEstimator.getValueAt(ii, 0);
-				record[14] = theta.getValueAt(ii, 0);
-				record[15] = mse.getValueAt(ii, 0);
+				record[5] = naiveEstimator.getValueAt(ii, 0);
+				record[6] = gregoireEstimator.getValueAt(ii, 0);
+				record[7] = gregoireVarianceEstimator.getValueAt(ii, 0);
+				record[8] = mcMean.getValueAt(ii, 0);
+				record[9] = cmcMean.getValueAt(ii, 0).realPart;
+				record[10] = cmcMean.getValueAt(ii, 0).imaginaryPart;
+				record[11] = cmcPsVar.getValueAt(ii, ii).realPart;
+				record[12] = cmcPsVar.getValueAt(ii, ii).imaginaryPart;
 				writer.addRecord(record);
 			}
 		}
@@ -352,14 +211,12 @@ public class ComplexNumberSquareTransformationCaseStudyBalanced {
 		String filename = REpiceaSystem.retrieveArgument("-outdir", Arrays.asList(args));
 		System.out.println("Export filename: " + filename);
 		List<Double> variances = new ArrayList<Double>();
-//		variances.add(0.5);
-//		variances.add(1.0);
-//		variances.add(2.0);
-		variances.add(4.0);
+		variances.add(1.0);
+		variances.add(2.0);
 		for (double variance : variances) {
 			String rootFilename = filename.concat("caseStudySquareBalanced_" + variance + "_");
 			List<Integer> sampleSizes = new ArrayList<Integer>();
-			sampleSizes.add(20);
+			sampleSizes.add(25);
 			sampleSizes.add(50);
 			sampleSizes.add(100);
 			sampleSizes.add(200);
@@ -367,9 +224,9 @@ public class ComplexNumberSquareTransformationCaseStudyBalanced {
 			for (int sampleSize : sampleSizes) {
 				Runnable doRun = new Runnable() {
 					public void run() {
-						ComplexNumberSquareTransformationCaseStudyBalanced s = new ComplexNumberSquareTransformationCaseStudyBalanced();
+						ComplexNumberSquareRootTransformationBalancedSimulationStudy s = new ComplexNumberSquareRootTransformationBalancedSimulationStudy();
 						try {
-							s.doRun(sampleSize, 50000, 5, 0.25, variance, rootFilename);
+							s.doRun(sampleSize, 50000, 10000, 5, 0.25, variance, rootFilename);
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
@@ -383,5 +240,18 @@ public class ComplexNumberSquareTransformationCaseStudyBalanced {
 				t.join();
 			}
 		}
+	}	
+
+	@Override
+	ComplexNumberSquareRootTransformationBalancedSimulationStudy.Model createModel(Sample s, 
+			Matrix betaHat, 
+			SymmetricMatrix invXtX, 
+			double sigma2Hat, 
+			int upsilon) {
+		return new ComplexNumberSquareRootTransformationBalancedSimulationStudy.Model(s, 
+				betaHat, 
+				invXtX, 
+				sigma2Hat, 
+				upsilon);
 	}	
 }
