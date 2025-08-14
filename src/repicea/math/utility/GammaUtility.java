@@ -90,8 +90,8 @@ public class GammaUtility {
 	}
 	
 	/**
-	 * This method implements the Lambert W function.
-	 * Code taken from http://keithbriggs.info/software.html  
+	 * Implementation of the Lambert W function as developed by Keith Briggs.
+	 * @see http://keithbriggs.info/software.html  
 	 * @param z
 	 * @return
 	 */

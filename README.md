@@ -33,3 +33,7 @@ This library also relies on
 - repicea library (https://github.com/CWFC-CCFB/repicea) which is licensed under the Lesser General Public License version 3.0.  
 - Jackson library (https://github.com/FasterXML/jackson-core) which is licensed under the Apache License version 2.0.
 
+Several algorithm implementations  were taken from publicly available sources, which must be acknowledged:
+- Keith Briggs for the Lambert W implementation in the repicea.math.utility.GammaUtility class (see http://keithbriggs.info/software.html) 
+- David W. Cantrell for the approximation of the inverse Gamma function in the repicea.math.utility.GammaUtility class (see https://web.archive.org/web/20171104030158/http://mathforum.org/kb/message.jspa?messageID=342551&tstart=0)
+- G. West for the approximation of the cumulative normal distribution in the repicea.math.utility.GaussianUtility class (see http://www.wilmott.com/pdfs/090721_west.pdf)
