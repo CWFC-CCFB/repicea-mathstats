@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea library.
+ * This file is part of the repicea-mathstats library.
  *
  * Copyright (C) 2009-2017 Mathieu Fortin for Rouge-Epicea
  *
@@ -33,7 +33,7 @@ public class NegativeBinomialUtility {
 	 * @return a mass probability
 	 */
 	@Deprecated
-	static double getMassProbabilityOLD(int y, double mean, double dispersion) {
+	static double getProbabilityMassOLD(int y, double mean, double dispersion) {
 		if (y < 0) {
 			throw new InvalidParameterException("The binomial distribution is designed for integer equals to or greater than 0!");
 		}
@@ -62,7 +62,7 @@ public class NegativeBinomialUtility {
 	 * @param dispersion the dispersion parameter
 	 * @return a mass probability
 	 */
-	public static double getMassProbability(int y, double mean, double dispersion) {
+	public static double getProbabilityMass(int y, double mean, double dispersion) {
 		if (y < 0) {
 			throw new InvalidParameterException("The binomial distribution is designed for integer equals to or greater than 0!");
 		} else if (y == 0) {
@@ -81,18 +81,18 @@ public class NegativeBinomialUtility {
 
 	/**
 	 * Provide a quantile of the distribution.
-	 * @param cdfValue the cumulative mass
+	 * @param cmfValue the cumulative mass
 	 * @param mean the mean of the distribution
 	 * @param dispersion the dispersion of the distribution
 	 * @return a quantile
 	 */
-	public static int getQuantile(double cdfValue, double mean, double dispersion) {
-		if (cdfValue < 0 || cdfValue > 1) 
-			throw new InvalidParameterException("The cdfValue parameter should be a double between 0 and 1!");
+	public static int getQuantile(double cmfValue, double mean, double dispersion) {
+		if (cmfValue <= 0 || cmfValue >= 1) 
+			throw new InvalidParameterException("The cmfValue parameter should be a double between 0 and 1!");
 		double cumulativeMass = 0d;
 		int y = 0;
-		while(cumulativeMass < cdfValue) 
-			cumulativeMass += getMassProbability(y++, mean, dispersion); 
+		while(cumulativeMass < cmfValue) 
+			cumulativeMass += getProbabilityMass(y++, mean, dispersion); 
 		return --y;
 	}
 

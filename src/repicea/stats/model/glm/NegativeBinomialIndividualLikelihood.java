@@ -79,7 +79,7 @@ public final class NegativeBinomialIndividualLikelihood extends GLMIndividualLik
 		
 	@Override
 	public Double getValue() {
-		return NegativeBinomialUtility.getMassProbability(((Double) observedValues.getValueAt(0, 0)).intValue(), 
+		return NegativeBinomialUtility.getProbabilityMass(((Double) observedValues.getValueAt(0, 0)).intValue(), 
 				getMu(), 
 				getDispersion());
 	}

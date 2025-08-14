@@ -23,6 +23,7 @@ import java.util.Random;
 
 import repicea.math.Matrix;
 import repicea.math.utility.NegativeBinomialUtility;
+import repicea.math.utility.PoissonUtility;
 import repicea.math.utility.TruncatedGaussianUtility;
 import repicea.math.utility.WeibullUtility;
 
@@ -109,7 +110,7 @@ public class REpiceaRandom extends Random {
 		
 		while (threshold > cumulativeProb) {		
 			output++;
-			double massProb = NegativeBinomialUtility.getMassProbability(output, mean, dispersion);
+			double massProb = NegativeBinomialUtility.getProbabilityMass(output, mean, dispersion);
 			cumulativeProb += massProb;
 		}
 		return output;
@@ -221,5 +222,14 @@ public class REpiceaRandom extends Random {
 	 */
 	public double nextTruncatedGaussian(double mu, double sigma2, double a, double b) {
 		return TruncatedGaussianUtility.getQuantile(nextDouble(), mu, sigma2, a, b);
+	}
+	
+	/**
+	 * Provide a random realization of the Poisson distribution.
+	 * @param lambda the mean and variance of the Poisson distribution
+	 * @return a count (an integer greater than or equal to 0)
+	 */
+	public int nextPoisson(double lambda) {
+		return PoissonUtility.getQuantile(nextDouble(), lambda);
 	}
 }

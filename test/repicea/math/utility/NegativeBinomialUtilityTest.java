@@ -30,9 +30,9 @@ import repicea.stats.estimates.MonteCarloEstimate;
 public class NegativeBinomialUtilityTest {
 
 	@Test
-	public void simpleValueTest() {
-		double expected = NegativeBinomialUtility.getMassProbabilityOLD(2, 1, .5);
-		double observed = NegativeBinomialUtility.getMassProbability(2, 1, .5);
+	public void test01SimpleValue() {
+		double expected = NegativeBinomialUtility.getProbabilityMassOLD(2, 1, .5);
+		double observed = NegativeBinomialUtility.getProbabilityMass(2, 1, .5);
 		Assert.assertEquals("Testing the two methods", expected, observed, 1E-8);
 	}
 
@@ -40,16 +40,16 @@ public class NegativeBinomialUtilityTest {
 	@Test
 	public void performanceTest() {
 		for (int i = 0; i < 100000; i++) 
-			NegativeBinomialUtility.getMassProbabilityOLD(2, 1, .5);
+			NegativeBinomialUtility.getProbabilityMassOLD(2, 1, .5);
 
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < 100000; i++) 
-			NegativeBinomialUtility.getMassProbabilityOLD(2, 1, .5);
+			NegativeBinomialUtility.getProbabilityMassOLD(2, 1, .5);
 		long elapsedTimeReference = System.currentTimeMillis() - startTime;
 		
 		startTime = System.currentTimeMillis();
 		for (int i = 0; i < 100000; i++) 
-			NegativeBinomialUtility.getMassProbability(2, 1, .5);
+			NegativeBinomialUtility.getProbabilityMass(2, 1, .5);
 		long elapsedTimeNewMethod = System.currentTimeMillis() - startTime;
 		System.out.println("Performance: Reference time = " + elapsedTimeReference + " - New method = " + elapsedTimeNewMethod);
 		Assert.assertTrue("Testing that the new method is faster", elapsedTimeNewMethod < elapsedTimeReference);
@@ -57,27 +57,27 @@ public class NegativeBinomialUtilityTest {
 	
 	
 	@Test
-	public void simpleValueTest2() {
-		double observed = NegativeBinomialUtility.getMassProbability(22, 1, 1);
-		double observed2 = NegativeBinomialUtility.getMassProbabilityOLD(22, 1, 1);
+	public void test02SimpleValue() {
+		double observed = NegativeBinomialUtility.getProbabilityMass(22, 1, 1);
+		double observed2 = NegativeBinomialUtility.getProbabilityMassOLD(22, 1, 1);
 		Assert.assertEquals("Testing the two methods", observed, observed2, 1E-8);
 	}
 
 	@Test
-	public void zeroValueFasterImplementationTest() {
-		double observed = NegativeBinomialUtility.getMassProbability(0, 1, 1);
-		double observed2 = NegativeBinomialUtility.getMassProbabilityOLD(0, 1, 1);
+	public void test03ZeroValueFasterImplementation() {
+		double observed = NegativeBinomialUtility.getProbabilityMass(0, 1, 1);
+		double observed2 = NegativeBinomialUtility.getProbabilityMassOLD(0, 1, 1);
 		Assert.assertEquals("Testing the two methods", observed, observed2, 1E-8);
 	}
 	
 	@Test
-	public void quantileTest1() {
+	public void test04Quantile() {
 		int observed = NegativeBinomialUtility.getQuantile(0.5, 1, .8);
 		Assert.assertEquals("Testing a quantile", 1, observed);
 	}
 
 	@Test
-	public void meanTest1() {
+	public void test05StochasticMean() {
 		double mu = 1d;
 		double theta = .8;
 		MonteCarloEstimate est = new MonteCarloEstimate();
@@ -99,7 +99,7 @@ public class NegativeBinomialUtilityTest {
 
 
 	@Test
-	public void meanTest2() {
+	public void test06StochasticMean() {
 		double mu = 1.5;
 		double theta = .5;
 		MonteCarloEstimate est = new MonteCarloEstimate();

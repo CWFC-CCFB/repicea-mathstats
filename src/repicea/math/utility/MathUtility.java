@@ -58,7 +58,7 @@ public class MathUtility {
 	public static double Factorial(int i) {
 		if (i < 0) {
 			throw new InvalidParameterException("Parameter i must be equal to or greater than 0!");
-		} else  if (i==0) {
+		} else if (i==0) {
 			return 1;
 		} else {
 			double result = 1;
