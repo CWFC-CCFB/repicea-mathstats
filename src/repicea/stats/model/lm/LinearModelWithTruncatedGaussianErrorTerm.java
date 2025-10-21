@@ -170,30 +170,6 @@ public class LinearModelWithTruncatedGaussianErrorTerm extends LinearModel {
 		return xBeta;
 	}
 	
-//	public Matrix getPredOnLogBackTransformedScale(Matrix xMatrix, double transformationOffset, boolean varianceRequired) {
-//		double sigma2 = getResidualVariance();
-//		double sigma = Math.sqrt(sigma2);
-//		Matrix xBeta = getXBeta(xMatrix);
-//		Matrix meanValues = new Matrix(xBeta.m_iRows, varianceRequired ? 2 : 1);
-//		for (int i = 0; i < xBeta.m_iRows; i++) {
-//			double xBeta_i = xBeta.getValueAt(i, 0);
-//			double F_t = GaussianUtility.getCumulativeProbability((truncation - xBeta_i)/sigma);
-//			double meanValue =  (F_t < LogBackTransformation.VERY_SMALL) ?
-//					Math.exp(xBeta_i + 0.5 * sigma2) :
-//						Math.exp(xBeta_i + 0.5 * sigma2) * ((1 + ErrorFunctionUtility.erf((xBeta_i + sigma2 - truncation)/Math.sqrt(2*sigma2)))/(2*(1-F_t))); 
-//			meanValues.setValueAt(i, 0, meanValue - transformationOffset);
-//			if (varianceRequired) {
-//				double sqrt2Sigma2 = Math.sqrt(2 * sigma2);
-//				double part1 = Math.exp(2*xBeta_i + 2* sigma2) * (1 + ErrorFunctionUtility.erf((xBeta_i + 2*sigma2 - truncation)/sqrt2Sigma2));
-//				double part2 = -2 * meanValue * Math.exp(xBeta_i + .5*sigma2) * (1 + ErrorFunctionUtility.erf((xBeta_i + sigma2 - truncation)/sqrt2Sigma2));
-//				double part3 = meanValue * meanValue * (1 - ErrorFunctionUtility.erf((truncation - xBeta_i)/sqrt2Sigma2));
-//				double var = 1d / (2 - 2*F_t) * (part1 + part2 + part3);
-//				meanValues.setValueAt(i, 1, var);
-//			}
-//		}
-//		return meanValues;
-//	}
-	
 	@Override
 	public String toString() {
 		return "Linear model with residual errors following a truncated Gaussian distribution (Truncated Tobit model)" + System.lineSeparator() +"fitted with maximum likelihood estimator";

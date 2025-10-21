@@ -228,7 +228,7 @@ public class LogBackTransformation {
 	 * @return a Matrix instance
 	 */
 	public static Matrix getResidualVariancesOnOriginalScale(LinearModel model, Estimator method) {
-		return 	getResidualVariancesOnOriginalScale(model, null, method);
+		return getResidualVariancesOnOriginalScale(model, null, method);
 	}
 
 	
@@ -258,10 +258,10 @@ public class LogBackTransformation {
 			for (int i = 0; i < xBeta.m_iRows; i++) {
 				double xBeta_i = xBeta.getValueAt(i, 0);
 				double F_t = GaussianUtility.getCumulativeProbability((truncation - xBeta_i)/sigma);
+				double sqrt2Sigma2 = Math.sqrt(2 * sigma2);
 				double meanValue =  (F_t < VERY_SMALL) ?
 						Math.exp(xBeta_i + 0.5 * sigma2) :
-							Math.exp(xBeta_i + 0.5 * sigma2) * ((1 + ErrorFunctionUtility.erf((xBeta_i + sigma2 - truncation)/Math.sqrt(2*sigma2)))/(2*(1-F_t))); 
-				double sqrt2Sigma2 = Math.sqrt(2 * sigma2);
+							Math.exp(xBeta_i + 0.5 * sigma2) * ((1 + ErrorFunctionUtility.erf((xBeta_i + sigma2 - truncation)/sqrt2Sigma2))/(2*(1-F_t))); 
 				double part1 = Math.exp(2*xBeta_i + 2* sigma2) * (1 + ErrorFunctionUtility.erf((xBeta_i + 2*sigma2 - truncation)/sqrt2Sigma2));
 				double part2 = -2 * meanValue * Math.exp(xBeta_i + .5*sigma2) * (1 + ErrorFunctionUtility.erf((xBeta_i + sigma2 - truncation)/sqrt2Sigma2));
 				double part3 = meanValue * meanValue * (1 - ErrorFunctionUtility.erf((truncation - xBeta_i)/sqrt2Sigma2));
@@ -270,11 +270,6 @@ public class LogBackTransformation {
 			}
 			return residualVariances;
 		} 
-		
-//		// Otherwise it is a simple LinearModel instance
-//		if (!(model.getEstimator() instanceof OLSEstimator)) {
-//			throw new UnsupportedOperationException("This method only works with models fitted using an OLS estimator!");
-//		}
 		
 		double sigma2hat = model.getResidualVariance();
 		
